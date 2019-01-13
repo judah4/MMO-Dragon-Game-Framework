@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using Google.Protobuf;
 using MessageProtocols;
@@ -37,7 +38,18 @@ namespace MmoGameFramework
                {
                    var message = new SimpleMessage()
                    {
-                       Info = null,
+                       MessageId = (int)ServerCodes.EntityInfo,
+                       Info = new EntityInfo()
+                       {
+                           EntityId = 1,
+                           EntityData = { new Dictionary<int, ByteString>()
+                           {
+                               {1, ByteString.CopyFrom(0x01)},
+                               {2, ByteString.CopyFrom(0x02)},
+                               {3, ByteString.CopyFrom(0x03)},
+                           }}
+                           
+                       }.ToByteString(),
                    };
                     // send a message to server
                     client.Send(message.ToByteArray());
@@ -47,7 +59,12 @@ namespace MmoGameFramework
 
                    var message = new SimpleMessage()
                    {
-                       Info = null
+                       MessageId = (int)ServerCodes.GameData,
+                       Info = new GameData()
+                       {
+                           EntityId = -1,
+                           Info =  ByteString.CopyFrom(0xFF, 0xFF),
+                       }.ToByteString()
                    };
                     // send a message to server
                     server.Send(1, message.ToByteArray());
@@ -79,6 +96,7 @@ namespace MmoGameFramework
                             Console.WriteLine("Server "+ msg.connectionId + " Connected");
                             var message = new SimpleMessage()
                             {
+                                MessageId = (int)ServerCodes.ClientConnect,
                                 Info = new ClientConnect()
                                 {
                                     ClientId = msg.connectionId,
@@ -88,8 +106,19 @@ namespace MmoGameFramework
                             break;
                         case Telepathy.EventType.Data:
                             var simpleData = SimpleMessage.Parser.ParseFrom(msg.data);
-                            Console.WriteLine("Server " + msg.connectionId + " Data: " + simpleData.Info);
-                            
+
+                            Console.WriteLine("Server " + msg.connectionId);
+
+                            switch ((ServerCodes)simpleData.MessageId)
+                            {
+                                case ServerCodes.GameData:
+                                    var gameData = GameData.Parser.ParseFrom(simpleData.Info);
+                                    Console.WriteLine($"Server Game Data: {BitConverter.ToString(gameData.Info.ToByteArray())}" );
+                                    break;
+                                default:
+                                    break;
+                            }
+
                             break;
                         case Telepathy.EventType.Disconnected:
                             Console.WriteLine("Server " + msg.connectionId + " Disconnected");
@@ -108,7 +137,7 @@ namespace MmoGameFramework
                 // grab all new messages. do this in your Update loop.
                 Telepathy.Message msg;
 
-                int clientId;
+                int clientId = -1;
 
                 while (client.GetNextMessage(out msg))
                 {
@@ -119,13 +148,26 @@ namespace MmoGameFramework
                             break;
                         case Telepathy.EventType.Data:
                             var simpleData = SimpleMessage.Parser.ParseFrom(msg.data);
-                            Console.WriteLine("Client " + msg.connectionId + " Data: " + (ServerCodes)simpleData.MessageId);
+                            Console.WriteLine("Client " + clientId + " Data: " + (ServerCodes)simpleData.MessageId);
                             switch ((ServerCodes)simpleData.MessageId)
                             {
-                                default:
+                                case ServerCodes.ClientConnect:
+                                    clientId = ClientConnect.Parser.ParseFrom(simpleData.Info).ClientId;
+                                    Console.WriteLine("My Client Id is " + clientId);
                                     break;
-                                ServerCodes.ClientConnect:
-
+                                case ServerCodes.GameData:
+                                    var gameData = GameData.Parser.ParseFrom(simpleData.Info);
+                                    Console.WriteLine($"Client Game Data: {BitConverter.ToString(gameData.Info.ToByteArray())}");
+                                    break;
+                                case ServerCodes.EntityInfo:
+                                    var entityInfo = EntityInfo.Parser.ParseFrom(simpleData.Info);
+                                    Console.WriteLine($"Client Entity Info: {entityInfo.EntityId}");
+                                    foreach (var pair in entityInfo.EntityData)
+                                    {
+                                        Console.WriteLine($"{pair.Key} {BitConverter.ToString(pair.Value.ToByteArray())}");
+                                    }
+                                    break;
+                                default:
                                     break;
                             }
 
