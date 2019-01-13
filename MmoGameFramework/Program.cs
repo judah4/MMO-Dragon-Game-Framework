@@ -12,13 +12,18 @@ namespace MmoGameFramework
     class Program
     {
         private static MmoServer server;
+        private static MmoServer workerServer;
+        private static EntityStore _entityStore;
 
         static void Main(string[] args)
         {
+            _entityStore = new EntityStore();
 
            // create and start the server
            server = new MmoServer();
            server.Start(1337);
+           workerServer = new MmoServer();
+           workerServer.Start(1338);
 
 
            bool loop = true;
@@ -31,19 +36,10 @@ namespace MmoGameFramework
                    var message = new SimpleMessage()
                    {
                        MessageId = (int)ServerCodes.EntityInfo,
-                       Info = new EntityInfo()
-                       {
-                           EntityId = 1,
-                           EntityData = { new Dictionary<int, ByteString>()
-                           {
-                               {1, new Position() { X = 100, Y = 101, Z = 99}.ToByteString()},
-                               {2, ByteString.CopyFrom(0x02)},
-                               {3, ByteString.CopyFrom(0x03)},
-                           }}
 
-                       }.ToByteString(),
+                       Info = _entityStore.Create().ToByteString(),
                    };
-                    // send a message to server
+                    // send a message to clients. get lists
                     server.SendClient(1, message);
 
                 }

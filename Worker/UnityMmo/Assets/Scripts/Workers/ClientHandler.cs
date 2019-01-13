@@ -1,10 +1,12 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using MmoWorker;
 using UnityEngine;
 
 public class ClientHandler : MonoBehaviour
 {
+    private GameObjectRepresentation _gameObjectRepresentation = new GameObjectRepresentation();
     private MmoClient _client;
 
     public string ipAddress = "localhost";
@@ -13,6 +15,26 @@ public class ClientHandler : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        if (Application.isEditor == false)
+        {
+            var newIp = GetArg("hostIp");
+            var newPort = GetArg("hostPort");
+
+            if (newIp!= null)
+            {
+                ipAddress = newIp;
+            }
+
+            if (newPort != null)
+            {
+                short portTemp;
+                if (short.TryParse(newPort, out portTemp))
+                {
+                    port = portTemp;
+                }
+            }
+        }
+
         // update even if window isn't focused, otherwise we don't receive.
         Application.runInBackground = true;
 
@@ -23,6 +45,7 @@ public class ClientHandler : MonoBehaviour
 
         _client = new MmoClient();
         _client.LoopOtherThread = false;
+        _client.OnEntityCreation += _gameObjectRepresentation.OnEntityCreation;
         _client.Connect(ipAddress, port);
     }
 
@@ -30,5 +53,24 @@ public class ClientHandler : MonoBehaviour
     void Update()
     {
         _client.Update();
+    }
+
+    void OnApplicationQuit()
+    {
+        _client.Disconnect();
+    }
+
+    // Helper function for getting the command line arguments
+    private static string GetArg(string name)
+    {
+        var args = System.Environment.GetCommandLineArgs();
+        for (int i = 0; i < args.Length; i++)
+        {
+            if (args[i] == name && args.Length > i + 1)
+            {
+                return args[i + 1];
+            }
+        }
+        return null;
     }
 }

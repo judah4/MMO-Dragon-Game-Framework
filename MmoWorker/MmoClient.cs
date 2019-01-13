@@ -19,6 +19,8 @@ namespace MmoWorker
         public bool Connected => _client.Connected;
         public bool Connecting => _client.Connecting;
 
+        public event Action<EntityInfo> OnEntityCreation;
+
         public MmoClient()
         {
             _client = new Telepathy.Client();
@@ -67,25 +69,19 @@ namespace MmoWorker
                             case ServerCodes.GameData:
                                 var gameData = GameData.Parser.ParseFrom(simpleData.Info);
                                 Telepathy.Logger.Log($"Client Game Data: {BitConverter.ToString(gameData.Info.ToByteArray())}");
+
+
+
                                 break;
                             case ServerCodes.EntityInfo:
                                 var entityInfo = EntityInfo.Parser.ParseFrom(simpleData.Info);
                                 Telepathy.Logger.Log($"Client Entity Info: {entityInfo.EntityId}");
                                 foreach (var pair in entityInfo.EntityData)
                                 {
-                                    if (pair.Key == 1)
-                                    {
-                                        var position = Position.Parser.ParseFrom(pair.Value);
-                                        Telepathy.Logger.Log($"{pair.Key} Pos:{position.ToString()}");
-
-                                    }
-                                    else
-                                    {
-                                        Telepathy.Logger.Log($"{pair.Key} {BitConverter.ToString(pair.Value.ToByteArray())}");
-
-                                    }
-
+                                    Telepathy.Logger.Log($"{pair.Key} {BitConverter.ToString(pair.Value.ToByteArray())}");
                                 }
+
+                                OnEntityCreation?.Invoke(entityInfo);
                                 break;
                             default:
                                 break;
