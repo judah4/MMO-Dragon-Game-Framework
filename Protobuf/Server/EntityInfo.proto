@@ -1,0 +1,9 @@
+syntax = "proto3";
+option csharp_namespace = "MessageProtocols.Server";
+package server;
+
+//3
+message EntityInfo {
+  int32 entity_id = 1;
+  map<int, bytes> entity_data = 2;
+}

@@ -1,0 +1,9 @@
+syntax = "proto3";
+option csharp_namespace = "MessageProtocols.Server";
+package server;
+
+//4
+message GameData {
+  int32 entity_id  = 1;
+  bytes info = 2;
+}

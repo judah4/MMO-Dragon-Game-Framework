@@ -1,0 +1,9 @@
+syntax = "proto3";
+option csharp_namespace = "MessageProtocols.Server";
+package server;
+
+
+message SimpleMessage {
+  int32 message_id = 1;
+  bytes info = 2;
+}

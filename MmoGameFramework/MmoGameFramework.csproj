@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <RootNamespace>MmoGameFramework</RootNamespace>
+    <AssemblyName>MmoGameFramework</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.6.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MessageProtocols\MessageProtocols.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Telepathy">
+      <HintPath>..\Libs\Telepathy\Telepathy.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
