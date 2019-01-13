@@ -1,0 +1,108 @@
+{
+  "runtimeTarget": {
+    "name": ".NETStandard,Version=v2.0/",
+    "signature": "19d3dd659b5fa2adabeefcff78ce8381da3d4fe9"
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETStandard,Version=v2.0": {},
+    ".NETStandard,Version=v2.0/": {
+      "MmoWorker/1.0.0": {
+        "dependencies": {
+          "Google.Protobuf": "3.6.1",
+          "MessageProtocols": "1.0.0",
+          "Mmogf.Core": "1.0.0",
+          "NETStandard.Library": "2.0.3",
+          "Telepathy": "1.0.0.0"
+        },
+        "runtime": {
+          "MmoWorker.dll": {}
+        }
+      },
+      "Google.Protobuf/3.6.1": {
+        "dependencies": {
+          "NETStandard.Library": "2.0.3"
+        },
+        "runtime": {
+          "lib/netstandard1.0/Google.Protobuf.dll": {
+            "assemblyVersion": "3.6.1.0",
+            "fileVersion": "3.6.1.0"
+          }
+        }
+      },
+      "Microsoft.NETCore.Platforms/1.1.0": {},
+      "NETStandard.Library/2.0.3": {
+        "dependencies": {
+          "Microsoft.NETCore.Platforms": "1.1.0"
+        }
+      },
+      "MessageProtocols/1.0.0": {
+        "dependencies": {
+          "Google.Protobuf": "3.6.1"
+        },
+        "runtime": {
+          "MessageProtocols.dll": {}
+        }
+      },
+      "Mmogf.Core/1.0.0": {
+        "dependencies": {
+          "Google.Protobuf": "3.6.1"
+        },
+        "runtime": {
+          "Mmogf.Core.dll": {}
+        }
+      },
+      "Telepathy/1.0.0.0": {
+        "runtime": {
+          "Telepathy.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "MmoWorker/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Google.Protobuf/3.6.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-D/h9IZl76jjfM5VlPzG235Zdys9RKXNLYbRGm2fa6Y2UshTqAvYBPIydNOvNTEa24DER/m/zvelHlLO9n1GtNQ==",
+      "path": "google.protobuf/3.6.1",
+      "hashPath": "google.protobuf.3.6.1.nupkg.sha512"
+    },
+    "Microsoft.NETCore.Platforms/1.1.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-bLpT1f/SFlO1CzqXG12KnJzpZs6lv24uX2Rzi4Fmm0noJpNlnWRVryuO3yK18Ca04t/YHcO1e1Z0WDfjseqNzw==",
+      "path": "microsoft.netcore.platforms/1.1.0",
+      "hashPath": "microsoft.netcore.platforms.1.1.0.nupkg.sha512"
+    },
+    "NETStandard.Library/2.0.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-st47PosZSHrjECdjeIzZQbzivYBJFv6P2nv4cj2ypdI204DO+vZ7l5raGMiX4eXMJ53RfOIg+/s4DHVZ54Nu2A==",
+      "path": "netstandard.library/2.0.3",
+      "hashPath": "netstandard.library.2.0.3.nupkg.sha512"
+    },
+    "MessageProtocols/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Mmogf.Core/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Telepathy/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

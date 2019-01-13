@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.6.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MessageProtocols\MessageProtocols.csproj" />
+    <ProjectReference Include="..\Mmogf.Core\Mmogf.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Telepathy">
+      <HintPath>..\Libs\Telepathy\Telepathy.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
