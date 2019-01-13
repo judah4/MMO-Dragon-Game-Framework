@@ -1,0 +1,10 @@
+syntax = "proto3";
+option csharp_namespace = "Mmogf.Core";
+package mmogf.core;
+
+//3
+message Position {
+  double x = 1;
+  double y = 2;
+  double z = 3;
+}

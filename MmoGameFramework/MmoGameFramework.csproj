@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MessageProtocols\MessageProtocols.csproj" />
+    <ProjectReference Include="..\Mmogf.Core\Mmogf.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

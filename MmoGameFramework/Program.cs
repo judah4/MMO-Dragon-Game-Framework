@@ -4,6 +4,7 @@ using System.Threading;
 using Google.Protobuf;
 using MessageProtocols;
 using MessageProtocols.Server;
+using Mmogf.Core;
 
 
 namespace MmoGameFramework
@@ -38,18 +39,12 @@ namespace MmoGameFramework
                {
                    var message = new SimpleMessage()
                    {
-                       MessageId = (int)ServerCodes.EntityInfo,
-                       Info = new EntityInfo()
+                       MessageId = (int)ServerCodes.GameData,
+                       Info = new GameData()
                        {
-                           EntityId = 1,
-                           EntityData = { new Dictionary<int, ByteString>()
-                           {
-                               {1, ByteString.CopyFrom(0x01)},
-                               {2, ByteString.CopyFrom(0x02)},
-                               {3, ByteString.CopyFrom(0x03)},
-                           }}
-                           
-                       }.ToByteString(),
+                           EntityId = -1,
+                           Info = ByteString.CopyFrom(0xFF, 0xFF),
+                       }.ToByteString()
                    };
                     // send a message to server
                     client.Send(message.ToByteArray());
@@ -59,12 +54,18 @@ namespace MmoGameFramework
 
                    var message = new SimpleMessage()
                    {
-                       MessageId = (int)ServerCodes.GameData,
-                       Info = new GameData()
+                       MessageId = (int)ServerCodes.EntityInfo,
+                       Info = new EntityInfo()
                        {
-                           EntityId = -1,
-                           Info =  ByteString.CopyFrom(0xFF, 0xFF),
-                       }.ToByteString()
+                           EntityId = 1,
+                           EntityData = { new Dictionary<int, ByteString>()
+                           {
+                               {1, new Position() { X = 100, Y = 101, Z = 99}.ToByteString()},
+                               {2, ByteString.CopyFrom(0x02)},
+                               {3, ByteString.CopyFrom(0x03)},
+                           }}
+
+                       }.ToByteString(),
                    };
                     // send a message to server
                     server.Send(1, message.ToByteArray());
@@ -164,7 +165,18 @@ namespace MmoGameFramework
                                     Console.WriteLine($"Client Entity Info: {entityInfo.EntityId}");
                                     foreach (var pair in entityInfo.EntityData)
                                     {
-                                        Console.WriteLine($"{pair.Key} {BitConverter.ToString(pair.Value.ToByteArray())}");
+                                        if (pair.Key == 1)
+                                        {
+                                            var position = Position.Parser.ParseFrom(pair.Value);
+                                            Console.WriteLine($"{pair.Key} Pos:{position.ToString()}");
+
+                                        }
+                                        else
+                                        {
+                                            Console.WriteLine($"{pair.Key} {BitConverter.ToString(pair.Value.ToByteArray())}");
+
+                                        }
+
                                     }
                                     break;
                                 default:
