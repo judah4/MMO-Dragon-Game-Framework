@@ -16,6 +16,11 @@ public class CommonHandler : MonoBehaviour
     public string ipAddress = "localhost";
     public short port = 1337;
 
+    public int ClientId
+    {
+        get { return Client?.ClientId ?? 0; }
+    }
+
     void OnEnable()
     {
     }
