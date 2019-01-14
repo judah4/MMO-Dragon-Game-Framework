@@ -15,9 +15,11 @@ Probably should not try to use. This was all written quickly over the weekend af
 * Example Unity3d client and server.  
 
 ## Future Work
+* Add rotations.  
 * Permissions for who can control what.
 * Spread out the server workers.
 * C# worker example without Unity3d.
 
 
-[![Watch the video](https://img.youtube.com/vi/wfTIpBYMjlk/0.jpg)](https://youtu.be/wfTIpBYMjlk)
+![Server and Clients setup](https://img.youtube.com/vi/wfTIpBYMjlk/0.jpg)
+[Watch the video](https://youtu.be/wfTIpBYMjlk)
