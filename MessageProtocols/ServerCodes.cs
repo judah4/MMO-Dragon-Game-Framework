@@ -10,6 +10,8 @@ namespace MessageProtocols
         ClientConnect,
         ServerConnect,
         EntityInfo,
-        GameData
+        GameData,
+        ChangeInterestArea,
+        EntityUpdate,
     }
 }

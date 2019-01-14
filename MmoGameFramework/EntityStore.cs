@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 using Google.Protobuf;
+using MessageProtocols.Core;
 using MessageProtocols.Server;
-using Mmogf.Core;
 
 namespace MmoGameFramework
 {
@@ -11,9 +11,11 @@ namespace MmoGameFramework
     {
         private int lastId = 0;
 
-        public Dictionary<int, EntityInfo> _entities = new Dictionary<int, EntityInfo>();
+        private Dictionary<int, EntityInfo> _entities = new Dictionary<int, EntityInfo>();
 
-        public EntityInfo Create()
+        public event Action<EntityInfo> OnUpdateEntity; 
+
+        public EntityInfo Create(string entityType, Position position)
         {
             var entityId = ++lastId;
             var entity = new EntityInfo()
@@ -21,8 +23,8 @@ namespace MmoGameFramework
                 EntityId = entityId,
                 EntityData =
                 {
-                    {1, new EntityType() { Name = "Cube"}.ToByteString()},
-                    {2, new Position() { X = 1, Y = 0, Z = 1}.ToByteString()}
+                    {1, new EntityType() { Name = entityType}.ToByteString()},
+                    {2, position.ToByteString()}
                 }
             };
 
@@ -30,5 +32,32 @@ namespace MmoGameFramework
             return entity;
         }
 
+        public List<EntityInfo> GetInArea(Position position, float radius)
+        {
+            var entities = new List<EntityInfo>();
+            foreach (var entityInfo in _entities)
+            {
+                if (Position.WithinArea(Position.Parser.ParseFrom(entityInfo.Value.EntityData[Position.ComponentId]), position, radius))
+                {
+                    entities.Add(entityInfo.Value);
+                }
+            }
+
+            return entities;
+        }
+
+        public EntityInfo GetEntity(int entityId)
+        {
+            EntityInfo entityInfo;
+            _entities.TryGetValue(entityId, out entityInfo);
+
+            return entityInfo;
+            
+        }
+
+        public void UpdateEntity(EntityInfo entityInfo)
+        {
+            OnUpdateEntity?.Invoke(entityInfo);
+        }
     }
 }

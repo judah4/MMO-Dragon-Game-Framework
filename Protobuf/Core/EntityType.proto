@@ -1,6 +1,6 @@
 syntax = "proto3";
-option csharp_namespace = "Mmogf.Core";
-package mmogf.core;
+option csharp_namespace = "MessageProtocols.Core";
+package messageprotocols.core;
 
 //1
 message EntityType {

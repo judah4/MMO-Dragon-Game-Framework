@@ -1,0 +1,12 @@
+syntax = "proto3";
+option csharp_namespace = "MessageProtocols.Server";
+
+package server;
+
+
+//7
+message EntityUpdate {
+  int32 entity_id = 1;
+  int32 component_id = 2;
+  bytes info = 3;
+}

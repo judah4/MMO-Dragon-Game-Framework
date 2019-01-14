@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using Google.Protobuf;
 using MessageProtocols;
+using MessageProtocols.Core;
 using MessageProtocols.Server;
-using Mmogf.Core;
 
 namespace MmoWorker
 {
@@ -20,6 +21,7 @@ namespace MmoWorker
         public bool Connecting => _client.Connecting;
 
         public event Action<EntityInfo> OnEntityCreation;
+        public event Action OnConnect;
 
         public MmoClient()
         {
@@ -65,6 +67,7 @@ namespace MmoWorker
                             case ServerCodes.ClientConnect:
                                 ClientId = ClientConnect.Parser.ParseFrom(simpleData.Info).ClientId;
                                 Telepathy.Logger.Log("My Client Id is " + ClientId);
+                                OnConnect?.Invoke();
                                 break;
                             case ServerCodes.GameData:
                                 var gameData = GameData.Parser.ParseFrom(simpleData.Info);
@@ -108,6 +111,10 @@ namespace MmoWorker
 
         }
 
+        internal void Send(IMessage message)
+        {
+            _client.Send(message.ToByteArray());
+        }
 
     }
 }

@@ -1,5 +1,1 @@
-protoc -I=Server --csharp_out=../MessageProtocols Server/ClientConnect.proto
-protoc -I=Server --csharp_out=../MessageProtocols Server/EntityInfo.proto
-protoc -I=Server --csharp_out=../MessageProtocols Server/GameData.proto
-protoc -I=Server --csharp_out=../MessageProtocols Server/ServerConnect.proto
-protoc -I=Server --csharp_out=../MessageProtocols Server/SimpleMessage.proto
+protoc -I=. --csharp_out=../MessageProtocols ./Core/Position.proto Core/EntityType.proto ./Server/ChangeInterestArea.proto ./Server/ClientConnect.proto ./Server/EntityInfo.proto ./Server/EntityUpdate.proto ./Server/GameData.proto ./Server/ServerConnect.proto  ./Server/SimpleMessage.proto

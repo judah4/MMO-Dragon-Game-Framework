@@ -7,9 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MmoGameFramework", "MmoGame
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessageProtocols", "MessageProtocols\MessageProtocols.csproj", "{5316FC77-DA5D-44E0-BB20-6252FB492E0B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mmogf.Core", "Mmogf.Core\Mmogf.Core.csproj", "{0097B63C-2332-45EA-8028-3D843314E0EE}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MmoWorker", "MmoWorker\MmoWorker.csproj", "{AEE3BDC4-C088-4769-9CBC-E678F11CACC7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MmoWorker", "MmoWorker\MmoWorker.csproj", "{AEE3BDC4-C088-4769-9CBC-E678F11CACC7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,10 +23,6 @@ Global
 		{5316FC77-DA5D-44E0-BB20-6252FB492E0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5316FC77-DA5D-44E0-BB20-6252FB492E0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5316FC77-DA5D-44E0-BB20-6252FB492E0B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0097B63C-2332-45EA-8028-3D843314E0EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0097B63C-2332-45EA-8028-3D843314E0EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0097B63C-2332-45EA-8028-3D843314E0EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0097B63C-2332-45EA-8028-3D843314E0EE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AEE3BDC4-C088-4769-9CBC-E678F11CACC7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AEE3BDC4-C088-4769-9CBC-E678F11CACC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AEE3BDC4-C088-4769-9CBC-E678F11CACC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
