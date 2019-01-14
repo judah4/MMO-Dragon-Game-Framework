@@ -15,4 +15,4 @@ Proof of concept for SpatialOS style entities and load balancing with distribute
 * C# worker example without unity.
 
 
-[![Watch the video](https://img.youtube.com/vi/wfTIpBYMjlk/0.jpg)](https://youtu.be/wfTIpBYMjlk)
+[![Watch the video](https://youtu.be/wfTIpBYMjlk)]
