@@ -21,6 +21,7 @@ namespace MmoWorker
         public bool Connecting => _client.Connecting;
 
         public event Action<EntityInfo> OnEntityCreation;
+        public event Action<EntityUpdate> OnEntityUpdate; 
         public event Action OnConnect;
 
         public MmoClient()
@@ -73,8 +74,6 @@ namespace MmoWorker
                                 var gameData = GameData.Parser.ParseFrom(simpleData.Info);
                                 Telepathy.Logger.Log($"Client Game Data: {BitConverter.ToString(gameData.Info.ToByteArray())}");
 
-
-
                                 break;
                             case ServerCodes.EntityInfo:
                                 var entityInfo = EntityInfo.Parser.ParseFrom(simpleData.Info);
@@ -85,6 +84,12 @@ namespace MmoWorker
                                 }
 
                                 OnEntityCreation?.Invoke(entityInfo);
+                                break;
+                            case ServerCodes.EntityUpdate:
+                                var entityUpdate = EntityUpdate.Parser.ParseFrom(simpleData.Info);
+
+                                OnEntityUpdate?.Invoke(entityUpdate);
+
                                 break;
                             default:
                                 break;

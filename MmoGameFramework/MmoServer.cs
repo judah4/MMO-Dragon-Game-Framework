@@ -45,73 +45,85 @@ namespace MmoGameFramework
         {
             while (_server.Active)
             {
-                // grab all new messages. do this in your Update loop.
-                Telepathy.Message msg;
-                while (_server.GetNextMessage(out msg))
+                try
                 {
-                    switch (msg.eventType)
+
+
+                    // grab all new messages. do this in your Update loop.
+                    Telepathy.Message msg;
+                    while (_server.GetNextMessage(out msg))
                     {
-                        case Telepathy.EventType.Connected:
-                            _connections.Add(msg.connectionId, new WorkerConnection("Worker", new Position()));
-                            Console.WriteLine("Server " + msg.connectionId + " Connected");
-                            var message = new SimpleMessage()
-                            {
-                                MessageId = (int)ServerCodes.ClientConnect,
-                                Info = new ClientConnect()
+                        switch (msg.eventType)
+                        {
+                            case Telepathy.EventType.Connected:
+                                _connections.Add(msg.connectionId, new WorkerConnection("Worker", new Position()));
+                                Console.WriteLine("Server " + msg.connectionId + " Connected");
+                                var message = new SimpleMessage()
                                 {
-                                    ClientId = msg.connectionId,
-                                }.ToByteString(),
-                            };
-                            _server.Send(msg.connectionId, message.ToByteArray());
-                            break;
-                        case Telepathy.EventType.Data:
-                            var simpleData = SimpleMessage.Parser.ParseFrom(msg.data);
-
-                            Console.WriteLine("Server " + msg.connectionId);
-
-                            switch ((ServerCodes)simpleData.MessageId)
-                            {
-                                case ServerCodes.GameData:
-                                    var gameData = GameData.Parser.ParseFrom(simpleData.Info);
-                                    Console.WriteLine($"Server Game Data: {BitConverter.ToString(gameData.Info.ToByteArray())}");
-                                    break;
-                                case ServerCodes.ChangeInterestArea:
-                                    var interestArea = ChangeInterestArea.Parser.ParseFrom(simpleData.Info);
-                                    WorkerConnection worker;
-                                    if (_connections.TryGetValue(msg.connectionId, out worker))
+                                    MessageId = (int) ServerCodes.ClientConnect,
+                                    Info = new ClientConnect()
                                     {
-                                        worker.InterestPosition = interestArea.Position;
+                                        ClientId = msg.connectionId,
+                                    }.ToByteString(),
+                                };
+                                _server.Send(msg.connectionId, message.ToByteArray());
+                                break;
+                            case Telepathy.EventType.Data:
+                                var simpleData = SimpleMessage.Parser.ParseFrom(msg.data);
 
-                                        var entities = _entities.GetInArea(worker.InterestPosition, worker.InterestRange);
+                                Console.WriteLine("Server " + msg.connectionId);
 
-                                        foreach (var entityInfo in entities)
+                                switch ((ServerCodes) simpleData.MessageId)
+                                {
+                                    case ServerCodes.GameData:
+                                        var gameData = GameData.Parser.ParseFrom(simpleData.Info);
+                                        Console.WriteLine(
+                                            $"Server Game Data: {BitConverter.ToString(gameData.Info.ToByteArray())}");
+                                        break;
+                                    case ServerCodes.ChangeInterestArea:
+                                        var interestArea = ChangeInterestArea.Parser.ParseFrom(simpleData.Info);
+                                        WorkerConnection worker;
+                                        if (_connections.TryGetValue(msg.connectionId, out worker))
                                         {
-                                            Send(msg.connectionId, new SimpleMessage()
+                                            worker.InterestPosition = interestArea.Position;
+
+                                            var entities = _entities.GetInArea(worker.InterestPosition,
+                                                worker.InterestRange);
+
+                                            foreach (var entityInfo in entities)
                                             {
-                                                MessageId = (int) ServerCodes.EntityInfo,
-                                                Info = new EntityInfo(entityInfo).ToByteString(),
-                                            });
+                                                Send(msg.connectionId, new SimpleMessage()
+                                                {
+                                                    MessageId = (int) ServerCodes.EntityInfo,
+                                                    Info = new EntityInfo(entityInfo).ToByteString(),
+                                                });
+                                            }
+
                                         }
 
-                                    }
-                                    break;
-                                case ServerCodes.EntityUpdate:
-                                    HandleEntityUpdate(msg, simpleData);
-                                    break;
-                                default:
-                                    break;
-                            }
+                                        break;
+                                    case ServerCodes.EntityUpdate:
+                                        HandleEntityUpdate(msg, simpleData);
+                                        break;
+                                    default:
+                                        break;
+                                }
 
-                            break;
-                        case Telepathy.EventType.Disconnected:
-                            Console.WriteLine("Server " + msg.connectionId + " Disconnected");
-                            _connections.Remove(msg.connectionId);
+                                break;
+                            case Telepathy.EventType.Disconnected:
+                                Console.WriteLine("Server " + msg.connectionId + " Disconnected");
+                                _connections.Remove(msg.connectionId);
 
-                            break;
+                                break;
+                        }
                     }
-                }
 
-                Thread.Sleep(10);
+                    Thread.Sleep(10);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.ToString());
+                }
             }
         }
 
@@ -163,6 +175,7 @@ namespace MmoGameFramework
                 Info = entityInfo.ToByteString(),
             };
 
+            Console.WriteLine("Sending Entity Update" );
             SendArea(entityInfo.Position, message);
         }
 

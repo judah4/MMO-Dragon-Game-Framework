@@ -2,9 +2,9 @@
 
 namespace MessageProtocols.Core
 {
-    public partial class Position
+    public partial class Position : IEntityComponent
     {
-        public const int ComponentId = 1;
+        public int ComponentId => 2;
 
         public static double DistanceSquared(Position position1, Position position2)
         {

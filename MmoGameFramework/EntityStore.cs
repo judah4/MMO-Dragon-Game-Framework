@@ -24,7 +24,7 @@ namespace MmoGameFramework
                 EntityData =
                 {
                     {1, new EntityType() { Name = entityType}.ToByteString()},
-                    {2, position.ToByteString()}
+                    {position.ComponentId, position.ToByteString()}
                 }
             };
 
@@ -37,7 +37,7 @@ namespace MmoGameFramework
             var entities = new List<EntityInfo>();
             foreach (var entityInfo in _entities)
             {
-                if (Position.WithinArea(Position.Parser.ParseFrom(entityInfo.Value.EntityData[Position.ComponentId]), position, radius))
+                if (Position.WithinArea(Position.Parser.ParseFrom(entityInfo.Value.EntityData[position.ComponentId]), position, radius))
                 {
                     entities.Add(entityInfo.Value);
                 }

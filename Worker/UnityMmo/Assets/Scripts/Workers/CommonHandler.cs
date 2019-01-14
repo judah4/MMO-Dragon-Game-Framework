@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using MessageProtocols;
 using MessageProtocols.Core;
 using MessageProtocols.Server;
 using MmoWorker;
@@ -55,6 +56,8 @@ public class CommonHandler : MonoBehaviour
         Client = new MmoClient();
         Client.LoopOtherThread = false;
         Client.OnEntityCreation += GameObjectRepresentation.OnEntityCreation;
+        Client.OnEntityUpdate += GameObjectRepresentation.OnEntityUpdate;
+
         Client.OnConnect += OnConnect;
 
         Client.Connect(ipAddress, port);
@@ -65,7 +68,7 @@ public class CommonHandler : MonoBehaviour
 
     void OnConnect()
     {
-        UpdateInterestArea(new Vector3(0,0,0));
+        UpdateInterestArea(transform.position);
     }
 
     // Update is called once per frame
@@ -96,7 +99,25 @@ public class CommonHandler : MonoBehaviour
     protected void UpdateInterestArea(Vector3 position)
     {
         //adjust position this way to not lose precision
-        var sendPos = new Position() {X = (double)position.x - transform.position.x, Y = (double)position.y - transform.position.y, Z = (double)position.z - transform.position.z, };
+        var sendPos = PositionToServer(position);
         MessageSender.SendInterestChange(sendPos);
+    }
+
+    public Position PositionToServer(Vector3 position)
+    {
+        var sendPos = new Position() { X = (double)position.x - transform.position.x, Y = (double)position.y - transform.position.y, Z = (double)position.z - transform.position.z, };
+        return sendPos;
+    }
+
+    public Vector3 PositionToClient(Position position)
+    {
+        var adjustedPos = new Vector3((int)position.X, (int)position.Y, (int)position.Z) + transform.position;
+        return adjustedPos;
+    }
+
+    public void UpdateEntity(int entityId, IEntityComponent position)
+    {
+        GameObjectRepresentation.UpdateEntity(entityId, position);
+        MessageSender.SendEntityUpdate(entityId, position);
     }
 }

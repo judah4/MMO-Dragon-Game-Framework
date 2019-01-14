@@ -27,6 +27,9 @@ namespace MmoGameFramework
             _entityStore.Create("Cube", new Position() { X = 1, Z = 3 });
             _entityStore.Create("Cube", new Position() { X = -3, Z = -3 });
 
+            Telepathy.Logger.LogMethod = Console.WriteLine;
+            Telepathy.Logger.LogWarningMethod = Console.WriteLine;
+            Telepathy.Logger.LogErrorMethod = Console.WriteLine;
 
             // create and start the server
             server = new MmoServer(_entityStore);
@@ -38,23 +41,32 @@ namespace MmoGameFramework
            bool loop = true;
            while (loop)
            {
-               var key = Console.ReadKey();
-              if (key.Key == ConsoleKey.S)
-              {
-                  var newEntity = _entityStore.Create("Cube",
-                      new Position() {X = random.NextDouble() * 10 - 5, Y = 2, Z = random.NextDouble() * 10 - 5});
-
-                  _entityStore.UpdateEntity(newEntity);
-
-                }
-                else if (key.Key == ConsoleKey.Escape)
+               try
                {
-                   loop = false;
-                   break;
+                   var key = Console.ReadKey();
+                   if (key.Key == ConsoleKey.S)
+                   {
+                       var newEntity = _entityStore.Create("Cube",
+                           new Position() { X = random.NextDouble() * 10 - 5, Y = 2, Z = random.NextDouble() * 10 - 5 });
+
+                       _entityStore.UpdateEntity(newEntity);
+
+                   }
+                   else if (key.Key == ConsoleKey.Escape)
+                   {
+                       loop = false;
+                       break;
+                   }
+                }
+               catch (Exception e)
+               {
+                    Console.WriteLine(e);
                }
+               
            }
 
            server.Stop();
+           workerServer.Stop();
         }
 
 

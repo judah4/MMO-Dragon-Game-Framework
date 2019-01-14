@@ -7,7 +7,7 @@ namespace MessageProtocols.Server
     {
         public Position Position
         {
-            get { return Core.Position.Parser.ParseFrom(EntityData[Position.ComponentId]); }
+            get { return Core.Position.Parser.ParseFrom(EntityData[new Position().ComponentId]); }
         }
        
     }

@@ -1,5 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using Google.Protobuf;
+using MessageProtocols;
 using MessageProtocols.Core;
 using MessageProtocols.Server;
 using UnityEngine;
@@ -21,7 +24,7 @@ public class GameObjectRepresentation
 
         var entityType = EntityType.Parser.ParseFrom(entity.EntityData[1]);
         var position = Position.Parser.ParseFrom(entity.EntityData[2]);
-        var adjustedPos = new Vector3((int) position.X, (int) position.Y, (int) position.Z) + _server.transform.position;
+        var adjustedPos = _server.PositionToClient(position);
 
         if (!_entities.TryGetValue(entity.EntityId, out entityGm))
         {
@@ -37,6 +40,15 @@ public class GameObjectRepresentation
             gm.name = $"{entityType.Name} : {entity.EntityId} - {_server.WorkerType}";
 
             entityGm = gm.AddComponent<EntityGameObject>();
+
+            var entityBehaviors = entityGm.GetComponents<BaseEntityBehavior>();
+            for (int cnt = 0; cnt < entityBehaviors.Length; cnt++)
+            {
+                entityBehaviors[cnt].Server = _server;
+                entityBehaviors[cnt].Entity = entityGm;
+                entityBehaviors[cnt].enabled = true;
+            }
+
             entityGm.EntityId = entity.EntityId;
             _entities.Add(entity.EntityId, entityGm);
         }
@@ -45,8 +57,38 @@ public class GameObjectRepresentation
             entityGm.transform.position = adjustedPos;
         }
 
-        //update the datas
+        foreach (var pair in entity.EntityData)
+        {
+            entityGm.Data.Remove(pair.Key);
+            entityGm.Data.Add(pair.Key, pair.Value);
+        }
 
+
+    }
+
+    public void OnEntityUpdate(EntityUpdate entity)
+    {
+        EntityGameObject entityGm;
+
+
+        if (!_entities.TryGetValue(entity.EntityId, out entityGm))
+            return;
+
+
+    }
+
+    public void UpdateEntity(int entityId, IEntityComponent entityComponent)
+    {
+        EntityGameObject entityGm;
+        if (!_entities.TryGetValue(entityId, out entityGm))
+            return;
+
+        var message = entityComponent as IMessage;
+
+        entityGm.Data.Remove(entityComponent.ComponentId);
+        entityGm.Data.Add(entityComponent.ComponentId, message.ToByteString());
+
+        entityGm.EntityUpdated();
 
     }
 }
