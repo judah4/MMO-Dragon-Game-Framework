@@ -21,5 +21,6 @@ Probably should not try to use. This was all written quickly over the weekend af
 * C# worker example without Unity3d.
 
 
-![Server and Clients setup](https://img.youtube.com/vi/wfTIpBYMjlk/0.jpg)
-[Watch the video](https://youtu.be/wfTIpBYMjlk)
+![Server and Clients setup](https://img.youtube.com/vi/wfTIpBYMjlk/0.jpg)  
+
+[Watch the video](https://youtu.be/wfTIpBYMjlk)  
