@@ -1,10 +1,11 @@
+
 # MMO Game Framework
 
-Proof of concept for SpatialOS style entities and load balancing with distributed server workers.  
+Proof of concept for SpatialOS style entities and load balancing with distributed server workers. 
 
 ### Warning  
 
-Probably should not try to use. This was all written quickly over the weekend after the whole issue with Unity and Improbable.  
+Probably should not try to use. This was all written quickly over the weekend after the whole issue with Unity and Improbable.  Might not even cover 1% of what a full mmo networking framework can do like SpatialOS.
 
 
 ## Features
