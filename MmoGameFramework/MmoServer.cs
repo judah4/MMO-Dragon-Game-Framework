@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using Google.Protobuf;
@@ -23,7 +23,7 @@ namespace MmoGameFramework
             _server = new Telepathy.Server();
 
             _entities.OnUpdateEntity += OnEntityUpdate;
-
+            _entities.OnUpdateEntityPartial += OnEntityUpdatePartial;
         }
 
         public void Start(short port)
@@ -142,7 +142,14 @@ namespace MmoGameFramework
             entityInfo.EntityData.Add(entityUpdate.ComponentId, entityUpdate.Info);
 
 
-            _entities.UpdateEntity(entityInfo);
+            if (entityUpdate.ComponentId == 2)
+            {
+                var position = Position.Parser.ParseFrom(entityUpdate.Info);
+                Console.WriteLine($"Entiy: {entityInfo.EntityId} position to {position.ToString()}");
+            }
+
+
+            _entities.UpdateEntityPartial(entityUpdate);
 
         }
 
@@ -175,8 +182,24 @@ namespace MmoGameFramework
                 Info = entityInfo.ToByteString(),
             };
 
-            Console.WriteLine("Sending Entity Update" );
+            Console.WriteLine("Sending Entity Info" );
             SendArea(entityInfo.Position, message);
+        }
+
+        private void OnEntityUpdatePartial(EntityUpdate entityUpdate)
+        {
+
+            var entity = _entities.GetEntity(entityUpdate.EntityId);
+
+            var message = new SimpleMessage()
+            {
+                MessageId = (int)ServerCodes.EntityUpdate,
+
+                Info = entityUpdate.ToByteString(),
+            };
+
+            Console.WriteLine("Sending Entity Update");
+            SendArea(entity.Position, message);
         }
 
     }

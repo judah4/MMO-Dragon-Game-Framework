@@ -52,10 +52,6 @@ public class GameObjectRepresentation
             entityGm.EntityId = entity.EntityId;
             _entities.Add(entity.EntityId, entityGm);
         }
-        else
-        {
-            entityGm.transform.position = adjustedPos;
-        }
 
         foreach (var pair in entity.EntityData)
         {
@@ -66,15 +62,19 @@ public class GameObjectRepresentation
 
     }
 
-    public void OnEntityUpdate(EntityUpdate entity)
+    public void OnEntityUpdate(EntityUpdate entityUpdate)
     {
         EntityGameObject entityGm;
 
+        Debug.Log(entityUpdate.ToString());
 
-        if (!_entities.TryGetValue(entity.EntityId, out entityGm))
+        if (!_entities.TryGetValue(entityUpdate.EntityId, out entityGm))
             return;
 
+        entityGm.Data.Remove(entityUpdate.ComponentId);
+        entityGm.Data.Add(entityUpdate.ComponentId, entityUpdate.Info);
 
+        entityGm.EntityUpdated();
     }
 
     public void UpdateEntity(int entityId, IEntityComponent entityComponent)

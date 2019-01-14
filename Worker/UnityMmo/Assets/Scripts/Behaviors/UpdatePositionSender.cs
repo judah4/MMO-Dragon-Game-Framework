@@ -13,8 +13,8 @@ public class UpdatePositionSender : BaseEntityBehavior
     {
 
         var pos = Position.Parser.ParseFrom(Entity.Data[new Position().ComponentId]);
-        var currentPos = Server.PositionToServer(transform.position);
-        if (!pos.X.Equals(currentPos.X) || !pos.Y.Equals(currentPos.Y) || !pos.Z.Equals(currentPos.Z))
+        var currentPos = Server.PositionToClient(pos);
+        if (Mathf.Abs((currentPos - transform.position).sqrMagnitude) > .01f)
         {
             Server.UpdateEntity(Entity.EntityId, new PositionUpdate(Server, transform.position).Get());
 

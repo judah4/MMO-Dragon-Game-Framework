@@ -18,8 +18,14 @@ public class UpdatePositionReceiver : BaseEntityBehavior
 
     void OnUpdate()
     {
-        transform.position =
-            Server.PositionToClient(Position.Parser.ParseFrom(Entity.Data[new Position().ComponentId]));
+        var position = Position.Parser.ParseFrom(Entity.Data[new Position().ComponentId]);
+        var localPos = Server.PositionToClient(position);
+
+        Debug.Log($"{Entity.EntityId} {position.ToString()} {localPos}");
+
+        transform.position = localPos;
+
+
     }
 
     void Update()

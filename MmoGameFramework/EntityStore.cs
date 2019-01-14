@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Google.Protobuf;
@@ -13,7 +13,8 @@ namespace MmoGameFramework
 
         private Dictionary<int, EntityInfo> _entities = new Dictionary<int, EntityInfo>();
 
-        public event Action<EntityInfo> OnUpdateEntity; 
+        public event Action<EntityInfo> OnUpdateEntity;
+        public event Action<EntityUpdate> OnUpdateEntityPartial;
 
         public EntityInfo Create(string entityType, Position position)
         {
@@ -58,6 +59,11 @@ namespace MmoGameFramework
         public void UpdateEntity(EntityInfo entityInfo)
         {
             OnUpdateEntity?.Invoke(entityInfo);
+        }
+
+        public void UpdateEntityPartial(EntityUpdate entityUpdate)
+        {
+            OnUpdateEntityPartial?.Invoke(entityUpdate);
         }
     }
 }
