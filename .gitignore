@@ -337,3 +337,5 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database 
 healthchecksdb
+
+Worker/UnityMmo/UserSettings/
