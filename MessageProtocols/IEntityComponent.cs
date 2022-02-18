@@ -8,7 +8,6 @@ namespace MessageProtocols
 {
     public interface IEntityComponent
     {
-        static int ComponentId { get; }
         int GetComponentId();
     }
 }
