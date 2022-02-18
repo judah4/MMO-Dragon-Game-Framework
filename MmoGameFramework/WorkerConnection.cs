@@ -10,12 +10,14 @@ namespace MmoGameFramework
         public string ConnectionType { get; set; }
         public Position InterestPosition { get; set; }
         public float InterestRange { get; set; }
+        public Lidgren.Network.NetConnection Connection { get; set; }
 
-        public WorkerConnection(string connectionType, Position interestPosition)
+        public WorkerConnection(string connectionType, Lidgren.Network.NetConnection senderConnection, Position interestPosition)
         {
             ConnectionType = connectionType;
             InterestPosition = interestPosition;
             InterestRange = 100;
+            Connection = senderConnection;
         }
 
     }

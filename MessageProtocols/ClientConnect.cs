@@ -25,7 +25,7 @@ namespace MessageProtocols.Server {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "ChpTZXJ2ZXIvQ2xpZW50Q29ubmVjdC5wcm90bxIGc2VydmVyIiIKDUNsaWVu",
-            "dENvbm5lY3QSEQoJY2xpZW50X2lkGAEgASgFQhqqAhdNZXNzYWdlUHJvdG9j",
+            "dENvbm5lY3QSEQoJY2xpZW50X2lkGAEgASgDQhqqAhdNZXNzYWdlUHJvdG9j",
             "b2xzLlNlcnZlcmIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
@@ -86,10 +86,10 @@ namespace MessageProtocols.Server {
 
     /// <summary>Field number for the "client_id" field.</summary>
     public const int ClientIdFieldNumber = 1;
-    private int clientId_;
+    private long clientId_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int ClientId {
+    public long ClientId {
       get { return clientId_; }
       set {
         clientId_ = value;
@@ -119,7 +119,7 @@ namespace MessageProtocols.Server {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override int GetHashCode() {
       int hash = 1;
-      if (ClientId != 0) hash ^= ClientId.GetHashCode();
+      if (ClientId != 0L) hash ^= ClientId.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -138,9 +138,9 @@ namespace MessageProtocols.Server {
     #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       output.WriteRawMessage(this);
     #else
-      if (ClientId != 0) {
+      if (ClientId != 0L) {
         output.WriteRawTag(8);
-        output.WriteInt32(ClientId);
+        output.WriteInt64(ClientId);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
@@ -152,9 +152,9 @@ namespace MessageProtocols.Server {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
-      if (ClientId != 0) {
+      if (ClientId != 0L) {
         output.WriteRawTag(8);
-        output.WriteInt32(ClientId);
+        output.WriteInt64(ClientId);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
@@ -166,8 +166,8 @@ namespace MessageProtocols.Server {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public int CalculateSize() {
       int size = 0;
-      if (ClientId != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(ClientId);
+      if (ClientId != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(ClientId);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -181,7 +181,7 @@ namespace MessageProtocols.Server {
       if (other == null) {
         return;
       }
-      if (other.ClientId != 0) {
+      if (other.ClientId != 0L) {
         ClientId = other.ClientId;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
@@ -200,7 +200,7 @@ namespace MessageProtocols.Server {
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
           case 8: {
-            ClientId = input.ReadInt32();
+            ClientId = input.ReadInt64();
             break;
           }
         }
@@ -219,7 +219,7 @@ namespace MessageProtocols.Server {
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
             break;
           case 8: {
-            ClientId = input.ReadInt32();
+            ClientId = input.ReadInt64();
             break;
           }
         }

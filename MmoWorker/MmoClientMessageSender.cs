@@ -40,7 +40,7 @@ namespace MmoWorker
             var changeInterest = new EntityUpdate()
             {
                 EntityId = entityId,
-                ComponentId = entityComponent.ComponentId,
+                ComponentId = entityComponent.GetComponentId(),
                 Info = message.ToByteString(),
             };
 

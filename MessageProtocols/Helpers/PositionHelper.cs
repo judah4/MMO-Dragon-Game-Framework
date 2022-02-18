@@ -4,7 +4,9 @@ namespace MessageProtocols.Core
 {
     public partial class Position : IEntityComponent
     {
-        public int ComponentId => 2;
+        public static int ComponentId => 2;
+
+        public int GetComponentId() => ComponentId;
 
         public static double DistanceSquared(Position position1, Position position2)
         {

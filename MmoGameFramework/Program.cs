@@ -27,46 +27,42 @@ namespace MmoGameFramework
             _entityStore.Create("Cube", new Position() { X = 1, Z = 3 });
             _entityStore.Create("Cube", new Position() { X = -3, Z = -3 });
 
-            Telepathy.Logger.LogMethod = Console.WriteLine;
-            Telepathy.Logger.LogWarningMethod = Console.WriteLine;
-            Telepathy.Logger.LogErrorMethod = Console.WriteLine;
-
             // create and start the server
             server = new MmoServer(_entityStore);
-           server.Start(1337);
-           workerServer = new MmoServer(_entityStore);
-           workerServer.Start(1338);
+            server.Start(1337);
+            workerServer = new MmoServer(_entityStore);
+            workerServer.Start(1338);
 
 
-           bool loop = true;
-           while (loop)
-           {
-               try
-               {
-                   var key = Console.ReadKey();
-                   if (key.Key == ConsoleKey.S)
-                   {
-                       var newEntity = _entityStore.Create("Cube",
-                           new Position() { X = random.NextDouble() * 10 - 5, Y = 2, Z = random.NextDouble() * 10 - 5 });
+            bool loop = true;
+            while (loop)
+            {
+                try
+                {
+                    var key = Console.ReadKey();
+                    if (key.Key == ConsoleKey.S)
+                    {
+                        var newEntity = _entityStore.Create("Cube",
+                            new Position() { X = random.NextDouble() * 10 - 5, Y = 2, Z = random.NextDouble() * 10 - 5 });
 
-                       _entityStore.UpdateEntity(newEntity);
+                        _entityStore.UpdateEntity(newEntity);
 
-                   }
-                   else if (key.Key == ConsoleKey.Escape)
-                   {
-                       loop = false;
-                       break;
-                   }
+                    }
+                    else if (key.Key == ConsoleKey.Escape)
+                    {
+                        loop = false;
+                        break;
+                    }
                 }
-               catch (Exception e)
-               {
+                catch (Exception e)
+                {
                     Console.WriteLine(e);
-               }
+                }
                
-           }
+            }
 
-           server.Stop();
-           workerServer.Stop();
+            server.Stop();
+            workerServer.Stop();
         }
 
 

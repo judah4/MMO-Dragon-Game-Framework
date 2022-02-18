@@ -1,0 +1,10 @@
+syntax = "proto3";
+option csharp_namespace = "MessageProtocols.Core";
+package messageprotocols.core;
+
+//2
+message Rotation {
+  float x = 1;
+  float y = 2;
+  float z = 3;
+}

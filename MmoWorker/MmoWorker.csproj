@@ -13,6 +13,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="Lidgren.Network">
+      <HintPath>..\Libs\Lidgren\Lidgren.Network.dll</HintPath>
+    </Reference>
     <Reference Include="Telepathy">
       <HintPath>..\Libs\Telepathy\Telepathy.dll</HintPath>
     </Reference>
