@@ -18,7 +18,7 @@ public class UpdatePositionReceiver : BaseEntityBehavior
 
     void OnUpdate()
     {
-        var position = Position.Parser.ParseFrom(Entity.Data[new Position().ComponentId]);
+        var position = Position.Parser.ParseFrom(Entity.Data[Position.ComponentId]);
         var localPos = Server.PositionToClient(position);
 
         Debug.Log($"{Entity.EntityId} {position.ToString()} {localPos}");
@@ -31,7 +31,7 @@ public class UpdatePositionReceiver : BaseEntityBehavior
     void Update()
     {
 
-        var pos = Position.Parser.ParseFrom(Entity.Data[new Position().ComponentId]);
+        var pos = Position.Parser.ParseFrom(Entity.Data[Position.ComponentId]);
         var currentPos = Server.PositionToServer(transform.position);
         if (!pos.X.Equals(currentPos.X) || !pos.Y.Equals(currentPos.Y) || !pos.Z.Equals(currentPos.Z))
         {

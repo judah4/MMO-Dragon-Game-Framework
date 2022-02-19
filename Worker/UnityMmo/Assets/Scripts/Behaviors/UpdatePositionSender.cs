@@ -19,7 +19,7 @@ public class UpdatePositionSender : BaseEntityBehavior
         if(Time.time - updateTime < updateTick)
             return;
 
-        var pos = Position.Parser.ParseFrom(Entity.Data[new Position().ComponentId]);
+        var pos = Position.Parser.ParseFrom(Entity.Data[Position.ComponentId]);
         var currentPos = Server.PositionToClient(pos);
 
         if (pos.Y < -100)

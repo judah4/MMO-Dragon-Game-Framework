@@ -31,7 +31,7 @@ namespace MmoWorker
             s_client = new NetClient(config);
 
             _sync = new SynchronizationContext();
-            s_client.RegisterReceivedCallback(new SendOrPostCallback(GotMessage), _sync);
+            //s_client.RegisterReceivedCallback(new SendOrPostCallback(GotMessage), _sync);
 
         }
 
@@ -45,6 +45,11 @@ namespace MmoWorker
         public void Stop()
         {
             s_client.Disconnect("Requested by user");
+        }
+
+        public void Update()
+        {
+            GotMessage(s_client);
         }
 
         public void GotMessage(object peer)

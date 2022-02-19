@@ -16,7 +16,7 @@ public class CommonHandler : MonoBehaviour
     public string ipAddress = "localhost";
     public short port = 1337;
 
-    public int ClientId
+    public long ClientId
     {
         get { return Client?.ClientId ?? 0; }
     }
@@ -51,15 +51,10 @@ public class CommonHandler : MonoBehaviour
         // update even if window isn't focused, otherwise we don't receive.
         Application.runInBackground = true;
 
-        // use Debug.Log functions for Telepathy so we can see it in the console
-        Telepathy.Logger.LogMethod = Debug.Log;
-        Telepathy.Logger.LogWarningMethod = Debug.LogWarning;
-        Telepathy.Logger.LogErrorMethod = Debug.LogError;
 
         GameObjectRepresentation = new GameObjectRepresentation(this);
 
         Client = new MmoClient();
-        Client.LoopOtherThread = false;
         Client.OnEntityCreation += GameObjectRepresentation.OnEntityCreation;
         Client.OnEntityUpdate += GameObjectRepresentation.OnEntityUpdate;
 
@@ -79,12 +74,11 @@ public class CommonHandler : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Client.Update();
     }
 
     void OnApplicationQuit()
     {
-        Client.Disconnect();
+        Client.Stop();
     }
 
     // Helper function for getting the command line arguments

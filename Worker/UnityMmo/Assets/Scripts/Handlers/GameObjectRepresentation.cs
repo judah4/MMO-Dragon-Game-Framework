@@ -85,8 +85,8 @@ public class GameObjectRepresentation
 
         var message = entityComponent as IMessage;
 
-        entityGm.Data.Remove(entityComponent.ComponentId);
-        entityGm.Data.Add(entityComponent.ComponentId, message.ToByteString());
+        entityGm.Data.Remove(entityComponent.GetComponentId());
+        entityGm.Data.Add(entityComponent.GetComponentId(), message.ToByteString());
 
         entityGm.EntityUpdated();
 
