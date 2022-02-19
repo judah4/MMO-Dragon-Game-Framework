@@ -19,7 +19,7 @@ public class UpdatePositionSender : BaseEntityBehavior
         if(Time.time - updateTime < updateTick)
             return;
 
-        var pos = Position.Parser.ParseFrom(Entity.Data[Position.ComponentId]);
+        var pos = Position.Parser.ParseFrom(Entity.Data[PositionComponent.ComponentId]);
         var currentPos = Server.PositionToClient(pos);
 
         if (pos.Y < -100)
@@ -38,7 +38,7 @@ public class UpdatePositionSender : BaseEntityBehavior
 
         if (Mathf.Abs((currentPos - transform.position).sqrMagnitude) > .22f)
         {
-            Server.UpdateEntity(Entity.EntityId, new PositionUpdate(Server, transform.position).Get());
+            Server.UpdateEntity(Entity.EntityId, PositionComponent.ComponentId, new PositionUpdate(Server, transform.position).Get());
             updateTime = Time.time;
         }
     }

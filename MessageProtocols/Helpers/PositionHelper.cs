@@ -2,7 +2,7 @@
 
 namespace MessageProtocols.Core
 {
-    public partial class Position : IEntityComponent
+    public partial class PositionComponent : IEntityComponent
     {
         public static int ComponentId => 2;
 

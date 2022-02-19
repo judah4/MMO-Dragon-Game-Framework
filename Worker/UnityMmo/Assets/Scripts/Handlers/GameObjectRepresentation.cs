@@ -77,16 +77,14 @@ public class GameObjectRepresentation
         entityGm.EntityUpdated();
     }
 
-    public void UpdateEntity(int entityId, IEntityComponent entityComponent)
+    public void UpdateEntity(int entityId, int componentId, IMessage message)
     {
         EntityGameObject entityGm;
         if (!_entities.TryGetValue(entityId, out entityGm))
             return;
 
-        var message = entityComponent as IMessage;
-
-        entityGm.Data.Remove(entityComponent.GetComponentId());
-        entityGm.Data.Add(entityComponent.GetComponentId(), message.ToByteString());
+        entityGm.Data.Remove(componentId);
+        entityGm.Data.Add(componentId, message.ToByteString());
 
         entityGm.EntityUpdated();
 

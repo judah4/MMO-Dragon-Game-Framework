@@ -73,7 +73,7 @@ namespace MmoGameFramework
                                 NetConnectionStatus status = (NetConnectionStatus)im.ReadByte();
 
                                 string reason = im.ReadString();
-                                Console.WriteLine(NetUtility.ToHexString(im.SenderConnection.RemoteUniqueIdentifier) + " " + status + ": " + reason);
+                                Console.WriteLine(im.SenderConnection.RemoteUniqueIdentifier + " " + status + ": " + reason);
 
                                 if (status == NetConnectionStatus.Connected)
                                 {
@@ -84,7 +84,7 @@ namespace MmoGameFramework
                                         MessageId = (int)ServerCodes.ClientConnect,
                                         Info = new ClientConnect()
                                         {
-                                            ClientId = (int)im.SenderConnection.RemoteUniqueIdentifier,
+                                            ClientId = im.SenderConnection.RemoteUniqueIdentifier,
                                         }.ToByteString(),
                                     };
                                     NetOutgoingMessage om = s_server.CreateMessage();
@@ -93,16 +93,15 @@ namespace MmoGameFramework
                                 }
                                 else if(status == NetConnectionStatus.Disconnected)
                                 {
-                                    Console.WriteLine("Server " + (int)im.SenderConnection.RemoteUniqueIdentifier + " Disconnected");
-                                    _connections.Remove((int)im.SenderConnection.RemoteUniqueIdentifier);
+                                    Console.WriteLine("Server " + im.SenderConnection.RemoteUniqueIdentifier + " Disconnected");
+                                    _connections.Remove(im.SenderConnection.RemoteUniqueIdentifier);
                                 }
 
                                 break;
                             case NetIncomingMessageType.Data:
 
+                                Console.WriteLine(im.SenderConnection.RemoteUniqueIdentifier +" What is this data? '" + BitConverter.ToString(im.Data) + "'");
                                 var simpleData = SimpleMessage.Parser.ParseFrom(im.Data);
-
-                                Console.WriteLine("Server " + im.SenderConnection.RemoteUniqueIdentifier);
 
                                 switch ((ServerCodes)simpleData.MessageId)
                                 {
@@ -138,20 +137,9 @@ namespace MmoGameFramework
                                         break;
                                     default:
                                         // incoming chat message from a client
-                                        string chat = im.ReadString();
+                                        //string chat = im.ReadString();
 
-                                        Console.WriteLine("Broadcasting '" + chat + "'");
-
-                                        // broadcast this to all connections, except sender
-                                        List<NetConnection> all = s_server.Connections; // get copy
-                                        all.Remove(im.SenderConnection);
-
-                                        if (all.Count > 0)
-                                        {
-                                            NetOutgoingMessage om = s_server.CreateMessage();
-                                            om.Write(NetUtility.ToHexString(im.SenderConnection.RemoteUniqueIdentifier) + " said: " + chat);
-                                            s_server.SendMessage(om, all, NetDeliveryMethod.ReliableOrdered, 0);
-                                        }
+                                        //Console.WriteLine("What is this data? '" + chat + "'");
                                         break;
                                 }
                                 
@@ -202,7 +190,7 @@ namespace MmoGameFramework
         {
             NetOutgoingMessage om = s_server.CreateMessage();
             om.Write(message.ToByteArray());
-            s_server.SendMessage(om, connection, NetDeliveryMethod.Unreliable, 0);
+            s_server.SendMessage(om, connection, NetDeliveryMethod.UnreliableSequenced);
         }
 
         public void SendArea(Position position, IMessage message)
@@ -210,7 +198,7 @@ namespace MmoGameFramework
             var connections = new List<NetConnection>();
             foreach (var workerConnection in _connections)
             {
-                if (Position.WithinArea(position, workerConnection.Value.InterestPosition,
+                if (PositionComponent.WithinArea(position, workerConnection.Value.InterestPosition,
                     workerConnection.Value.InterestRange))
                 {
                     connections.Add(workerConnection.Value.Connection);
@@ -223,7 +211,7 @@ namespace MmoGameFramework
 
             NetOutgoingMessage om = s_server.CreateMessage();
             om.Write(message.ToByteArray());
-            s_server.SendMessage(om, connections, NetDeliveryMethod.Unreliable, 0);
+            s_server.SendMessage(om, connections, NetDeliveryMethod.UnreliableSequenced, 0);
         }
 
         private void OnEntityUpdate(EntityInfo entityInfo)

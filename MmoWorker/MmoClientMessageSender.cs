@@ -33,14 +33,13 @@ namespace MmoWorker
             });
         }
 
-        public void SendEntityUpdate(int entityId, IEntityComponent entityComponent)
+        public void SendEntityUpdate(int entityId, int componentId, IMessage message)
         {
-            var message = entityComponent as IMessage;
 
             var changeInterest = new EntityUpdate()
             {
                 EntityId = entityId,
-                ComponentId = entityComponent.GetComponentId(),
+                ComponentId = componentId,
                 Info = message.ToByteString(),
             };
 

@@ -14,23 +14,23 @@ namespace MmoWorker
     {
         public long ClientId { get; private set; }
 
-        private static NetClient s_client;
+        private NetClient s_client;
 
         public bool Connected => s_client.ConnectionStatus == NetConnectionStatus.Connected;
+        public NetConnectionStatus Status => s_client.ConnectionStatus;
 
         public event Action<EntityInfo> OnEntityCreation;
         public event Action<EntityUpdate> OnEntityUpdate; 
         public event Action OnConnect;
 
-        SynchronizationContext _sync;
+        public event Action<string> OnLog;
 
         public MmoClient()
         {
             NetPeerConfiguration config = new NetPeerConfiguration("dragon-bingus");
             config.AutoFlushSendQueue = false;
             s_client = new NetClient(config);
-
-            _sync = new SynchronizationContext();
+            //_sync = new SynchronizationContext();
             //s_client.RegisterReceivedCallback(new SendOrPostCallback(GotMessage), _sync);
 
         }
@@ -65,14 +65,14 @@ namespace MmoWorker
                     case NetIncomingMessageType.WarningMessage:
                     case NetIncomingMessageType.VerboseDebugMessage:
                         string text = im.ReadString();
-                        Console.WriteLine(text);
+                        OnLog?.Invoke(text);
                         break;
                     case NetIncomingMessageType.StatusChanged:
                         NetConnectionStatus status = (NetConnectionStatus)im.ReadByte();
 
                         if (status == NetConnectionStatus.Connected)
                         {
-                            Console.WriteLine("Client connected");
+                            OnLog?.Invoke("Client connected");
                             //if self
                             OnConnect?.Invoke();
                         }
@@ -82,30 +82,31 @@ namespace MmoWorker
                         }
 
                         string reason = im.ReadString();
-                        Console.WriteLine(status.ToString() + ": " + reason);
+                        OnLog(status.ToString() + ": " + reason);
 
                         break;
                     case NetIncomingMessageType.Data:
+                        OnLog?.Invoke("Client " + s_client.UniqueIdentifier + " Data: " + BitConverter.ToString(im.Data));
                         var simpleData = SimpleMessage.Parser.ParseFrom(im.Data);
-                        Console.WriteLine("Client " + s_client.UniqueIdentifier + " Data: " + (ServerCodes)simpleData.MessageId);
                         switch ((ServerCodes)simpleData.MessageId)
                         {
                             case ServerCodes.ClientConnect:
-                                //ClientId = ClientConnect.Parser.ParseFrom(simpleData.Info).ClientId;
-                                //Console.WriteLine("My Client Id is " + ClientId);
+                                //ClientId = ClientConnect.Parser.ParseFrom(simpleData.Info).ClientId;w
+                                //OnLog?.Invoke("My Client Id is " + ClientId);
+                                OnLog?.Invoke("Client connected msg");
                                 //OnConnect?.Invoke();
                                 break;
                             case ServerCodes.GameData:
                                 var gameData = GameData.Parser.ParseFrom(simpleData.Info);
-                                Console.WriteLine($"Client Game Data: {BitConverter.ToString(gameData.Info.ToByteArray())}");
+                                OnLog?.Invoke($"Client Game Data: {BitConverter.ToString(gameData.Info.ToByteArray())}");
 
                                 break;
                             case ServerCodes.EntityInfo:
                                 var entityInfo = EntityInfo.Parser.ParseFrom(simpleData.Info);
-                                Console.WriteLine($"Client Entity Info: {entityInfo.EntityId}");
+                                OnLog?.Invoke($"Client Entity Info: {entityInfo.EntityId}");
                                 foreach (var pair in entityInfo.EntityData)
                                 {
-                                    Console.WriteLine($"{pair.Key} {BitConverter.ToString(pair.Value.ToByteArray())}");
+                                    OnLog?.Invoke($"{pair.Key} {BitConverter.ToString(pair.Value.ToByteArray())}");
                                 }
 
                                 OnEntityCreation?.Invoke(entityInfo);
@@ -121,7 +122,7 @@ namespace MmoWorker
                         }
                         break;
                     default:
-                        Console.WriteLine("Unhandled type: " + im.MessageType + " " + im.LengthBytes + " bytes");
+                        OnLog?.Invoke("Unhandled type: " + im.MessageType + " " + im.LengthBytes + " bytes");
                         break;
                 }
                 s_client.Recycle(im);
@@ -132,7 +133,7 @@ namespace MmoWorker
         {
             NetOutgoingMessage om = s_client.CreateMessage();
             om.Write(message.ToByteArray());
-            s_client.SendMessage(om, NetDeliveryMethod.Unreliable);
+            s_client.SendMessage(om, NetDeliveryMethod.UnreliableSequenced);
             s_client.FlushSendQueue();
         }
 

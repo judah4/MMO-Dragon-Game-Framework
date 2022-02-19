@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Google.Protobuf;
 using MessageProtocols;
 using MessageProtocols.Core;
 using MessageProtocols.Server;
@@ -55,13 +56,13 @@ public class CommonHandler : MonoBehaviour
         GameObjectRepresentation = new GameObjectRepresentation(this);
 
         Client = new MmoClient();
+        Client.OnLog += Debug.Log;
         Client.OnEntityCreation += GameObjectRepresentation.OnEntityCreation;
         Client.OnEntityUpdate += GameObjectRepresentation.OnEntityUpdate;
 
         Client.OnConnect += OnConnect;
 
         Client.Connect(ipAddress, port);
-
 
         MessageSender = new MmoClientMessageSender(Client);
     }
@@ -74,6 +75,7 @@ public class CommonHandler : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        Client.Update();
     }
 
     void OnApplicationQuit()
@@ -114,9 +116,9 @@ public class CommonHandler : MonoBehaviour
         return adjustedPos;
     }
 
-    public void UpdateEntity(int entityId, IEntityComponent position)
+    public void UpdateEntity(int entityId, int componentId, IMessage position)
     {
-        GameObjectRepresentation.UpdateEntity(entityId, position);
-        MessageSender.SendEntityUpdate(entityId, position);
+        GameObjectRepresentation.UpdateEntity(entityId, componentId, position);
+        MessageSender.SendEntityUpdate(entityId, componentId, position);
     }
 }

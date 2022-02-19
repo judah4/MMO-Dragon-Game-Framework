@@ -9,13 +9,14 @@ namespace ExampleWorker
         static void Main(string[] args)
         {
             _mmoClient = new MmoClient();
-            _mmoClient.Connect("127.0.0.1", 1338);
-
+            _mmoClient.Connect("127.0.0.1", 1337);
+            _mmoClient.OnLog += Console.WriteLine;
             bool loop = true;
             while (loop)
             {
                 try
                 {
+                    _mmoClient.Update();
                     var key = Console.ReadKey();
                     if (key.Key == ConsoleKey.S)
                     {
