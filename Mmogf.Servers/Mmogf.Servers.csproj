@@ -6,11 +6,17 @@
 
   <ItemGroup>
     <PackageReference Include="MessagePack" Version="2.3.85" />
+    <PackageReference Include="MessagePack.UnityShims" Version="2.3.85" />
   </ItemGroup>
 	<ItemGroup>
 		<Compile Include="..\Worker\UnityMmo\Assets\MmogfMessages\**\*.cs" LinkBase="Shared" />
 	</ItemGroup>
 	<ItemGroup>
-	  <ProjectReference Include="..\MessageProtocols\Mmogf.csproj" />
+	  <ProjectReference Include="..\Mmogf\Mmogf.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Reference Include="Lidgren.Network">
+	    <HintPath>..\Libs\Lidgren\Lidgren.Network.dll</HintPath>
+	  </Reference>
 	</ItemGroup>
 </Project>

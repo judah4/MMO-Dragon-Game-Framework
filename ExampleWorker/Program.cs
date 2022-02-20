@@ -4,11 +4,11 @@ namespace ExampleWorker
 {
     class Program
     {
-        private static MmoClient? _mmoClient;
+        private static MmoWorker? _mmoClient;
 
         static void Main(string[] args)
         {
-            _mmoClient = new MmoClient();
+            _mmoClient = new MmoWorker();
             _mmoClient.Connect("127.0.0.1", 1337);
             _mmoClient.OnLog += Console.WriteLine;
             bool loop = true;

@@ -1,4 +1,5 @@
-﻿using Mmogf.Core;
+﻿using Lidgren.Network;
+using Mmogf.Core;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -24,10 +25,19 @@ namespace MmoGameFramework
             _entityStore.Create("Cube", new Position() { X = -3, Z = -3 });
 
             // create and start the server
-            server = new MmoServer(_entityStore);
-            server.Start(1337);
-            workerServer = new MmoServer(_entityStore);
-            workerServer.Start(1338);
+            server = new MmoServer(_entityStore, new NetPeerConfiguration("Dragon-Clients")
+            {
+                MaximumConnections = 100,
+                Port = 1337,
+            });
+            server.Start();
+
+            workerServer = new MmoServer(_entityStore, new NetPeerConfiguration("Dragon-Workers")
+            {
+                MaximumConnections = 100,
+                Port = 1338,
+            });
+            workerServer.Start();
 
             bool loop = true;
             Console.WriteLine("S to spawn Cube.");

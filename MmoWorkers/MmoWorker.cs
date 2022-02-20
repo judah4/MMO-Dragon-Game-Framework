@@ -8,7 +8,7 @@ using Mmogf.Core;
 
 namespace MmoWorkers
 {
-    public class MmoClient
+    public class MmoWorker
     {
         public long ClientId { get; private set; }
 
@@ -23,7 +23,7 @@ namespace MmoWorkers
 
         public event Action<string> OnLog;
 
-        public MmoClient()
+        public MmoWorker()
         {
             NetPeerConfiguration config = new NetPeerConfiguration("dragon-bingus");
             config.AutoFlushSendQueue = false;

@@ -16,23 +16,20 @@ namespace MmoGameFramework
 
         public Dictionary<long, WorkerConnection> _connections = new Dictionary<long, WorkerConnection>();
 
-        public MmoServer(EntityStore entities)
+        public MmoServer(EntityStore entities, NetPeerConfiguration config)
         {
             _entities = entities;
 
             // set up network
-            _config = new NetPeerConfiguration("dragon-bingus");
-            _config.MaximumConnections = 100;
-            _config.Port = 14242;
+            _config = config;
             s_server = new NetServer(_config);
 
             _entities.OnUpdateEntity += OnEntityUpdate;
             _entities.OnUpdateEntityPartial += OnEntityUpdatePartial;
         }
 
-        public void Start(short port)
+        public void Start()
         {
-            _config.Port = port;
             s_server.Start();
 
             var thread1 = new Thread(Loop);

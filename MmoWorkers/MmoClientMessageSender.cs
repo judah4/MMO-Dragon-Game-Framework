@@ -9,9 +9,9 @@ namespace MmoWorkers
 {
     public class MmoClientMessageSender
     {
-        private MmoClient _client;
+        private MmoWorker _client;
 
-        public MmoClientMessageSender(MmoClient mmoClient)
+        public MmoClientMessageSender(MmoWorker mmoClient)
         {
             _client = mmoClient;
 
