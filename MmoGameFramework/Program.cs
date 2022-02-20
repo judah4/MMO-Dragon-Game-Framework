@@ -29,8 +29,10 @@ namespace MmoGameFramework
             workerServer = new MmoServer(_entityStore);
             workerServer.Start(1338);
 
-
             bool loop = true;
+            Console.WriteLine("S to spawn Cube.");
+            Console.WriteLine("ESC to close.");
+
             while (loop)
             {
                 try

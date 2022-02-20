@@ -12,6 +12,7 @@ namespace ExampleWorker
             _mmoClient.Connect("127.0.0.1", 1337);
             _mmoClient.OnLog += Console.WriteLine;
             bool loop = true;
+            Console.WriteLine("ESC to close.");
             while (loop)
             {
                 try
