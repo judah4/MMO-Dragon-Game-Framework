@@ -1,12 +1,9 @@
 ﻿using System;
 
-namespace MessageProtocols.Core
+namespace Mmogf.Core
 {
-    public partial class PositionComponent : IEntityComponent
+    public partial struct Position
     {
-        public static int ComponentId => 2;
-
-        public int GetComponentId() => ComponentId;
 
         public static double DistanceSquared(Position position1, Position position2)
         {

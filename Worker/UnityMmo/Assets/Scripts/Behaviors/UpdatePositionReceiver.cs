@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using MessageProtocols.Core;
+using MessagePack;
+using Mmogf.Core;
 using UnityEngine;
 
 public class UpdatePositionReceiver : BaseEntityBehavior
@@ -18,7 +19,7 @@ public class UpdatePositionReceiver : BaseEntityBehavior
 
     void OnUpdate()
     {
-        var position = Position.Parser.ParseFrom(Entity.Data[PositionComponent.ComponentId]);
+        var position = MessagePackSerializer.Deserialize<Position>(Entity.Data[Position.ComponentId]);
         var localPos = Server.PositionToClient(position);
 
         Debug.Log($"{Entity.EntityId} {position.ToString()} {localPos}");
@@ -30,12 +31,11 @@ public class UpdatePositionReceiver : BaseEntityBehavior
 
     void Update()
     {
-
-        var pos = Position.Parser.ParseFrom(Entity.Data[PositionComponent.ComponentId]);
+        var pos = MessagePackSerializer.Deserialize<Position>(Entity.Data[Position.ComponentId]);
         var currentPos = Server.PositionToServer(transform.position);
         if (!pos.X.Equals(currentPos.X) || !pos.Y.Equals(currentPos.Y) || !pos.Z.Equals(currentPos.Z))
         {
-            Server.UpdateEntity(Entity.EntityId, PositionComponent.ComponentId, new PositionUpdate(Server, transform.position).Get());
+            Server.UpdateEntity(Entity.EntityId, Position.ComponentId, new PositionUpdate(Server, transform.position).Get());
 
         }
     }

@@ -1,13 +1,14 @@
-﻿using System;
-using MessageProtocols.Core;
+﻿using MessagePack;
+using System;
 
-namespace MessageProtocols.Server
+namespace Mmogf.Core
 {
-    public partial class EntityInfo
+    public partial struct EntityInfo
     {
+        [IgnoreMember]
         public Position Position
         {
-            get { return Core.Position.Parser.ParseFrom(EntityData[PositionComponent.ComponentId]); }
+            get { return MessagePackSerializer.Deserialize<Position>(EntityData[Position.ComponentId]); }
         }
        
     }

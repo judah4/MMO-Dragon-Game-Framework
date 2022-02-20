@@ -1,4 +1,4 @@
-﻿using MmoWorker;
+﻿using MmoWorkers;
 
 namespace ExampleWorker
 {

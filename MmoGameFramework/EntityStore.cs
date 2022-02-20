@@ -1,9 +1,8 @@
+using MessagePack;
+using Mmogf.Core;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Google.Protobuf;
-using MessageProtocols.Core;
-using MessageProtocols.Server;
 
 namespace MmoGameFramework
 {
@@ -22,10 +21,10 @@ namespace MmoGameFramework
             var entity = new EntityInfo()
             {
                 EntityId = entityId,
-                EntityData =
+                EntityData = new Dictionary<int, byte[]>()
                 {
-                    {1, new EntityType() { Name = entityType}.ToByteString()},
-                    {PositionComponent.ComponentId, position.ToByteString()}
+                    { EntityType.ComponentId, MessagePackSerializer.Serialize(new EntityType() { Name = entityType}) },
+                    { Position.ComponentId, MessagePackSerializer.Serialize(position) }
                 }
             };
 
@@ -38,7 +37,7 @@ namespace MmoGameFramework
             var entities = new List<EntityInfo>();
             foreach (var entityInfo in _entities)
             {
-                if (PositionComponent.WithinArea(Position.Parser.ParseFrom(entityInfo.Value.EntityData[PositionComponent.ComponentId]), position, radius))
+                if (Position.WithinArea(entityInfo.Value.Position, position, radius))
                 {
                     entities.Add(entityInfo.Value);
                 }
@@ -47,13 +46,13 @@ namespace MmoGameFramework
             return entities;
         }
 
-        public EntityInfo GetEntity(int entityId)
+        public EntityInfo? GetEntity(int entityId)
         {
             EntityInfo entityInfo;
-            _entities.TryGetValue(entityId, out entityInfo);
+            if(!_entities.TryGetValue(entityId, out entityInfo))
+                return null;
 
-            return entityInfo;
-            
+            return entityInfo;        
         }
 
         public void UpdateEntity(EntityInfo entityInfo)

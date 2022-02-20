@@ -1,10 +1,8 @@
-﻿using System.Collections;
+﻿using MessagePack;
+using Mmogf.Core;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Google.Protobuf;
-using MessageProtocols;
-using MessageProtocols.Core;
-using MessageProtocols.Server;
 using UnityEngine;
 
 public class GameObjectRepresentation
@@ -22,8 +20,8 @@ public class GameObjectRepresentation
     {
         EntityGameObject entityGm;
 
-        var entityType = EntityType.Parser.ParseFrom(entity.EntityData[1]);
-        var position = Position.Parser.ParseFrom(entity.EntityData[2]);
+        var entityType = MessagePackSerializer.Deserialize<EntityType>(entity.EntityData[EntityType.ComponentId]);
+        var position = MessagePackSerializer.Deserialize<Position>(entity.EntityData[Position.ComponentId]);
         var adjustedPos = _server.PositionToClient(position);
 
         if (!_entities.TryGetValue(entity.EntityId, out entityGm))
@@ -77,14 +75,14 @@ public class GameObjectRepresentation
         entityGm.EntityUpdated();
     }
 
-    public void UpdateEntity(int entityId, int componentId, IMessage message)
+    public void UpdateEntity(int entityId, int componentId, object message)
     {
         EntityGameObject entityGm;
         if (!_entities.TryGetValue(entityId, out entityGm))
             return;
 
         entityGm.Data.Remove(componentId);
-        entityGm.Data.Add(componentId, message.ToByteString());
+        entityGm.Data.Add(componentId, MessagePackSerializer.Serialize(message));
 
         entityGm.EntityUpdated();
 

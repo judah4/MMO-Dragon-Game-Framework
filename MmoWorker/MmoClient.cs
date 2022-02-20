@@ -2,13 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
-using Google.Protobuf;
 using Lidgren.Network;
-using MessageProtocols;
-using MessageProtocols.Core;
-using MessageProtocols.Server;
+using MessagePack;
+using Mmogf.Core;
 
-namespace MmoWorker
+namespace MmoWorkers
 {
     public class MmoClient
     {
@@ -87,7 +85,7 @@ namespace MmoWorker
                         break;
                     case NetIncomingMessageType.Data:
                         OnLog?.Invoke("Client " + s_client.UniqueIdentifier + " Data: " + BitConverter.ToString(im.Data));
-                        var simpleData = SimpleMessage.Parser.ParseFrom(im.Data);
+                        var simpleData = MessagePackSerializer.Deserialize<SimpleMessage>(im.Data);
                         switch ((ServerCodes)simpleData.MessageId)
                         {
                             case ServerCodes.ClientConnect:
@@ -97,22 +95,22 @@ namespace MmoWorker
                                 //OnConnect?.Invoke();
                                 break;
                             case ServerCodes.GameData:
-                                var gameData = GameData.Parser.ParseFrom(simpleData.Info);
-                                OnLog?.Invoke($"Client Game Data: {BitConverter.ToString(gameData.Info.ToByteArray())}");
+                                var gameData = MessagePackSerializer.Deserialize<GameData>(simpleData.Info);
+                                OnLog?.Invoke($"Client Game Data: {BitConverter.ToString(gameData.Info)}");
 
                                 break;
                             case ServerCodes.EntityInfo:
-                                var entityInfo = EntityInfo.Parser.ParseFrom(simpleData.Info);
+                                var entityInfo = MessagePackSerializer.Deserialize<EntityInfo>(simpleData.Info);
                                 OnLog?.Invoke($"Client Entity Info: {entityInfo.EntityId}");
                                 foreach (var pair in entityInfo.EntityData)
                                 {
-                                    OnLog?.Invoke($"{pair.Key} {BitConverter.ToString(pair.Value.ToByteArray())}");
+                                    OnLog?.Invoke($"{pair.Key} {BitConverter.ToString(pair.Value)}");
                                 }
 
                                 OnEntityCreation?.Invoke(entityInfo);
                                 break;
                             case ServerCodes.EntityUpdate:
-                                var entityUpdate = EntityUpdate.Parser.ParseFrom(simpleData.Info);
+                                var entityUpdate = MessagePackSerializer.Deserialize<EntityUpdate>(simpleData.Info);
 
                                 OnEntityUpdate?.Invoke(entityUpdate);
 
@@ -129,10 +127,10 @@ namespace MmoWorker
             }
         }
 
-        internal void Send(IMessage message)
+        internal void Send(SimpleMessage message)
         {
             NetOutgoingMessage om = s_client.CreateMessage();
-            om.Write(message.ToByteArray());
+            om.Write(MessagePackSerializer.Serialize(message));
             s_client.SendMessage(om, NetDeliveryMethod.UnreliableSequenced);
             s_client.FlushSendQueue();
         }

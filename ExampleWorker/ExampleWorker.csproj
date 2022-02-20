@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MmoWorker\MmoWorker.csproj" />
+    <ProjectReference Include="..\MmoWorker\MmoWorkers.csproj" />
   </ItemGroup>
 
 </Project>

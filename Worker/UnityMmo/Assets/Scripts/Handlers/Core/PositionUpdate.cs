@@ -1,6 +1,6 @@
-﻿using System.Collections;
+﻿using Mmogf.Core;
+using System.Collections;
 using System.Collections.Generic;
-using MessageProtocols.Core;
 using UnityEngine;
 
 public class PositionUpdate
@@ -11,7 +11,7 @@ public class PositionUpdate
     public PositionUpdate(CommonHandler server, Vector3 position)
     {
         _server = server;
-        _position = server.PositionToServer(position);
+        _position = _server.PositionToServer(position);
     }
 
     public Position Get()

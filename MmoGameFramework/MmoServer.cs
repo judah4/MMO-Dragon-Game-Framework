@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using Google.Protobuf;
 using Lidgren.Network;
-using MessageProtocols;
-using MessageProtocols.Core;
-using MessageProtocols.Server;
+using MessagePack;
+using Mmogf.Core;
 
 namespace MmoGameFramework
 {
@@ -82,13 +80,13 @@ namespace MmoGameFramework
                                     var message = new SimpleMessage()
                                     {
                                         MessageId = (int)ServerCodes.ClientConnect,
-                                        Info = new ClientConnect()
+                                        Info = MessagePackSerializer.Serialize(new ClientConnect()
                                         {
                                             ClientId = im.SenderConnection.RemoteUniqueIdentifier,
-                                        }.ToByteString(),
+                                        }),
                                     };
                                     NetOutgoingMessage om = s_server.CreateMessage();
-                                    om.Write(message.ToByteArray());
+                                    om.Write(MessagePackSerializer.Serialize(message));
                                     s_server.SendMessage(om, im.SenderConnection, NetDeliveryMethod.ReliableOrdered, 0);
                                 }
                                 else if(status == NetConnectionStatus.Disconnected)
@@ -101,17 +99,17 @@ namespace MmoGameFramework
                             case NetIncomingMessageType.Data:
 
                                 Console.WriteLine(im.SenderConnection.RemoteUniqueIdentifier +" What is this data? '" + BitConverter.ToString(im.Data) + "'");
-                                var simpleData = SimpleMessage.Parser.ParseFrom(im.Data);
+                                var simpleData = MessagePackSerializer.Deserialize<SimpleMessage>(im.Data);
 
                                 switch ((ServerCodes)simpleData.MessageId)
                                 {
                                     case ServerCodes.GameData:
-                                        var gameData = GameData.Parser.ParseFrom(simpleData.Info);
+                                        var gameData = MessagePackSerializer.Deserialize<GameData>(simpleData.Info);
                                         Console.WriteLine(
-                                            $"Server Game Data: {BitConverter.ToString(gameData.Info.ToByteArray())}");
+                                            $"Server Game Data: {BitConverter.ToString(gameData.Info)}");
                                         break;
                                     case ServerCodes.ChangeInterestArea:
-                                        var interestArea = ChangeInterestArea.Parser.ParseFrom(simpleData.Info);
+                                        var interestArea = MessagePackSerializer.Deserialize<ChangeInterestArea>(simpleData.Info);
                                         WorkerConnection worker;
                                         if (_connections.TryGetValue(im.SenderConnection.RemoteUniqueIdentifier, out worker))
                                         {
@@ -125,7 +123,7 @@ namespace MmoGameFramework
                                                 Send(im.SenderConnection, new SimpleMessage()
                                                 {
                                                     MessageId = (int)ServerCodes.EntityInfo,
-                                                    Info = new EntityInfo(entityInfo).ToByteString(),
+                                                    Info = MessagePackSerializer.Serialize(entityInfo),
                                                 });
                                             }
 
@@ -162,23 +160,21 @@ namespace MmoGameFramework
 
         void HandleEntityUpdate(NetIncomingMessage im, SimpleMessage simpleData)
         {
-            var entityUpdate = EntityUpdate.Parser.ParseFrom(simpleData.Info);
+            var entityUpdate = MessagePackSerializer.Deserialize<EntityUpdate>(simpleData.Info);
             var entityInfo = _entities.GetEntity(entityUpdate.EntityId);
 
             if (entityInfo == null)
-            {
                 return;
+            
 
-            }
-
-            entityInfo.EntityData.Remove(entityUpdate.ComponentId);
-            entityInfo.EntityData.Add(entityUpdate.ComponentId, entityUpdate.Info);
+            entityInfo.Value.EntityData.Remove(entityUpdate.ComponentId);
+            entityInfo.Value.EntityData.Add(entityUpdate.ComponentId, entityUpdate.Info);
 
 
             if (entityUpdate.ComponentId == 2)
             {
-                var position = Position.Parser.ParseFrom(entityUpdate.Info);
-                Console.WriteLine($"Entiy: {entityInfo.EntityId} position to {position.ToString()}");
+                var position = MessagePackSerializer.Deserialize<Position>(entityUpdate.Info);
+                Console.WriteLine($"Entiy: {entityInfo.Value.EntityId} position to {position.ToString()}");
             }
 
 
@@ -186,19 +182,19 @@ namespace MmoGameFramework
 
         }
 
-        public void Send(NetConnection connection, IMessage message)
+        public void Send(NetConnection connection, object message)
         {
             NetOutgoingMessage om = s_server.CreateMessage();
-            om.Write(message.ToByteArray());
+            om.Write(MessagePackSerializer.Serialize(message));
             s_server.SendMessage(om, connection, NetDeliveryMethod.UnreliableSequenced);
         }
 
-        public void SendArea(Position position, IMessage message)
+        public void SendArea(Position position, SimpleMessage message)
         {
             var connections = new List<NetConnection>();
             foreach (var workerConnection in _connections)
             {
-                if (PositionComponent.WithinArea(position, workerConnection.Value.InterestPosition,
+                if (Position.WithinArea(position, workerConnection.Value.InterestPosition,
                     workerConnection.Value.InterestRange))
                 {
                     connections.Add(workerConnection.Value.Connection);
@@ -210,18 +206,17 @@ namespace MmoGameFramework
                 return;
 
             NetOutgoingMessage om = s_server.CreateMessage();
-            om.Write(message.ToByteArray());
+            om.Write(MessagePackSerializer.Serialize(message));
             s_server.SendMessage(om, connections, NetDeliveryMethod.UnreliableSequenced, 0);
         }
 
         private void OnEntityUpdate(EntityInfo entityInfo)
         {
-
             var message = new SimpleMessage()
             {
                 MessageId = (int)ServerCodes.EntityInfo,
 
-                Info = entityInfo.ToByteString(),
+                Info = MessagePackSerializer.Serialize(entityInfo),
             };
 
             Console.WriteLine("Sending Entity Info" );
@@ -232,16 +227,18 @@ namespace MmoGameFramework
         {
 
             var entity = _entities.GetEntity(entityUpdate.EntityId);
+            if(entity == null)
+                return;
 
             var message = new SimpleMessage()
             {
                 MessageId = (int)ServerCodes.EntityUpdate,
 
-                Info = entityUpdate.ToByteString(),
+                Info = MessagePackSerializer.Serialize(entityUpdate),
             };
 
             Console.WriteLine("Sending Entity Update");
-            SendArea(entity.Position, message);
+            SendArea(entity.Value.Position, message);
         }
 
     }

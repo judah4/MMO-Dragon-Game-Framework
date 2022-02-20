@@ -1,10 +1,7 @@
-﻿using System.Collections;
+﻿using Mmogf.Core;
+using MmoWorkers;
+using System.Collections;
 using System.Collections.Generic;
-using Google.Protobuf;
-using MessageProtocols;
-using MessageProtocols.Core;
-using MessageProtocols.Server;
-using MmoWorker;
 using UnityEngine;
 
 public class CommonHandler : MonoBehaviour
@@ -116,7 +113,7 @@ public class CommonHandler : MonoBehaviour
         return adjustedPos;
     }
 
-    public void UpdateEntity(int entityId, int componentId, IMessage position)
+    public void UpdateEntity(int entityId, int componentId, object position)
     {
         GameObjectRepresentation.UpdateEntity(entityId, componentId, position);
         MessageSender.SendEntityUpdate(entityId, componentId, position);

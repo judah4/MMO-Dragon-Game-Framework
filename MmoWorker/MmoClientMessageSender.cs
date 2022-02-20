@@ -1,13 +1,11 @@
-﻿using System;
+﻿using MessagePack;
+using Mmogf.Core;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
-using Google.Protobuf;
-using MessageProtocols;
-using MessageProtocols.Core;
-using MessageProtocols.Server;
 
-namespace MmoWorker
+namespace MmoWorkers
 {
     public class MmoClientMessageSender
     {
@@ -29,24 +27,24 @@ namespace MmoWorker
             _client.Send(new SimpleMessage()
             {
                 MessageId = (int) ServerCodes.ChangeInterestArea,
-                Info = changeInterest.ToByteString(),
+                Info = MessagePackSerializer.Serialize(changeInterest),
             });
         }
 
-        public void SendEntityUpdate(int entityId, int componentId, IMessage message)
+        public void SendEntityUpdate(int entityId, int componentId, object message)
         {
 
             var changeInterest = new EntityUpdate()
             {
                 EntityId = entityId,
                 ComponentId = componentId,
-                Info = message.ToByteString(),
+                Info = MessagePackSerializer.Serialize(message),
             };
 
             _client.Send(new SimpleMessage()
             {
                 MessageId = (int)ServerCodes.EntityUpdate,
-                Info = changeInterest.ToByteString(),
+                Info = MessagePackSerializer.Serialize(changeInterest),
             });
         }
 

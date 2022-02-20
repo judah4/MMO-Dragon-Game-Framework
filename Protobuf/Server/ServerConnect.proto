@@ -4,5 +4,5 @@ package server;
 
 //2
 message ServerConnect {
-  int32 server_id = 1;
+  int64 server_id = 1;
 }

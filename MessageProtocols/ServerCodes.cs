@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace MessageProtocols
+namespace Mmogf.Core
 {
     public enum ServerCodes
     {
