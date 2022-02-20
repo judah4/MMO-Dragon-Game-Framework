@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MessageProtocols\Mmogf.Core.csproj" />
+    <ProjectReference Include="..\Mmogf.Servers\Mmogf.Servers.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MessagePack" Version="2.3.85" />
+  </ItemGroup>
+	<ItemGroup>
+		<Compile Include="..\Worker\UnityMmo\Assets\MmogfMessages\**\*.cs" LinkBase="Shared" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\MessageProtocols\Mmogf.csproj" />
+	</ItemGroup>
+</Project>

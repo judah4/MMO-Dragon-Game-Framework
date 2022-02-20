@@ -1,5 +1,4 @@
 ﻿using Mmogf.Core;
-using MmoWorkers;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,8 +6,7 @@ using UnityEngine;
 public class CommonHandler : MonoBehaviour
 {
     protected GameObjectRepresentation GameObjectRepresentation;
-    protected MmoClient Client;
-    protected MmoClientMessageSender MessageSender;
+    protected MmoWorker Client;
 
     public string WorkerType = "worker";
     public string ipAddress = "localhost";
@@ -52,7 +50,7 @@ public class CommonHandler : MonoBehaviour
 
         GameObjectRepresentation = new GameObjectRepresentation(this);
 
-        Client = new MmoClient();
+        Client = new MmoWorker();
         Client.OnLog += Debug.Log;
         Client.OnEntityCreation += GameObjectRepresentation.OnEntityCreation;
         Client.OnEntityUpdate += GameObjectRepresentation.OnEntityUpdate;
@@ -61,7 +59,6 @@ public class CommonHandler : MonoBehaviour
 
         Client.Connect(ipAddress, port);
 
-        MessageSender = new MmoClientMessageSender(Client);
     }
 
     void OnConnect()
@@ -98,7 +95,7 @@ public class CommonHandler : MonoBehaviour
     {
         //adjust position this way to not lose precision
         var sendPos = PositionToServer(position);
-        MessageSender.SendInterestChange(sendPos);
+        Client.SendInterestChange(sendPos);
     }
 
     public Position PositionToServer(Vector3 position)
@@ -116,6 +113,6 @@ public class CommonHandler : MonoBehaviour
     public void UpdateEntity(int entityId, int componentId, object position)
     {
         GameObjectRepresentation.UpdateEntity(entityId, componentId, position);
-        MessageSender.SendEntityUpdate(entityId, componentId, position);
+        Client.SendEntityUpdate(entityId, componentId, position);
     }
 }

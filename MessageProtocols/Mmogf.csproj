@@ -5,11 +5,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MessagePack" Version="2.3.85" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Workers\" />
+    <Reference Include="Lidgren.Network">
+      <HintPath>..\Libs\Lidgren\Lidgren.Network.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>
