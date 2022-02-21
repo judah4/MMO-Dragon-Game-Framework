@@ -130,6 +130,9 @@ namespace MmoGameFramework
                                     case ServerCodes.EntityUpdate:
                                         HandleEntityUpdate(im, simpleData);
                                         break;
+                                    case ServerCodes.EntityCommand:
+                                        HandleEntityCommand(im, simpleData);
+                                        break;
                                     default:
                                         // incoming chat message from a client
                                         //string chat = im.ReadString();
@@ -153,6 +156,23 @@ namespace MmoGameFramework
                     Console.WriteLine(e.ToString());
                 }
             }
+        }
+
+        private void HandleEntityCommand(NetIncomingMessage im, SimpleMessage simpleData)
+        {
+            //get command info
+            var entityUpdate = MessagePackSerializer.Deserialize<EntityUpdate>(simpleData.Info);
+            var entityInfo = _entities.GetEntity(entityUpdate.EntityId);
+
+            if (entityInfo == null)
+                return;
+
+            NetOutgoingMessage om = s_server.CreateMessage();
+            om.Write(MessagePackSerializer.Serialize(simpleData));
+            s_server.SendToAll(om, NetDeliveryMethod.ReliableOrdered);
+            //pass to authority aka worker
+
+            //be able to send to clients from servers and vice versa
         }
 
         void HandleEntityUpdate(NetIncomingMessage im, SimpleMessage simpleData)
