@@ -15,16 +15,21 @@ namespace MmoGameFramework
         public event Action<EntityInfo> OnUpdateEntity;
         public event Action<EntityUpdate> OnUpdateEntityPartial;
 
-        public EntityInfo Create(string entityType, Position position)
+        public EntityInfo Create(string entityType, Position position, Rotation? rotation = null)
         {
             var entityId = ++lastId;
+
+            if(rotation == null)
+                rotation = Rotation.Identity;
+
             var entity = new EntityInfo()
             {
                 EntityId = entityId,
                 EntityData = new Dictionary<int, byte[]>()
                 {
                     { EntityType.ComponentId, MessagePackSerializer.Serialize(new EntityType() { Name = entityType}) },
-                    { Position.ComponentId, MessagePackSerializer.Serialize(position) }
+                    { Position.ComponentId, MessagePackSerializer.Serialize(position) },
+                    { Rotation.ComponentId, MessagePackSerializer.Serialize(rotation) }
                 }
             };
 

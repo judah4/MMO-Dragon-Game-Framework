@@ -10,6 +10,12 @@ namespace Mmogf.Core
         {
             get { return MessagePackSerializer.Deserialize<Position>(EntityData[Position.ComponentId]); }
         }
-       
+
+        [IgnoreMember]
+        public Rotation Rotation
+        {
+            get { return MessagePackSerializer.Deserialize<Rotation>(EntityData[Rotation.ComponentId]); }
+        }
+
     }
 }

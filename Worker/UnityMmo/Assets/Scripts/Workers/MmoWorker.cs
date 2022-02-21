@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading;
 using Lidgren.Network;
 using MessagePack;
+using Mmogf;
 using Mmogf.Core;
 
 
@@ -22,12 +23,10 @@ using Mmogf.Core;
 
         public event Action<string> OnLog;
 
-        public MmoWorker()
+        public MmoWorker(NetPeerConfiguration config)
         {
-            NetPeerConfiguration config = new NetPeerConfiguration("dragon-bingus");
             config.AutoFlushSendQueue = false;
             s_client = new NetClient(config);
-            //_sync = new SynchronizationContext();
             //s_client.RegisterReceivedCallback(new SendOrPostCallback(GotMessage), _sync);
 
         }
@@ -148,8 +147,8 @@ using Mmogf.Core;
             });
         }
 
-        public void SendEntityUpdate(int entityId, int componentId, object message)
-        {
+        public void SendEntityUpdate<T>(int entityId, int componentId, T message) where T : IMessage
+    {
 
             var changeInterest = new EntityUpdate()
             {

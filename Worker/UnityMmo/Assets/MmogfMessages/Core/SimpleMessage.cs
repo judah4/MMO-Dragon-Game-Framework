@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace Mmogf.Core
 {
     [MessagePackObject]
-    public struct SimpleMessage
+    public struct SimpleMessage : IMessage
     {
         [Key(0)]
         public int MessageId { get; set; }

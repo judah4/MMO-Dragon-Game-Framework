@@ -25,14 +25,14 @@ namespace MmoGameFramework
             _entityStore.Create("Cube", new Position() { X = -3, Z = -3 });
 
             // create and start the server
-            server = new MmoServer(_entityStore, new NetPeerConfiguration("Dragon-Clients")
+            server = new MmoServer(_entityStore, new NetPeerConfiguration("Dragon-Client")
             {
                 MaximumConnections = 100,
                 Port = 1337,
             });
             server.Start();
 
-            workerServer = new MmoServer(_entityStore, new NetPeerConfiguration("Dragon-Workers")
+            workerServer = new MmoServer(_entityStore, new NetPeerConfiguration("Dragon-Worker")
             {
                 MaximumConnections = 100,
                 Port = 1338,

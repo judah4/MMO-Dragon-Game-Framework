@@ -1,4 +1,6 @@
-﻿using MessagePack;
+﻿using Assets.Scripts.Helpers;
+using MessagePack;
+using Mmogf;
 using Mmogf.Core;
 using System.Collections;
 using System.Collections.Generic;
@@ -22,7 +24,9 @@ public class GameObjectRepresentation
 
         var entityType = MessagePackSerializer.Deserialize<EntityType>(entity.EntityData[EntityType.ComponentId]);
         var position = MessagePackSerializer.Deserialize<Position>(entity.EntityData[Position.ComponentId]);
+        var rot = MessagePackSerializer.Deserialize<Rotation>(entity.EntityData[Rotation.ComponentId]);
         var adjustedPos = _server.PositionToClient(position);
+        var rotation = rot.ToQuaternion();
 
         if (!_entities.TryGetValue(entity.EntityId, out entityGm))
         {
@@ -34,7 +38,7 @@ public class GameObjectRepresentation
             }
 
             var gm = Object.Instantiate(prefab, adjustedPos,
-                Quaternion.identity);
+                rotation);
             gm.name = $"{entityType.Name} : {entity.EntityId} - {_server.WorkerType}";
 
             entityGm = gm.AddComponent<EntityGameObject>();
@@ -75,7 +79,7 @@ public class GameObjectRepresentation
         entityGm.EntityUpdated();
     }
 
-    public void UpdateEntity(int entityId, int componentId, object message)
+    public void UpdateEntity<T>(int entityId, int componentId, T message) where T : IEntityComponent
     {
         EntityGameObject entityGm;
         if (!_entities.TryGetValue(entityId, out entityGm))

@@ -1,4 +1,6 @@
-﻿using Mmogf.Core;
+﻿using Lidgren.Network;
+using Mmogf;
+using Mmogf.Core;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,7 +10,7 @@ public class CommonHandler : MonoBehaviour
     protected GameObjectRepresentation GameObjectRepresentation;
     protected MmoWorker Client;
 
-    public string WorkerType = "worker";
+    public string WorkerType = "Dragon-Worker";
     public string ipAddress = "localhost";
     public short port = 1337;
 
@@ -50,7 +52,9 @@ public class CommonHandler : MonoBehaviour
 
         GameObjectRepresentation = new GameObjectRepresentation(this);
 
-        Client = new MmoWorker();
+        var config = new NetPeerConfiguration(WorkerType);
+
+        Client = new MmoWorker(config);
         Client.OnLog += Debug.Log;
         Client.OnEntityCreation += GameObjectRepresentation.OnEntityCreation;
         Client.OnEntityUpdate += GameObjectRepresentation.OnEntityUpdate;
@@ -110,9 +114,9 @@ public class CommonHandler : MonoBehaviour
         return adjustedPos;
     }
 
-    public void UpdateEntity(int entityId, int componentId, object position)
+    public void UpdateEntity<T>(int entityId, int componentId, T component) where T : IEntityComponent
     {
-        GameObjectRepresentation.UpdateEntity(entityId, componentId, position);
-        Client.SendEntityUpdate(entityId, componentId, position);
+        GameObjectRepresentation.UpdateEntity(entityId, componentId, component);
+        Client.SendEntityUpdate(entityId, componentId, component);
     }
 }

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace Mmogf.Core
 {
     [MessagePackObject]
-    public struct ServerConnect
+    public struct ServerConnect : IMessage
     {
         [Key(0)]
         public long ServerId { get; set; }

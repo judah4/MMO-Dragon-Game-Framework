@@ -1,4 +1,5 @@
 ﻿using MessagePack;
+using Mmogf;
 using Mmogf.Core;
 using System;
 using System.Collections.Generic;
@@ -31,7 +32,7 @@ namespace MmoWorkers
             });
         }
 
-        public void SendEntityUpdate(int entityId, int componentId, object message)
+        public void SendEntityUpdate(int entityId, int componentId, IMessage message)
         {
 
             var changeInterest = new EntityUpdate()

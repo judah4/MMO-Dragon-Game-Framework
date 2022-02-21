@@ -5,6 +5,12 @@ namespace Mmogf.Core
     [MessagePackObject]
     public struct Rotation : IEntityComponent
     {
+
+        public static Rotation Identity => new Rotation()
+        {
+            W = 1,
+        };
+
         public static int ComponentId = 3;
         public int GetComponentId() => ComponentId;
 

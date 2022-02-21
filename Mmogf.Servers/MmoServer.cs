@@ -168,7 +168,7 @@ namespace MmoGameFramework
             entityInfo.Value.EntityData.Add(entityUpdate.ComponentId, entityUpdate.Info);
 
 
-            if (entityUpdate.ComponentId == 2)
+            if (entityUpdate.ComponentId == Position.ComponentId)
             {
                 var position = MessagePackSerializer.Deserialize<Position>(entityUpdate.Info);
                 Console.WriteLine($"Entiy: {entityInfo.Value.EntityId} position to {position.ToString()}");
@@ -179,7 +179,7 @@ namespace MmoGameFramework
 
         }
 
-        public void Send(NetConnection connection, object message)
+        public void Send(NetConnection connection, SimpleMessage message)
         {
             NetOutgoingMessage om = s_server.CreateMessage();
             om.Write(MessagePackSerializer.Serialize(message));
