@@ -4,6 +4,6 @@
   "version": "0.1.0",
   "unity": "2020.3",
   "author": "Cookie Dragon Games",
-  "description": "SpatialOS GDK Core Module.",
+  "description": "MMO Game Framework Core Module.",
   "type": "library"
 }
