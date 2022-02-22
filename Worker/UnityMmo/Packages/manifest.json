@@ -1,10 +1,11 @@
 {
   "dependencies": {
+    "com.neuecc.messagepack": "file:com.neuecc.messagepack",
     "com.unity.2d.sprite": "1.0.0",
     "com.unity.2d.tilemap": "1.0.0",
     "com.unity.ads": "3.7.5",
     "com.unity.analytics": "3.6.12",
-    "com.unity.collab-proxy": "1.15.12",
+    "com.unity.collab-proxy": "1.15.13",
     "com.unity.ide.rider": "3.0.12",
     "com.unity.ide.visualstudio": "2.0.14",
     "com.unity.ide.vscode": "1.2.5",
@@ -15,6 +16,7 @@
     "com.unity.toolchain.win-x86_64-linux-x86_64": "1.0.0",
     "com.unity.ugui": "1.0.0",
     "com.unity.xr.legacyinputhelpers": "2.1.8",
+    "games.cookiedragon.mmogf.core": "file:games.cookiedragon.mmogf.core",
     "com.unity.modules.ai": "1.0.0",
     "com.unity.modules.androidjni": "1.0.0",
     "com.unity.modules.animation": "1.0.0",
@@ -45,9 +47,6 @@
     "com.unity.modules.video": "1.0.0",
     "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.wind": "1.0.0",
-    "com.unity.modules.xr": "1.0.0",
-
-    "games.cookiedragon.mmogf.core": "file:games.cookiedragon.mmogf.core",
-    "com.neuecc.messagepack": "file:com.neuecc.messagepack"
+    "com.unity.modules.xr": "1.0.0"
   }
 }
