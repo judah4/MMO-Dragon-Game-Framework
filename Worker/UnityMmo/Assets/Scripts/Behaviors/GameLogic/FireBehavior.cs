@@ -6,7 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FireVisualizer : BaseEntityBehavior
+public class FireBehavior: BaseEntityBehavior
 {
 
     //get command requests
@@ -16,9 +16,13 @@ public class FireVisualizer : BaseEntityBehavior
         //register a callback?
         //Entity.OnCommandResponse
 
-        for(int cnt = 0; cnt < Server.CommandRequests.Count; cnt++)
+    }
+
+    private void Update()
+    {
+        for (int cnt = 0; cnt < Server.CommandRequests.Count; cnt++)
         {
-            if(Server.CommandRequests[cnt].ComponentId != Cannon.ComponentId)
+            if (Server.CommandRequests[cnt].ComponentId != Cannon.ComponentId)
                 continue;
 
             var request = Server.CommandRequests[cnt];
@@ -27,7 +31,6 @@ public class FireVisualizer : BaseEntityBehavior
 
             HandleFire(request);
         }
-
     }
 
     void HandleFire(CommandRequest request)

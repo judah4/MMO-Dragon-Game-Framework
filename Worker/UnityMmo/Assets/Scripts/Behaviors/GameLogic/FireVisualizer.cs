@@ -6,7 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FireBehavior : BaseEntityBehavior
+public class FireVisualizer : BaseEntityBehavior
 {
 
     bool _left = false;
