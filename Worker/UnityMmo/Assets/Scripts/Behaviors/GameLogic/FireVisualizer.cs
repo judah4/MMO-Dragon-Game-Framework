@@ -1,6 +1,6 @@
 ﻿using Assets.Scripts.Helpers;
-using Dragongf.Assets.MmogfMessages.GameLogic;
 using MessagePack;
+using Mmogf;
 using Mmogf.Core;
 using System.Collections;
 using System.Collections.Generic;

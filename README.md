@@ -32,3 +32,7 @@ Probably should not try to use. This was all written quickly over the weekend af
 # Important Links!
 
 https://github.com/neuecc/MessagePack-CSharp#aot-code-generation-support-for-unityxamarin
+
+## Setting up MessagePack Codegen
+../packages/games.cookiedragon.mmogf.core/MmogfMessages to ../packages/games.cookiedragon.mmogf.core/Scripts/Generated
+MmogfMessages to Scripts/Generated
