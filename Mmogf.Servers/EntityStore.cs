@@ -13,9 +13,11 @@ namespace MmoGameFramework
         private Dictionary<int, EntityInfo> _entities = new Dictionary<int, EntityInfo>();
 
         public event Action<EntityInfo> OnUpdateEntity;
+        public event Action<CommandRequest> OnEntityCommand;
+        public event Action<CommandResponse> OnEntityCommandResponse;
         public event Action<EntityUpdate> OnUpdateEntityPartial;
 
-        public EntityInfo Create(string entityType, Position position, Rotation? rotation = null)
+        public EntityInfo Create(string entityType, Position position, Rotation? rotation = null, Dictionary<int, byte[]> additionalData = null)
         {
             var entityId = ++lastId;
 
@@ -32,6 +34,17 @@ namespace MmoGameFramework
                     { Rotation.ComponentId, MessagePackSerializer.Serialize(rotation) }
                 }
             };
+
+            if(additionalData != null)
+            {
+                foreach(var additional in additionalData)
+                {
+                    if(entity.EntityData.ContainsKey(additional.Key))
+                        continue;
+
+                    entity.EntityData.Add(additional.Key, additional.Value);
+                }
+            }
 
             _entities.Add(entityId, entity);
             return entity;
@@ -68,6 +81,16 @@ namespace MmoGameFramework
         public void UpdateEntityPartial(EntityUpdate entityUpdate)
         {
             OnUpdateEntityPartial?.Invoke(entityUpdate);
+        }
+
+        public void SendCommand(CommandRequest commandRequest)
+        {
+            OnEntityCommand?.Invoke(commandRequest);
+        }
+
+        public void SendCommandResponse(CommandResponse commandResponse)
+        {
+            OnEntityCommandResponse?.Invoke(commandResponse);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Lidgren.Network;
+﻿using Dragongf;
+using Lidgren.Network;
 using Mmogf;
 using Mmogf.Core;
 using System.Collections;
@@ -9,6 +10,8 @@ public class CommonHandler : MonoBehaviour
 {
     protected GameObjectRepresentation GameObjectRepresentation;
     protected MmoWorker Client;
+
+    public List<CommandRequest> CommandRequests = new List<CommandRequest>();
 
     public string WorkerType = "Dragon-Worker";
     public string ipAddress = "localhost";
@@ -58,10 +61,12 @@ public class CommonHandler : MonoBehaviour
         Client.OnLog += Debug.Log;
         Client.OnEntityCreation += GameObjectRepresentation.OnEntityCreation;
         Client.OnEntityUpdate += GameObjectRepresentation.OnEntityUpdate;
+        Client.OnEntityCommand += OnEntityCommand;
 
         Client.OnConnect += OnConnect;
 
-        Client.Connect(ipAddress, port);
+        Client.Connect(WorkerType, ipAddress, port);
+
 
     }
 
@@ -73,12 +78,21 @@ public class CommonHandler : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        CommandRequests.Clear(); //reset every tick
+
         Client.Update();
+
+        OnUpdate();
     }
 
     void OnApplicationQuit()
     {
         Client.Stop();
+    }
+
+    protected virtual void OnUpdate()
+    {
+
     }
 
     // Helper function for getting the command line arguments
@@ -119,4 +133,21 @@ public class CommonHandler : MonoBehaviour
         GameObjectRepresentation.UpdateEntity(entityId, componentId, component);
         Client.SendEntityUpdate(entityId, componentId, component);
     }
+
+    private void OnEntityCommand(CommandRequest request)
+    {
+        //add to list to be handled
+        CommandRequests.Add(request); 
+    }
+
+
+    public void SendCommand<T>(int entityId, int componentId, T fireCommand, System.Action<CommandResponse> callback = null) where T : ICommand
+    {
+        Client.SendCommand(entityId, componentId, fireCommand, callback);
+    }
+    public void SendCommandResponse<T>(CommandRequest request, T responsePayload) where T : ICommand
+    {
+        Client.SendCommandResponse(request, responsePayload);
+    }
+
 }

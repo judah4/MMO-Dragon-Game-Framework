@@ -5,8 +5,8 @@ using System.Text;
 
 namespace Mmogf
 {
-    public interface ICommand : IMessage
+    public interface IEntityComponent : IMessage
     {
-
+        int GetComponentId();
     }
 }

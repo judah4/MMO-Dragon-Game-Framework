@@ -2,26 +2,35 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using Assets.Scripts.Behaviors.Internals;
 using Lidgren.Network;
 using MessagePack;
 using Mmogf;
 using Mmogf.Core;
 
+namespace Dragongf {
 
     public class MmoWorker
     {
         public long ClientId { get; private set; }
+        public string WorkerType { get; private set; }
+        public int Ping { get; private set; }
 
         private NetClient s_client;
+        private DateTime _pingRequestAt;
+        private Dictionary<string, Action<CommandResponse>> _commandCallbacks = new Dictionary<string, Action<CommandResponse>>();
 
         public bool Connected => s_client.ConnectionStatus == NetConnectionStatus.Connected;
         public NetConnectionStatus Status => s_client.ConnectionStatus;
 
         public event Action<EntityInfo> OnEntityCreation;
+        public event Action<CommandRequest> OnEntityCommand;
         public event Action<EntityUpdate> OnEntityUpdate;
         public event Action OnConnect;
 
         public event Action<string> OnLog;
+
+        List<IInternalBehavior> _internalBehaviors;
 
         public MmoWorker(NetPeerConfiguration config)
         {
@@ -29,12 +38,18 @@ using Mmogf.Core;
             s_client = new NetClient(config);
             //s_client.RegisterReceivedCallback(new SendOrPostCallback(GotMessage), _sync);
 
+            _internalBehaviors = new List<IInternalBehavior>()
+            {
+                new PingBehavior(this),
+            };
+
         }
 
-        public void Connect(string host, short port)
+        public void Connect(string workerType, string host, short port)
         {
+            WorkerType = workerType;
             s_client.Start();
-            NetOutgoingMessage hail = s_client.CreateMessage("This is the hail message");
+            NetOutgoingMessage hail = s_client.CreateMessage(workerType);
             s_client.Connect(host, port, hail);
         }
 
@@ -46,6 +61,16 @@ using Mmogf.Core;
         public void Update()
         {
             GotMessage(s_client);
+
+            InternalBehaviors();
+        }
+
+        private void InternalBehaviors()
+        {
+            for(int cnt = 0; cnt < _internalBehaviors.Count; cnt++)
+            {
+                _internalBehaviors[cnt].Update();
+            }
         }
 
         public void GotMessage(object peer)
@@ -109,10 +134,34 @@ using Mmogf.Core;
                                 break;
                             case ServerCodes.EntityUpdate:
                                 var entityUpdate = MessagePackSerializer.Deserialize<EntityUpdate>(simpleData.Info);
-
                                 OnEntityUpdate?.Invoke(entityUpdate);
-
                                 break;
+                        case ServerCodes.EntityCommandRequest:
+                            var commandRequest = MessagePackSerializer.Deserialize<CommandRequest>(simpleData.Info);
+                            OnEntityCommand?.Invoke(commandRequest);
+                            break;
+                            case ServerCodes.EntityCommandResponse:
+                                var commandResponse = MessagePackSerializer.Deserialize<CommandResponse>(simpleData.Info);
+
+                                Action<CommandResponse> callback;
+                                //get from dictionary
+                                if (_commandCallbacks.TryGetValue(commandResponse.RequestId, out callback))
+                                {
+                                    //send to callback
+                                    _commandCallbacks.Remove(commandResponse.RequestId);
+                                    try
+                                    {
+                                        callback?.Invoke(commandResponse);
+                                    }
+                                    catch(Exception e)
+                                    {
+                                        OnLog?.Invoke(e.ToString());
+                                    }
+                                }
+                                break;
+                            case ServerCodes.Ping:
+                            PingResponse();
+                            break;
                             default:
                                 break;
                         }
@@ -125,7 +174,7 @@ using Mmogf.Core;
             }
         }
 
-        internal void Send(SimpleMessage message)
+        public void Send(SimpleMessage message)
         {
             NetOutgoingMessage om = s_client.CreateMessage();
             om.Write(MessagePackSerializer.Serialize(message));
@@ -148,7 +197,7 @@ using Mmogf.Core;
         }
 
         public void SendEntityUpdate<T>(int entityId, int componentId, T message) where T : IMessage
-    {
+        {
 
             var changeInterest = new EntityUpdate()
             {
@@ -164,5 +213,62 @@ using Mmogf.Core;
             });
         }
 
+        public void SendPing()
+        {
+            Send(new SimpleMessage()
+            {
+                MessageId = (int)ServerCodes.Ping,
+                Info = new byte[0],
+            });
+            _pingRequestAt = DateTime.UtcNow;
+        }
+
+        void PingResponse()
+        {
+            var timespan = DateTime.UtcNow - _pingRequestAt;
+            Ping = (int)timespan.TotalMilliseconds;
+            OnLog?.Invoke($"Ping: {Ping}");
+        }
+        public void SendCommand<T>(int entityId, int componentId, T command, Action<CommandResponse> callback) where T : ICommand
+        {
+
+            var requestId = Guid.NewGuid().ToString();
+
+            //register callback
+            _commandCallbacks.Add(requestId, callback);
+
+            Send(new SimpleMessage()
+            {
+                MessageId = (int)ServerCodes.EntityCommandRequest,
+                Info = MessagePackSerializer.Serialize(new CommandRequest()
+                {
+                    RequestId = requestId,
+                    RequestorWorkerType = WorkerType,
+                    EntityId = entityId,
+                    ComponentId = componentId,
+                    Payload = MessagePackSerializer.Serialize(command),
+                }),
+            });
+        }
+
+        internal void SendCommandResponse<T>(CommandRequest request, T responsePayload) where T : ICommand
+        {
+            Send(new SimpleMessage()
+            {
+                MessageId = (int)ServerCodes.EntityCommandResponse,
+                Info = MessagePackSerializer.Serialize(new CommandResponse()
+                {
+                    RequestId = request.RequestId,
+                    CommandStatus = CommandStatus.Success,
+                    RequesterId = request.RequesterId,
+                    EntityId = request.EntityId,
+                    ComponentId = request.ComponentId,
+                    Payload = MessagePackSerializer.Serialize(responsePayload),
+                }),
+            });
+        }
+
+
     }
 
+}

@@ -13,6 +13,8 @@ namespace Mmogf.Core
         GameData,
         ChangeInterestArea,
         EntityUpdate,
-        EntityCommand,
+        EntityCommandRequest,
+        EntityCommandResponse,
+        Ping,
     }
 }

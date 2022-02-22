@@ -25,6 +25,8 @@ namespace MmoGameFramework
             s_server = new NetServer(_config);
 
             _entities.OnUpdateEntity += OnEntityUpdate;
+            _entities.OnEntityCommand += OnEntityCommand;
+            _entities.OnEntityCommandResponse += OnEntityCommandResponse;
             _entities.OnUpdateEntityPartial += OnEntityUpdatePartial;
         }
 
@@ -72,7 +74,8 @@ namespace MmoGameFramework
 
                                 if (status == NetConnectionStatus.Connected)
                                 {
-                                    _connections.Add(im.SenderConnection.RemoteUniqueIdentifier, new WorkerConnection("Worker", im.SenderConnection, new Position()));
+                                    //todo: do some sort of worker type validation from a config
+                                    _connections.Add(im.SenderConnection.RemoteUniqueIdentifier, new WorkerConnection(im.SenderConnection.RemoteHailMessage.ReadString(), im.SenderConnection, new Position()));
                                     Console.WriteLine("Remote hail: " + im.SenderConnection.RemoteHailMessage.ReadString());
                                     var message = new SimpleMessage()
                                     {
@@ -95,8 +98,9 @@ namespace MmoGameFramework
                                 break;
                             case NetIncomingMessageType.Data:
 
-                                Console.WriteLine(im.SenderConnection.RemoteUniqueIdentifier +" What is this data? '" + BitConverter.ToString(im.Data) + "'");
+                                Console.WriteLine(im.SenderConnection.RemoteUniqueIdentifier +" - '" + BitConverter.ToString(im.Data) + "'");
                                 var simpleData = MessagePackSerializer.Deserialize<SimpleMessage>(im.Data);
+                                Console.WriteLine((ServerCodes)simpleData.MessageId);
 
                                 switch ((ServerCodes)simpleData.MessageId)
                                 {
@@ -130,8 +134,18 @@ namespace MmoGameFramework
                                     case ServerCodes.EntityUpdate:
                                         HandleEntityUpdate(im, simpleData);
                                         break;
-                                    case ServerCodes.EntityCommand:
+                                    case ServerCodes.EntityCommandRequest:
                                         HandleEntityCommand(im, simpleData);
+                                        break;
+                                    case ServerCodes.EntityCommandResponse:
+                                        HandleEntityCommandResponse(im, simpleData);
+                                        break;
+                                    case ServerCodes.Ping:
+                                        Send(im.SenderConnection, new SimpleMessage()
+                                        {
+                                            MessageId = (int)ServerCodes.Ping,
+                                            Info = new byte[0],
+                                        });
                                         break;
                                     default:
                                         // incoming chat message from a client
@@ -161,18 +175,104 @@ namespace MmoGameFramework
         private void HandleEntityCommand(NetIncomingMessage im, SimpleMessage simpleData)
         {
             //get command info
-            var entityUpdate = MessagePackSerializer.Deserialize<EntityUpdate>(simpleData.Info);
-            var entityInfo = _entities.GetEntity(entityUpdate.EntityId);
+            var commandRequest = MessagePackSerializer.Deserialize<CommandRequest>(simpleData.Info);
+
+            if(commandRequest.EntityId == 0 && commandRequest.ComponentId == 0)
+            {
+                //world command
+                HandleWorldCommand(im, simpleData, commandRequest);
+                return;
+            }
+
+            var entityInfo = _entities.GetEntity(commandRequest.EntityId);
+
+            if (entityInfo == null)
+                return;
+            WorkerConnection worker;
+            if (!_connections.TryGetValue(im.SenderConnection.RemoteUniqueIdentifier, out worker))
+            {
+                //send failure
+                Send(im.SenderConnection, new SimpleMessage() {
+                    MessageId = (int)ServerCodes.EntityCommandResponse,
+                    Info = MessagePackSerializer.Serialize(new CommandResponse()
+                    {
+                        RequestId = commandRequest.RequestId,
+                        CommandStatus = CommandStatus.InvalidRequest,
+                        Message = "No Worker Identified",
+                        ComponentId = commandRequest.ComponentId,
+                        RequesterId = commandRequest.RequesterId,
+                        EntityId = commandRequest.EntityId,
+                    }),
+                });
+            }
+
+            commandRequest.RequestorWorkerType = worker.ConnectionType;
+            commandRequest.RequesterId = worker.Connection.RemoteUniqueIdentifier;
+
+            //pass to authority aka worker
+
+            _entities.SendCommand(commandRequest);
+
+        }
+
+        private void HandleWorldCommand(NetIncomingMessage im, SimpleMessage simpleData, CommandRequest commandRequest)
+        {
+            //todo: verify sender has permissions
+
+            WorkerConnection worker;
+            if (!_connections.TryGetValue(im.SenderConnection.RemoteUniqueIdentifier, out worker))
+            {
+                //send failure
+                Send(im.SenderConnection, new SimpleMessage()
+                {
+                    MessageId = (int)ServerCodes.EntityCommandResponse,
+                    Info = MessagePackSerializer.Serialize(new CommandResponse()
+                    {
+                        RequestId = commandRequest.RequestId,
+                        CommandStatus = CommandStatus.InvalidRequest,
+                        Message = "No Worker Identified",
+                        ComponentId = commandRequest.ComponentId,
+                        RequesterId = commandRequest.RequesterId,
+                        EntityId = commandRequest.EntityId,
+                    }),
+                });
+            }
+
+            var createEntity = MessagePackSerializer.Deserialize<World.CreateEntity>(commandRequest.Payload);
+
+            var entityInfo = _entities.Create(createEntity.EntityType, createEntity.Position, createEntity.Rotation, createEntity.Components);
+            _entities.UpdateEntity(entityInfo);
+
+            Send(im.SenderConnection, new SimpleMessage()
+            {
+                MessageId = (int)ServerCodes.EntityCommandResponse,
+                Info = MessagePackSerializer.Serialize(new CommandResponse()
+                {
+                    RequestId = commandRequest.RequestId,
+                    CommandStatus = CommandStatus.Success,
+                    Message = "",
+                    ComponentId = commandRequest.ComponentId,
+                    RequesterId = commandRequest.RequesterId,
+                    EntityId = commandRequest.EntityId,
+                    Payload = MessagePackSerializer.Serialize(entityInfo),
+                }),
+            });
+
+        }
+
+        private void HandleEntityCommandResponse(NetIncomingMessage im, SimpleMessage simpleData)
+        {
+            //get command info
+            var commandResponse = MessagePackSerializer.Deserialize<CommandResponse>(simpleData.Info);
+            var entityInfo = _entities.GetEntity(commandResponse.EntityId);
 
             if (entityInfo == null)
                 return;
 
-            NetOutgoingMessage om = s_server.CreateMessage();
-            om.Write(MessagePackSerializer.Serialize(simpleData));
-            s_server.SendToAll(om, NetDeliveryMethod.ReliableOrdered);
             //pass to authority aka worker
 
-            //be able to send to clients from servers and vice versa
+            _entities.SendCommandResponse(commandResponse);
+
         }
 
         void HandleEntityUpdate(NetIncomingMessage im, SimpleMessage simpleData)
@@ -227,6 +327,15 @@ namespace MmoGameFramework
             s_server.SendMessage(om, connections, NetDeliveryMethod.UnreliableSequenced, 0);
         }
 
+        public void SendToAuthority(SimpleMessage message)
+        {
+            //send to all for now
+
+            NetOutgoingMessage om = s_server.CreateMessage();
+            om.Write(MessagePackSerializer.Serialize(message));
+            s_server.SendToAll(om, NetDeliveryMethod.ReliableOrdered);
+        }
+
         private void OnEntityUpdate(EntityInfo entityInfo)
         {
             var message = new SimpleMessage()
@@ -256,6 +365,56 @@ namespace MmoGameFramework
 
             Console.WriteLine("Sending Entity Update");
             SendArea(entity.Value.Position, message);
+        }
+
+        private void OnEntityCommand(CommandRequest commandRequest)
+        {
+
+            var entity = _entities.GetEntity(commandRequest.EntityId);
+            if (entity == null)
+                return;
+
+                //todo: get ACL and find who has authority over the command
+
+            var message = new SimpleMessage()
+            {
+                MessageId = (int)ServerCodes.EntityCommandRequest,
+
+                Info = MessagePackSerializer.Serialize(commandRequest),
+            };
+
+            Console.WriteLine("Sending Command Request");
+            SendToAuthority(message);
+        }
+
+        private void OnEntityCommandResponse(CommandResponse commandResponse)
+        {
+
+            var entity = _entities.GetEntity(commandResponse.EntityId);
+            if (entity == null)
+                return;
+
+            //todo: we need an internal request table
+
+            WorkerConnection worker;
+            if (!_connections.TryGetValue(commandResponse.RequesterId, out worker))
+            {
+                //disconnected??
+                return;
+            }
+
+            //fix / validate data
+            commandResponse.RequesterId = worker.Connection.RemoteUniqueIdentifier;
+
+            var message = new SimpleMessage()
+            {
+                MessageId = (int)ServerCodes.EntityCommandResponse,
+
+                Info = MessagePackSerializer.Serialize(commandResponse),
+            };
+
+            Console.WriteLine("Sending Command Response");
+            Send(worker.Connection, message);
         }
 
     }

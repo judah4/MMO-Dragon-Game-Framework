@@ -44,6 +44,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbcc1ec8468cf684db3d4903dc8eff76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  WorkerType: client
+  WorkerType: Dragon-Client
   ipAddress: 127.0.0.1
   port: 1337
