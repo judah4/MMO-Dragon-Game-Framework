@@ -1,8 +1,0 @@
-syntax = "proto3";
-option csharp_namespace = "MessageProtocols.Server";
-package server;
-
-//1
-message ClientConnect {
-  int64 client_id = 1;
-}
