@@ -19,17 +19,18 @@ namespace MessagePack.Formatters.Mmogf.Core
     using global::System.Buffers;
     using global::MessagePack;
 
-    public sealed class SimpleMessageFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Mmogf.Core.SimpleMessage>
+    public sealed class MmoMessageFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Mmogf.Core.MmoMessage>
     {
 
-        public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Mmogf.Core.SimpleMessage value, global::MessagePack.MessagePackSerializerOptions options)
+        public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Mmogf.Core.MmoMessage value, global::MessagePack.MessagePackSerializerOptions options)
         {
+            global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
             writer.WriteArrayHeader(2);
-            writer.Write(value.MessageId);
+            formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.ServerCodes>().Serialize(ref writer, value.MessageId, options);
             writer.Write(value.Info);
         }
 
-        public global::Mmogf.Core.SimpleMessage Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
+        public global::Mmogf.Core.MmoMessage Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
         {
             if (reader.TryReadNil())
             {
@@ -37,15 +38,16 @@ namespace MessagePack.Formatters.Mmogf.Core
             }
 
             options.Security.DepthStep(ref reader);
+            global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
             var length = reader.ReadArrayHeader();
-            var ____result = new global::Mmogf.Core.SimpleMessage();
+            var ____result = new global::Mmogf.Core.MmoMessage();
 
             for (int i = 0; i < length; i++)
             {
                 switch (i)
                 {
                     case 0:
-                        ____result.MessageId = reader.ReadInt32();
+                        ____result.MessageId = formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.ServerCodes>().Deserialize(ref reader, options);
                         break;
                     case 1:
                         ____result.Info = reader.ReadBytes()?.ToArray();

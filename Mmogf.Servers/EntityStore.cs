@@ -17,12 +17,14 @@ namespace MmoGameFramework
         public event Action<CommandResponse> OnEntityCommandResponse;
         public event Action<EntityUpdate> OnUpdateEntityPartial;
 
-        public EntityInfo Create(string entityType, Position position, Rotation? rotation = null, Dictionary<int, byte[]> additionalData = null)
+        public EntityInfo Create(string entityType, Position position, List<Acl> acls, Rotation? rotation = null, Dictionary<int, byte[]> additionalData = null)
         {
             var entityId = ++lastId;
 
             if(rotation == null)
                 rotation = Rotation.Identity;
+
+            //validate acl list for data passsed
 
             var entity = new EntityInfo()
             {
@@ -31,7 +33,8 @@ namespace MmoGameFramework
                 {
                     { EntityType.ComponentId, MessagePackSerializer.Serialize(new EntityType() { Name = entityType}) },
                     { Position.ComponentId, MessagePackSerializer.Serialize(position) },
-                    { Rotation.ComponentId, MessagePackSerializer.Serialize(rotation) }
+                    { Rotation.ComponentId, MessagePackSerializer.Serialize(rotation) },
+                    { Acls.ComponentId, MessagePackSerializer.Serialize(new Acls() { AclList = acls }) },
                 }
             };
 

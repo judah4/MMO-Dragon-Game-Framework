@@ -49,24 +49,28 @@ namespace MessagePack.Resolvers
 
         static MmogfCoreResolverGetFormatterHelper()
         {
-            lookup = new global::System.Collections.Generic.Dictionary<Type, int>(16)
+            lookup = new global::System.Collections.Generic.Dictionary<Type, int>(20)
             {
                 { typeof(global::System.Collections.Generic.Dictionary<int, byte[]>), 0 },
-                { typeof(global::Mmogf.Core.CommandStatus), 1 },
-                { typeof(global::Mmogf.Core.ChangeInterestArea), 2 },
-                { typeof(global::Mmogf.Core.ClientConnect), 3 },
-                { typeof(global::Mmogf.Core.CommandRequest), 4 },
-                { typeof(global::Mmogf.Core.CommandResponse), 5 },
-                { typeof(global::Mmogf.Core.EntityInfo), 6 },
-                { typeof(global::Mmogf.Core.EntityType), 7 },
-                { typeof(global::Mmogf.Core.EntityUpdate), 8 },
-                { typeof(global::Mmogf.Core.EventData), 9 },
-                { typeof(global::Mmogf.Core.GameData), 10 },
-                { typeof(global::Mmogf.Core.Position), 11 },
-                { typeof(global::Mmogf.Core.Rotation), 12 },
-                { typeof(global::Mmogf.Core.ServerConnect), 13 },
-                { typeof(global::Mmogf.Core.SimpleMessage), 14 },
-                { typeof(global::Mmogf.Core.World.CreateEntity), 15 },
+                { typeof(global::System.Collections.Generic.List<global::Mmogf.Core.Acl>), 1 },
+                { typeof(global::Mmogf.Core.CommandStatus), 2 },
+                { typeof(global::Mmogf.Core.ServerCodes), 3 },
+                { typeof(global::Mmogf.Core.Acl), 4 },
+                { typeof(global::Mmogf.Core.Acls), 5 },
+                { typeof(global::Mmogf.Core.ChangeInterestArea), 6 },
+                { typeof(global::Mmogf.Core.ClientConnect), 7 },
+                { typeof(global::Mmogf.Core.CommandRequest), 8 },
+                { typeof(global::Mmogf.Core.CommandResponse), 9 },
+                { typeof(global::Mmogf.Core.EntityInfo), 10 },
+                { typeof(global::Mmogf.Core.EntityType), 11 },
+                { typeof(global::Mmogf.Core.EntityUpdate), 12 },
+                { typeof(global::Mmogf.Core.EventData), 13 },
+                { typeof(global::Mmogf.Core.GameData), 14 },
+                { typeof(global::Mmogf.Core.MmoMessage), 15 },
+                { typeof(global::Mmogf.Core.Position), 16 },
+                { typeof(global::Mmogf.Core.Rotation), 17 },
+                { typeof(global::Mmogf.Core.ServerConnect), 18 },
+                { typeof(global::Mmogf.Core.World.CreateEntity), 19 },
             };
         }
 
@@ -81,21 +85,25 @@ namespace MessagePack.Resolvers
             switch (key)
             {
                 case 0: return new global::MessagePack.Formatters.DictionaryFormatter<int, byte[]>();
-                case 1: return new MessagePack.Formatters.Mmogf.Core.CommandStatusFormatter();
-                case 2: return new MessagePack.Formatters.Mmogf.Core.ChangeInterestAreaFormatter();
-                case 3: return new MessagePack.Formatters.Mmogf.Core.ClientConnectFormatter();
-                case 4: return new MessagePack.Formatters.Mmogf.Core.CommandRequestFormatter();
-                case 5: return new MessagePack.Formatters.Mmogf.Core.CommandResponseFormatter();
-                case 6: return new MessagePack.Formatters.Mmogf.Core.EntityInfoFormatter();
-                case 7: return new MessagePack.Formatters.Mmogf.Core.EntityTypeFormatter();
-                case 8: return new MessagePack.Formatters.Mmogf.Core.EntityUpdateFormatter();
-                case 9: return new MessagePack.Formatters.Mmogf.Core.EventDataFormatter();
-                case 10: return new MessagePack.Formatters.Mmogf.Core.GameDataFormatter();
-                case 11: return new MessagePack.Formatters.Mmogf.Core.PositionFormatter();
-                case 12: return new MessagePack.Formatters.Mmogf.Core.RotationFormatter();
-                case 13: return new MessagePack.Formatters.Mmogf.Core.ServerConnectFormatter();
-                case 14: return new MessagePack.Formatters.Mmogf.Core.SimpleMessageFormatter();
-                case 15: return new MessagePack.Formatters.Mmogf.Core.World_CreateEntityFormatter();
+                case 1: return new global::MessagePack.Formatters.ListFormatter<global::Mmogf.Core.Acl>();
+                case 2: return new MessagePack.Formatters.Mmogf.Core.CommandStatusFormatter();
+                case 3: return new MessagePack.Formatters.Mmogf.Core.ServerCodesFormatter();
+                case 4: return new MessagePack.Formatters.Mmogf.Core.AclFormatter();
+                case 5: return new MessagePack.Formatters.Mmogf.Core.AclsFormatter();
+                case 6: return new MessagePack.Formatters.Mmogf.Core.ChangeInterestAreaFormatter();
+                case 7: return new MessagePack.Formatters.Mmogf.Core.ClientConnectFormatter();
+                case 8: return new MessagePack.Formatters.Mmogf.Core.CommandRequestFormatter();
+                case 9: return new MessagePack.Formatters.Mmogf.Core.CommandResponseFormatter();
+                case 10: return new MessagePack.Formatters.Mmogf.Core.EntityInfoFormatter();
+                case 11: return new MessagePack.Formatters.Mmogf.Core.EntityTypeFormatter();
+                case 12: return new MessagePack.Formatters.Mmogf.Core.EntityUpdateFormatter();
+                case 13: return new MessagePack.Formatters.Mmogf.Core.EventDataFormatter();
+                case 14: return new MessagePack.Formatters.Mmogf.Core.GameDataFormatter();
+                case 15: return new MessagePack.Formatters.Mmogf.Core.MmoMessageFormatter();
+                case 16: return new MessagePack.Formatters.Mmogf.Core.PositionFormatter();
+                case 17: return new MessagePack.Formatters.Mmogf.Core.RotationFormatter();
+                case 18: return new MessagePack.Formatters.Mmogf.Core.ServerConnectFormatter();
+                case 19: return new MessagePack.Formatters.Mmogf.Core.World_CreateEntityFormatter();
                 default: return null;
             }
         }

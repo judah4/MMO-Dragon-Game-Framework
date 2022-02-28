@@ -25,9 +25,9 @@ namespace MmoWorkers
                 Position = position,
             };
 
-            _client.Send(new SimpleMessage()
+            _client.Send(new MmoMessage()
             {
-                MessageId = (int) ServerCodes.ChangeInterestArea,
+                MessageId = ServerCodes.ChangeInterestArea,
                 Info = MessagePackSerializer.Serialize(changeInterest),
             });
         }
@@ -42,9 +42,9 @@ namespace MmoWorkers
                 Info = MessagePackSerializer.Serialize(message),
             };
 
-            _client.Send(new SimpleMessage()
+            _client.Send(new MmoMessage()
             {
-                MessageId = (int)ServerCodes.EntityUpdate,
+                MessageId = ServerCodes.EntityUpdate,
                 Info = MessagePackSerializer.Serialize(changeInterest),
             });
         }

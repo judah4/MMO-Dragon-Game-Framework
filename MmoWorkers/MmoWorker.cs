@@ -85,7 +85,7 @@ namespace MmoWorkers
                         break;
                     case NetIncomingMessageType.Data:
                         OnLog?.Invoke("Client " + s_client.UniqueIdentifier + " Data: " + BitConverter.ToString(im.Data));
-                        var simpleData = MessagePackSerializer.Deserialize<SimpleMessage>(im.Data);
+                        var simpleData = MessagePackSerializer.Deserialize<MmoMessage>(im.Data);
                         switch ((ServerCodes)simpleData.MessageId)
                         {
                             case ServerCodes.ClientConnect:
@@ -127,7 +127,7 @@ namespace MmoWorkers
             }
         }
 
-        internal void Send(SimpleMessage message)
+        internal void Send(MmoMessage message)
         {
             NetOutgoingMessage om = s_client.CreateMessage();
             om.Write(MessagePackSerializer.Serialize(message));

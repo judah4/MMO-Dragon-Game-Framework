@@ -106,7 +106,7 @@ namespace Mmogf.Core {
                         break;
                     case NetIncomingMessageType.Data:
                         OnLog?.Invoke("Client " + s_client.UniqueIdentifier + " Data: " + BitConverter.ToString(im.Data));
-                        var simpleData = MessagePackSerializer.Deserialize<SimpleMessage>(im.Data);
+                        var simpleData = MessagePackSerializer.Deserialize<MmoMessage>(im.Data);
                         switch ((ServerCodes)simpleData.MessageId)
                         {
                             case ServerCodes.ClientConnect:
@@ -172,7 +172,7 @@ namespace Mmogf.Core {
             }
         }
 
-        public void Send(SimpleMessage message)
+        public void Send(MmoMessage message)
         {
             NetOutgoingMessage om = s_client.CreateMessage();
             om.Write(MessagePackSerializer.Serialize(message));
@@ -187,9 +187,9 @@ namespace Mmogf.Core {
                 Position = position,
             };
 
-            Send(new SimpleMessage()
+            Send(new MmoMessage()
             {
-                MessageId = (int)ServerCodes.ChangeInterestArea,
+                MessageId = ServerCodes.ChangeInterestArea,
                 Info = MessagePackSerializer.Serialize(changeInterest),
             });
         }
@@ -204,18 +204,18 @@ namespace Mmogf.Core {
                 Info = MessagePackSerializer.Serialize(message),
             };
 
-            Send(new SimpleMessage()
+            Send(new MmoMessage()
             {
-                MessageId = (int)ServerCodes.EntityUpdate,
+                MessageId = ServerCodes.EntityUpdate,
                 Info = MessagePackSerializer.Serialize(changeInterest),
             });
         }
 
         public void SendPing()
         {
-            Send(new SimpleMessage()
+            Send(new MmoMessage()
             {
-                MessageId = (int)ServerCodes.Ping,
+                MessageId = ServerCodes.Ping,
                 Info = new byte[0],
             });
             _pingRequestAt = DateTime.UtcNow;
@@ -235,9 +235,9 @@ namespace Mmogf.Core {
             //register callback
             _commandCallbacks.Add(requestId, callback);
 
-            Send(new SimpleMessage()
+            Send(new MmoMessage()
             {
-                MessageId = (int)ServerCodes.EntityCommandRequest,
+                MessageId = ServerCodes.EntityCommandRequest,
                 Info = MessagePackSerializer.Serialize(new CommandRequest()
                 {
                     RequestId = requestId,
@@ -251,9 +251,9 @@ namespace Mmogf.Core {
 
         internal void SendCommandResponse<T>(CommandRequest request, T responsePayload) where T : ICommand
         {
-            Send(new SimpleMessage()
+            Send(new MmoMessage()
             {
-                MessageId = (int)ServerCodes.EntityCommandResponse,
+                MessageId = ServerCodes.EntityCommandResponse,
                 Info = MessagePackSerializer.Serialize(new CommandResponse()
                 {
                     RequestId = request.RequestId,

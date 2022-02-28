@@ -16,7 +16,7 @@ namespace MmoGameFramework
         {
             ConnectionType = connectionType;
             InterestPosition = interestPosition;
-            InterestRange = 100;
+            InterestRange = 200;
             Connection = senderConnection;
         }
 

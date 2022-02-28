@@ -20,9 +20,12 @@ namespace MmoGameFramework
             _entityStore = new EntityStore();
 
             //create starter objects
-            _entityStore.Create("Cube", new Position() {X = 3, Z = 3});
-            _entityStore.Create("Cube", new Position() { X = 1, Z = 3 });
-            _entityStore.Create("Cube", new Position() { X = -3, Z = -3 });
+            _entityStore.Create("Cube", new Position() {X = 3, Z = 3}, new List<Acl>()
+            {
+                new Acl() { ComponentId = Position.ComponentId, WorkerType = "Dragon-Worker" },
+                new Acl() { ComponentId = Rotation.ComponentId, WorkerType = "Dragon-Worker" },
+                new Acl() { ComponentId = Acls.ComponentId, WorkerType = "Dragon-Worker" },
+            });
 
             // create and start the server
             server = new MmoServer(_entityStore, new NetPeerConfiguration("Dragon-Client")
@@ -40,7 +43,6 @@ namespace MmoGameFramework
             workerServer.Start();
 
             bool loop = true;
-            Console.WriteLine("S to spawn Cube.");
             Console.WriteLine("ESC to close.");
 
             while (loop)
@@ -48,15 +50,7 @@ namespace MmoGameFramework
                 try
                 {
                     var key = Console.ReadKey();
-                    if (key.Key == ConsoleKey.S)
-                    {
-                        var newEntity = _entityStore.Create("Cube",
-                            new Position() { X = random.NextDouble() * 10 - 5, Y = 2, Z = random.NextDouble() * 10 - 5 });
-
-                        _entityStore.UpdateEntity(newEntity);
-
-                    }
-                    else if (key.Key == ConsoleKey.Escape)
+                    if (key.Key == ConsoleKey.Escape)
                     {
                         loop = false;
                         break;

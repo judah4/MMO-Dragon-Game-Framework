@@ -4,10 +4,10 @@ using System.Collections.Generic;
 namespace Mmogf.Core
 {
     [MessagePackObject]
-    public struct SimpleMessage : IMessage
+    public struct MmoMessage: IMessage 
     {
         [Key(0)]
-        public int MessageId { get; set; }
+        public ServerCodes MessageId { get; set; }
         [Key(1)]
         public byte[] Info { get; set; }
     }

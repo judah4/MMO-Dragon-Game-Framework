@@ -77,9 +77,9 @@ namespace MmoGameFramework
                                     //todo: do some sort of worker type validation from a config
                                     _connections.Add(im.SenderConnection.RemoteUniqueIdentifier, new WorkerConnection(im.SenderConnection.RemoteHailMessage.ReadString(), im.SenderConnection, new Position()));
                                     Console.WriteLine("Remote hail: " + im.SenderConnection.RemoteHailMessage.ReadString());
-                                    var message = new SimpleMessage()
+                                    var message = new MmoMessage()
                                     {
-                                        MessageId = (int)ServerCodes.ClientConnect,
+                                        MessageId = ServerCodes.ClientConnect,
                                         Info = MessagePackSerializer.Serialize(new ClientConnect()
                                         {
                                             ClientId = im.SenderConnection.RemoteUniqueIdentifier,
@@ -99,7 +99,7 @@ namespace MmoGameFramework
                             case NetIncomingMessageType.Data:
 
                                 Console.WriteLine(im.SenderConnection.RemoteUniqueIdentifier +" - '" + BitConverter.ToString(im.Data) + "'");
-                                var simpleData = MessagePackSerializer.Deserialize<SimpleMessage>(im.Data);
+                                var simpleData = MessagePackSerializer.Deserialize<MmoMessage>(im.Data);
                                 Console.WriteLine((ServerCodes)simpleData.MessageId);
 
                                 switch ((ServerCodes)simpleData.MessageId)
@@ -121,9 +121,9 @@ namespace MmoGameFramework
 
                                             foreach (var entityInfo in entities)
                                             {
-                                                Send(im.SenderConnection, new SimpleMessage()
+                                                Send(im.SenderConnection, new MmoMessage()
                                                 {
-                                                    MessageId = (int)ServerCodes.EntityInfo,
+                                                    MessageId = ServerCodes.EntityInfo,
                                                     Info = MessagePackSerializer.Serialize(entityInfo),
                                                 });
                                             }
@@ -141,9 +141,9 @@ namespace MmoGameFramework
                                         HandleEntityCommandResponse(im, simpleData);
                                         break;
                                     case ServerCodes.Ping:
-                                        Send(im.SenderConnection, new SimpleMessage()
+                                        Send(im.SenderConnection, new MmoMessage()
                                         {
-                                            MessageId = (int)ServerCodes.Ping,
+                                            MessageId = ServerCodes.Ping,
                                             Info = new byte[0],
                                         });
                                         break;
@@ -172,7 +172,7 @@ namespace MmoGameFramework
             }
         }
 
-        private void HandleEntityCommand(NetIncomingMessage im, SimpleMessage simpleData)
+        private void HandleEntityCommand(NetIncomingMessage im, MmoMessage simpleData)
         {
             //get command info
             var commandRequest = MessagePackSerializer.Deserialize<CommandRequest>(simpleData.Info);
@@ -192,8 +192,8 @@ namespace MmoGameFramework
             if (!_connections.TryGetValue(im.SenderConnection.RemoteUniqueIdentifier, out worker))
             {
                 //send failure
-                Send(im.SenderConnection, new SimpleMessage() {
-                    MessageId = (int)ServerCodes.EntityCommandResponse,
+                Send(im.SenderConnection, new MmoMessage() {
+                    MessageId = ServerCodes.EntityCommandResponse,
                     Info = MessagePackSerializer.Serialize(new CommandResponse()
                     {
                         RequestId = commandRequest.RequestId,
@@ -215,17 +215,16 @@ namespace MmoGameFramework
 
         }
 
-        private void HandleWorldCommand(NetIncomingMessage im, SimpleMessage simpleData, CommandRequest commandRequest)
+        private void HandleWorldCommand(NetIncomingMessage im, MmoMessage message, CommandRequest commandRequest)
         {
-            //todo: verify sender has permissions
 
             WorkerConnection worker;
             if (!_connections.TryGetValue(im.SenderConnection.RemoteUniqueIdentifier, out worker))
             {
                 //send failure
-                Send(im.SenderConnection, new SimpleMessage()
+                Send(im.SenderConnection, new MmoMessage()
                 {
-                    MessageId = (int)ServerCodes.EntityCommandResponse,
+                    MessageId = ServerCodes.EntityCommandResponse,
                     Info = MessagePackSerializer.Serialize(new CommandResponse()
                     {
                         RequestId = commandRequest.RequestId,
@@ -236,16 +235,38 @@ namespace MmoGameFramework
                         EntityId = commandRequest.EntityId,
                     }),
                 });
+                return;
             }
 
+            //todo: verify sender has permissions from config settings
+
+            if (worker.ConnectionType != "Dragon-Worker")
+            {
+                Send(im.SenderConnection, new MmoMessage()
+                {
+                    MessageId = ServerCodes.EntityCommandResponse,
+                    Info = MessagePackSerializer.Serialize(new CommandResponse()
+                    {
+                        RequestId = commandRequest.RequestId,
+                        CommandStatus = CommandStatus.InvalidRequest,
+                        Message = "No permission to create entities.",
+                        ComponentId = commandRequest.ComponentId,
+                        RequesterId = commandRequest.RequesterId,
+                        EntityId = commandRequest.EntityId,
+                    }),
+                });
+                return;
+            }
+
+            
             var createEntity = MessagePackSerializer.Deserialize<World.CreateEntity>(commandRequest.Payload);
 
-            var entityInfo = _entities.Create(createEntity.EntityType, createEntity.Position, createEntity.Rotation, createEntity.Components);
+            var entityInfo = _entities.Create(createEntity.EntityType, createEntity.Position, createEntity.Acls, createEntity.Rotation, createEntity.Components);
             _entities.UpdateEntity(entityInfo);
 
-            Send(im.SenderConnection, new SimpleMessage()
+            Send(im.SenderConnection, new MmoMessage()
             {
-                MessageId = (int)ServerCodes.EntityCommandResponse,
+                MessageId = ServerCodes.EntityCommandResponse,
                 Info = MessagePackSerializer.Serialize(new CommandResponse()
                 {
                     RequestId = commandRequest.RequestId,
@@ -260,7 +281,7 @@ namespace MmoGameFramework
 
         }
 
-        private void HandleEntityCommandResponse(NetIncomingMessage im, SimpleMessage simpleData)
+        private void HandleEntityCommandResponse(NetIncomingMessage im, MmoMessage simpleData)
         {
             //get command info
             var commandResponse = MessagePackSerializer.Deserialize<CommandResponse>(simpleData.Info);
@@ -275,7 +296,7 @@ namespace MmoGameFramework
 
         }
 
-        void HandleEntityUpdate(NetIncomingMessage im, SimpleMessage simpleData)
+        void HandleEntityUpdate(NetIncomingMessage im, MmoMessage simpleData)
         {
             var entityUpdate = MessagePackSerializer.Deserialize<EntityUpdate>(simpleData.Info);
             var entityInfo = _entities.GetEntity(entityUpdate.EntityId);
@@ -299,14 +320,14 @@ namespace MmoGameFramework
 
         }
 
-        public void Send(NetConnection connection, SimpleMessage message)
+        public void Send(NetConnection connection, MmoMessage message)
         {
             NetOutgoingMessage om = s_server.CreateMessage();
             om.Write(MessagePackSerializer.Serialize(message));
             s_server.SendMessage(om, connection, NetDeliveryMethod.UnreliableSequenced);
         }
 
-        public void SendArea(Position position, SimpleMessage message)
+        public void SendArea(Position position, MmoMessage message)
         {
             var connections = new List<NetConnection>();
             foreach (var workerConnection in _connections)
@@ -327,7 +348,7 @@ namespace MmoGameFramework
             s_server.SendMessage(om, connections, NetDeliveryMethod.UnreliableSequenced, 0);
         }
 
-        public void SendToAuthority(SimpleMessage message)
+        public void SendToAuthority(MmoMessage message)
         {
             //send to all for now
 
@@ -338,9 +359,9 @@ namespace MmoGameFramework
 
         private void OnEntityUpdate(EntityInfo entityInfo)
         {
-            var message = new SimpleMessage()
+            var message = new MmoMessage()
             {
-                MessageId = (int)ServerCodes.EntityInfo,
+                MessageId = ServerCodes.EntityInfo,
 
                 Info = MessagePackSerializer.Serialize(entityInfo),
             };
@@ -356,9 +377,9 @@ namespace MmoGameFramework
             if(entity == null)
                 return;
 
-            var message = new SimpleMessage()
+            var message = new MmoMessage()
             {
-                MessageId = (int)ServerCodes.EntityUpdate,
+                MessageId = ServerCodes.EntityUpdate,
 
                 Info = MessagePackSerializer.Serialize(entityUpdate),
             };
@@ -376,9 +397,9 @@ namespace MmoGameFramework
 
                 //todo: get ACL and find who has authority over the command
 
-            var message = new SimpleMessage()
+            var message = new MmoMessage()
             {
-                MessageId = (int)ServerCodes.EntityCommandRequest,
+                MessageId = ServerCodes.EntityCommandRequest,
 
                 Info = MessagePackSerializer.Serialize(commandRequest),
             };
@@ -406,9 +427,9 @@ namespace MmoGameFramework
             //fix / validate data
             commandResponse.RequesterId = worker.Connection.RemoteUniqueIdentifier;
 
-            var message = new SimpleMessage()
+            var message = new MmoMessage()
             {
-                MessageId = (int)ServerCodes.EntityCommandResponse,
+                MessageId = ServerCodes.EntityCommandResponse,
 
                 Info = MessagePackSerializer.Serialize(commandResponse),
             };

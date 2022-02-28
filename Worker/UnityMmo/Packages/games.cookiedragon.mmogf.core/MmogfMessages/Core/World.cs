@@ -18,12 +18,16 @@ namespace Mmogf.Core
             [Key(3)]
             public Dictionary<int, byte[]> Components { get; set; }
 
-            public CreateEntity(string entityType, Position position, Rotation rotation, Dictionary<int, byte[]> components)
+            [Key(4)]
+            public List<Acl> Acls { get; set; }
+
+            public CreateEntity(string entityType, Position position, Rotation rotation, Dictionary<int, byte[]> components, List<Acl> acls)
             {
                 EntityType = entityType;
                 Position = position;
                 Rotation = rotation;
                 Components = components;
+                Acls = acls;
             }
 
 
