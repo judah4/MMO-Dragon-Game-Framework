@@ -25,13 +25,14 @@ namespace MessagePack.Formatters.Mmogf.Core
         public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Mmogf.Core.CommandResponse value, global::MessagePack.MessagePackSerializerOptions options)
         {
             global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
-            writer.WriteArrayHeader(7);
+            writer.WriteArrayHeader(8);
             formatterResolver.GetFormatterWithVerify<string>().Serialize(ref writer, value.RequestId, options);
             formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.CommandStatus>().Serialize(ref writer, value.CommandStatus, options);
             formatterResolver.GetFormatterWithVerify<string>().Serialize(ref writer, value.Message, options);
             writer.Write(value.RequesterId);
             writer.Write(value.EntityId);
             writer.Write(value.ComponentId);
+            formatterResolver.GetFormatterWithVerify<string>().Serialize(ref writer, value.Command, options);
             writer.Write(value.Payload);
         }
 
@@ -70,6 +71,9 @@ namespace MessagePack.Formatters.Mmogf.Core
                         ____result.ComponentId = reader.ReadInt32();
                         break;
                     case 6:
+                        ____result.Command = formatterResolver.GetFormatterWithVerify<string>().Deserialize(ref reader, options);
+                        break;
+                    case 7:
                         ____result.Payload = reader.ReadBytes()?.ToArray();
                         break;
                     default:

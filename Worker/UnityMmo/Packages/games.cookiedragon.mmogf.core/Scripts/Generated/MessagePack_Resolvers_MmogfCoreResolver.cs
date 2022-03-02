@@ -49,7 +49,7 @@ namespace MessagePack.Resolvers
 
         static MmogfCoreResolverGetFormatterHelper()
         {
-            lookup = new global::System.Collections.Generic.Dictionary<Type, int>(20)
+            lookup = new global::System.Collections.Generic.Dictionary<Type, int>(21)
             {
                 { typeof(global::System.Collections.Generic.Dictionary<int, byte[]>), 0 },
                 { typeof(global::System.Collections.Generic.List<global::Mmogf.Core.Acl>), 1 },
@@ -71,6 +71,7 @@ namespace MessagePack.Resolvers
                 { typeof(global::Mmogf.Core.Rotation), 17 },
                 { typeof(global::Mmogf.Core.ServerConnect), 18 },
                 { typeof(global::Mmogf.Core.World.CreateEntity), 19 },
+                { typeof(global::Mmogf.Core.World.DeleteEntity), 20 },
             };
         }
 
@@ -104,6 +105,7 @@ namespace MessagePack.Resolvers
                 case 17: return new MessagePack.Formatters.Mmogf.Core.RotationFormatter();
                 case 18: return new MessagePack.Formatters.Mmogf.Core.ServerConnectFormatter();
                 case 19: return new MessagePack.Formatters.Mmogf.Core.World_CreateEntityFormatter();
+                case 20: return new MessagePack.Formatters.Mmogf.Core.World_DeleteEntityFormatter();
                 default: return null;
             }
         }

@@ -13,6 +13,7 @@ namespace MmoGameFramework
         private EntityStore _entities;
         NetPeerConfiguration _config;
         public bool Active => s_server.Status == NetPeerStatus.Running;
+        public string WorkerType => _config.AppIdentifier;
 
         public Dictionary<long, WorkerConnection> _connections = new Dictionary<long, WorkerConnection>();
 
@@ -194,14 +195,10 @@ namespace MmoGameFramework
                 //send failure
                 Send(im.SenderConnection, new MmoMessage() {
                     MessageId = ServerCodes.EntityCommandResponse,
-                    Info = MessagePackSerializer.Serialize(new CommandResponse()
+                    Info = MessagePackSerializer.Serialize(new CommandResponse(commandRequest)
                     {
-                        RequestId = commandRequest.RequestId,
                         CommandStatus = CommandStatus.InvalidRequest,
                         Message = "No Worker Identified",
-                        ComponentId = commandRequest.ComponentId,
-                        RequesterId = commandRequest.RequesterId,
-                        EntityId = commandRequest.EntityId,
                     }),
                 });
             }
@@ -225,14 +222,10 @@ namespace MmoGameFramework
                 Send(im.SenderConnection, new MmoMessage()
                 {
                     MessageId = ServerCodes.EntityCommandResponse,
-                    Info = MessagePackSerializer.Serialize(new CommandResponse()
+                    Info = MessagePackSerializer.Serialize(new CommandResponse(commandRequest)
                     {
-                        RequestId = commandRequest.RequestId,
                         CommandStatus = CommandStatus.InvalidRequest,
                         Message = "No Worker Identified",
-                        ComponentId = commandRequest.ComponentId,
-                        RequesterId = commandRequest.RequesterId,
-                        EntityId = commandRequest.EntityId,
                     }),
                 });
                 return;
@@ -245,39 +238,50 @@ namespace MmoGameFramework
                 Send(im.SenderConnection, new MmoMessage()
                 {
                     MessageId = ServerCodes.EntityCommandResponse,
-                    Info = MessagePackSerializer.Serialize(new CommandResponse()
+                    Info = MessagePackSerializer.Serialize(new CommandResponse(commandRequest)
                     {
-                        RequestId = commandRequest.RequestId,
                         CommandStatus = CommandStatus.InvalidRequest,
                         Message = "No permission to create entities.",
-                        ComponentId = commandRequest.ComponentId,
-                        RequesterId = commandRequest.RequesterId,
-                        EntityId = commandRequest.EntityId,
                     }),
                 });
                 return;
             }
 
-            
-            var createEntity = MessagePackSerializer.Deserialize<World.CreateEntity>(commandRequest.Payload);
-
-            var entityInfo = _entities.Create(createEntity.EntityType, createEntity.Position, createEntity.Acls, createEntity.Rotation, createEntity.Components);
-            _entities.UpdateEntity(entityInfo);
-
-            Send(im.SenderConnection, new MmoMessage()
+            switch(commandRequest.Command)
             {
-                MessageId = ServerCodes.EntityCommandResponse,
-                Info = MessagePackSerializer.Serialize(new CommandResponse()
-                {
-                    RequestId = commandRequest.RequestId,
-                    CommandStatus = CommandStatus.Success,
-                    Message = "",
-                    ComponentId = commandRequest.ComponentId,
-                    RequesterId = commandRequest.RequesterId,
-                    EntityId = commandRequest.EntityId,
-                    Payload = MessagePackSerializer.Serialize(entityInfo),
-                }),
-            });
+                case nameof(World.CreateEntity):
+                    var createEntity = MessagePackSerializer.Deserialize<World.CreateEntity>(commandRequest.Payload);
+
+                    var entityInfo = _entities.Create(createEntity.EntityType, createEntity.Position, createEntity.Acls, createEntity.Rotation, createEntity.Components);
+                    _entities.UpdateEntity(entityInfo);
+                    Send(im.SenderConnection, new MmoMessage()
+                    {
+                        MessageId = ServerCodes.EntityCommandResponse,
+                        Info = MessagePackSerializer.Serialize(new CommandResponse(commandRequest)
+                        {
+                            CommandStatus = CommandStatus.Success,
+                            Message = "",
+                            Payload = MessagePackSerializer.Serialize(entityInfo),
+                        }),
+                    });
+                    break;
+                case nameof(World.DeleteEntity):
+                    var deleteEntity = MessagePackSerializer.Deserialize<World.DeleteEntity>(commandRequest.Payload);
+
+                    //_entities.Delete(deleteEntity.EntityId);
+                    //_entities.UpdateEntity(entityInfo);
+                    Send(im.SenderConnection, new MmoMessage()
+                    {
+                        MessageId = ServerCodes.EntityCommandResponse,
+                        Info = MessagePackSerializer.Serialize(new CommandResponse(commandRequest)
+                        {
+                            CommandStatus = CommandStatus.Failure,
+                            Message = "Not Implemented",
+                            Payload = null,
+                        }),
+                    });
+                    break;
+            }
 
         }
 
@@ -303,11 +307,22 @@ namespace MmoGameFramework
 
             if (entityInfo == null)
                 return;
-            
+
+            WorkerConnection worker;
+            if (!_connections.TryGetValue(im.SenderConnection.RemoteUniqueIdentifier, out worker))
+            {
+                //disconnected??
+                return;
+            }
+            var acls = entityInfo.Value.Acls;
+            if(!acls.CanWrite(entityUpdate.ComponentId, worker.ConnectionType))
+            {
+                //log
+                return;
+            }
 
             entityInfo.Value.EntityData.Remove(entityUpdate.ComponentId);
             entityInfo.Value.EntityData.Add(entityUpdate.ComponentId, entityUpdate.Info);
-
 
             if (entityUpdate.ComponentId == Position.ComponentId)
             {
@@ -395,7 +410,20 @@ namespace MmoGameFramework
             if (entity == null)
                 return;
 
-                //todo: get ACL and find who has authority over the command
+            //todo: get ACL and find who has authority over the command
+            var acls = entity.Value.Acls;
+            Acl? entityAcl = null;
+            foreach(var acl in acls.AclList)
+            {
+                if(acl.ComponentId != commandRequest.ComponentId)
+                    continue;
+                entityAcl = acl;
+            }
+            if (entityAcl == null)
+                return;
+
+            if(entityAcl.Value.WorkerType != WorkerType)
+                return;
 
             var message = new MmoMessage()
             {

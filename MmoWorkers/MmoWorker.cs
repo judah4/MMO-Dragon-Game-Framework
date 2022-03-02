@@ -84,28 +84,28 @@ namespace MmoWorkers
 
                         break;
                     case NetIncomingMessageType.Data:
-                        OnLog?.Invoke("Client " + s_client.UniqueIdentifier + " Data: " + BitConverter.ToString(im.Data));
+                        //OnLog?.Invoke("Client " + s_client.UniqueIdentifier + " Data: " + BitConverter.ToString(im.Data));
                         var simpleData = MessagePackSerializer.Deserialize<MmoMessage>(im.Data);
                         switch ((ServerCodes)simpleData.MessageId)
                         {
                             case ServerCodes.ClientConnect:
                                 //ClientId = ClientConnect.Parser.ParseFrom(simpleData.Info).ClientId;w
                                 //OnLog?.Invoke("My Client Id is " + ClientId);
-                                OnLog?.Invoke("Client connected msg");
+                                //OnLog?.Invoke("Client connected msg");
                                 //OnConnect?.Invoke();
                                 break;
                             case ServerCodes.GameData:
                                 var gameData = MessagePackSerializer.Deserialize<GameData>(simpleData.Info);
-                                OnLog?.Invoke($"Client Game Data: {BitConverter.ToString(gameData.Info)}");
+                                //OnLog?.Invoke($"Client Game Data: {BitConverter.ToString(gameData.Info)}");
 
                                 break;
                             case ServerCodes.EntityInfo:
                                 var entityInfo = MessagePackSerializer.Deserialize<EntityInfo>(simpleData.Info);
-                                OnLog?.Invoke($"Client Entity Info: {entityInfo.EntityId}");
-                                foreach (var pair in entityInfo.EntityData)
-                                {
-                                    OnLog?.Invoke($"{pair.Key} {BitConverter.ToString(pair.Value)}");
-                                }
+                                //OnLog?.Invoke($"Client Entity Info: {entityInfo.EntityId}");
+                                //foreach (var pair in entityInfo.EntityData)
+                                //{
+                                //    OnLog?.Invoke($"{pair.Key} {BitConverter.ToString(pair.Value)}");
+                                //}
 
                                 OnEntityCreation?.Invoke(entityInfo);
                                 break;

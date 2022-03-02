@@ -1,5 +1,4 @@
-﻿using Assets.Scripts.Helpers;
-using MessagePack;
+﻿using MessagePack;
 using Mmogf;
 using Mmogf.Core;
 using System.Collections;

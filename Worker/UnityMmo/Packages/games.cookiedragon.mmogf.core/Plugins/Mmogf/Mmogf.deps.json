@@ -7,7 +7,7 @@
   "targets": {
     ".NETStandard,Version=v2.0": {},
     ".NETStandard,Version=v2.0/": {
-      "Mmogf/0.1.0": {
+      "Mmogf/0.0.5": {
         "dependencies": {
           "NETStandard.Library": "2.0.3",
           "Lidgren.Network": "2012.1.7.0"
@@ -33,7 +33,7 @@
     }
   },
   "libraries": {
-    "Mmogf/0.1.0": {
+    "Mmogf/0.0.5": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

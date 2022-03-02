@@ -30,6 +30,18 @@ namespace Mmogf.Core
                 Acls = acls;
             }
 
+        }
+
+        [MessagePackObject]
+        public struct DeleteEntity : ICommand
+        {
+            [Key(0)]
+            public int EntityId { get; set; }
+
+            public DeleteEntity(int entityId)
+            {
+                EntityId = entityId;
+            }
 
         }
     }

@@ -1,5 +1,4 @@
-﻿using Assets.Scripts.Helpers;
-using MessagePack;
+﻿using MessagePack;
 using Mmogf.Core;
 using System.Collections;
 using System.Collections.Generic;
@@ -24,7 +23,6 @@ namespace Mmogf.Core
         {
             if(Time.time - updateTime < updateTick)
                 return;
-
 
             var rot = MessagePackSerializer.Deserialize<Rotation>(Entity.Data[Rotation.ComponentId]);
             if(UpdateRotation) 

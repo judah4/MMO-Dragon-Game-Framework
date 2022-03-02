@@ -1,10 +1,9 @@
 ﻿using Lidgren.Network;
-using Mmogf.Core;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Mmogf
+namespace Mmogf.Core
 {
 
 
@@ -22,6 +21,15 @@ namespace Mmogf
         public long ClientId
         {
             get { return Client?.ClientId ?? 0; }
+        }
+
+        public int Ping
+        {
+            get { return Client?.Ping ?? 0; }
+        }
+        public NetConnectionStatus Status
+        {
+            get { return Client?.Status ?? NetConnectionStatus.None; }
         }
 
         void OnEnable()

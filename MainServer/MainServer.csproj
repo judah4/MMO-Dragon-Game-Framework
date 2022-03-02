@@ -4,7 +4,8 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
     <RootNamespace>MmoGameFramework</RootNamespace>
-    <AssemblyName>MmoGameFramework</AssemblyName>
+    <AssemblyName>MmogfMainServer</AssemblyName>
+    <Version>0.0.5</Version>
   </PropertyGroup>
 
   <ItemGroup>

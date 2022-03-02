@@ -17,5 +17,11 @@ namespace Mmogf.Core
             get { return MessagePackSerializer.Deserialize<Rotation>(EntityData[Rotation.ComponentId]); }
         }
 
+        [IgnoreMember]
+        public Acls Acls
+        {
+            get { return MessagePackSerializer.Deserialize<Acls>(EntityData[Acls.ComponentId]); }
+        }
+
     }
 }

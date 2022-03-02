@@ -31,6 +31,21 @@ namespace Mmogf.Core
         [Key(5)]
         public int ComponentId { get; set; }
         [Key(6)]
+        public string Command { get; set; }
+        [Key(7)]
         public byte[] Payload { get; set; }
+
+        public CommandResponse(CommandRequest request)
+        {
+            RequestId = request.RequestId;
+            CommandStatus = CommandStatus.Success;
+            Message = "";
+            RequesterId = request.RequesterId;
+            EntityId = request.EntityId;
+            ComponentId = request.ComponentId;
+            Command = request.Command;
+            Payload = null;
+        }
+
     }
 }

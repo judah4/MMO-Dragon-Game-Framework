@@ -25,7 +25,7 @@ namespace Mmogf
             if (Input.GetKeyDown(KeyCode.S))
             {
                 //create ship
-                _serverHandler.SendCommand(0, 0, new World.CreateEntity("Ship", new Position() { Y = 1, }, Rotation.Identity, 
+                _serverHandler.SendCommand(0, 0, new World.CreateEntity("Ship", new Position() { Y = 0, }, RandomHeading().ToRotation(), 
                     new Dictionary<int, byte[]>() 
                     {
                         { Cannon.ComponentId, MessagePack.MessagePackSerializer.Serialize(new Cannon()) },
@@ -41,7 +41,32 @@ namespace Mmogf
                         Debug.Log($"Create Entity! {response.CommandStatus} - {response.Message}");
                     });
             }
-        
+
+            if (Input.GetKeyDown(KeyCode.D))
+            {
+                //create ship
+                _serverHandler.SendCommand(0, 0, new World.CreateEntity("Shark", new Position() { Y = -5, }, RandomHeading().ToRotation(),
+                    new Dictionary<int, byte[]>()
+                    {
+                        { Cannon.ComponentId, MessagePack.MessagePackSerializer.Serialize(new Cannon()) },
+                    },
+                    new List<Acl>()
+                    {
+                        new Acl() { ComponentId = Position.ComponentId, WorkerType = "Dragon-Worker" },
+                        new Acl() { ComponentId = Rotation.ComponentId, WorkerType = "Dragon-Worker" },
+                        new Acl() { ComponentId = Acls.ComponentId, WorkerType = "Dragon-Worker" },
+                        new Acl() { ComponentId = Cannon.ComponentId, WorkerType = "Dragon-Worker" },
+                    }),
+                    response => {
+                        Debug.Log($"Create Entity! {response.CommandStatus} - {response.Message}");
+                    });
+            }
+
+        }
+
+        Quaternion RandomHeading()
+        {
+            return Quaternion.Euler(0, Random.Range(-180, 180), 0);
         }
     }
 }

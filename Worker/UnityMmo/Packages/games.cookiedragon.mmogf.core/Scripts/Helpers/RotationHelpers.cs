@@ -1,12 +1,11 @@
-﻿using Mmogf.Core;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Assets.Scripts.Helpers
+namespace Mmogf.Core
 {
     public static class RotationHelpers
     {

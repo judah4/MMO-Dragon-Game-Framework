@@ -6,7 +6,8 @@ using Lidgren.Network;
 using MessagePack;
 using Mmogf.Core.Behaviors;
 
-namespace Mmogf.Core {
+namespace Mmogf.Core 
+{
 
     public class MmoWorker
     {
@@ -101,32 +102,32 @@ namespace Mmogf.Core {
                         }
 
                         string reason = im.ReadString();
-                        OnLog(status.ToString() + ": " + reason);
+                        //OnLog(status.ToString() + ": " + reason);
 
                         break;
                     case NetIncomingMessageType.Data:
-                        OnLog?.Invoke("Client " + s_client.UniqueIdentifier + " Data: " + BitConverter.ToString(im.Data));
+                        //OnLog?.Invoke("Client " + s_client.UniqueIdentifier + " Data: " + BitConverter.ToString(im.Data));
                         var simpleData = MessagePackSerializer.Deserialize<MmoMessage>(im.Data);
                         switch ((ServerCodes)simpleData.MessageId)
                         {
                             case ServerCodes.ClientConnect:
                                 //ClientId = ClientConnect.Parser.ParseFrom(simpleData.Info).ClientId;w
                                 //OnLog?.Invoke("My Client Id is " + ClientId);
-                                OnLog?.Invoke("Client connected msg");
+                                //OnLog?.Invoke("Client connected msg");
                                 //OnConnect?.Invoke();
                                 break;
                             case ServerCodes.GameData:
                                 var gameData = MessagePackSerializer.Deserialize<GameData>(simpleData.Info);
-                                OnLog?.Invoke($"Client Game Data: {BitConverter.ToString(gameData.Info)}");
+                                //OnLog?.Invoke($"Client Game Data: {BitConverter.ToString(gameData.Info)}");
 
                                 break;
                             case ServerCodes.EntityInfo:
                                 var entityInfo = MessagePackSerializer.Deserialize<EntityInfo>(simpleData.Info);
-                                OnLog?.Invoke($"Client Entity Info: {entityInfo.EntityId}");
-                                foreach (var pair in entityInfo.EntityData)
-                                {
-                                    OnLog?.Invoke($"{pair.Key} {BitConverter.ToString(pair.Value)}");
-                                }
+                                //OnLog?.Invoke($"Client Entity Info: {entityInfo.EntityId}");
+                                //foreach (var pair in entityInfo.EntityData)
+                                //{
+                                //    OnLog?.Invoke($"{pair.Key} {BitConverter.ToString(pair.Value)}");
+                                //}
 
                                 OnEntityCreation?.Invoke(entityInfo);
                                 break;
@@ -244,6 +245,7 @@ namespace Mmogf.Core {
                     RequestorWorkerType = WorkerType,
                     EntityId = entityId,
                     ComponentId = componentId,
+                    Command = command.GetType().Name,
                     Payload = MessagePackSerializer.Serialize(command),
                 }),
             });
@@ -254,13 +256,9 @@ namespace Mmogf.Core {
             Send(new MmoMessage()
             {
                 MessageId = ServerCodes.EntityCommandResponse,
-                Info = MessagePackSerializer.Serialize(new CommandResponse()
+                Info = MessagePackSerializer.Serialize(new CommandResponse(request)
                 {
-                    RequestId = request.RequestId,
                     CommandStatus = CommandStatus.Success,
-                    RequesterId = request.RequesterId,
-                    EntityId = request.EntityId,
-                    ComponentId = request.ComponentId,
                     Payload = MessagePackSerializer.Serialize(responsePayload),
                 }),
             });

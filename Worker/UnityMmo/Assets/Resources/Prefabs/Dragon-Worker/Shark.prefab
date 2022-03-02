@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1209935762920366884}
   - component: {fileID: 7336893033674576000}
+  - component: {fileID: 2511793359988459894}
   m_Layer: 0
   m_Name: Shark
   m_TagString: Untagged
@@ -46,6 +47,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   UpdateRotation: 1
+--- !u!114 &2511793359988459894
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7055602586454160243}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5ba5132686c4b74daaec0ab911dc54c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _turnSpeed: 120
+  _moveSpeed: 5
+  _turnPower: 0.1
+  _turnTimer: 3
 --- !u!1001 &3207886153485043319
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -76,7 +93,7 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 486445ee6bcc4014eb288a27c6b644f0,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -1.924
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 486445ee6bcc4014eb288a27c6b644f0,
         type: 3}

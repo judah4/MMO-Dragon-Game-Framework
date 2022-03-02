@@ -1,5 +1,4 @@
-﻿using Assets.Scripts.Helpers;
-using MessagePack;
+﻿using MessagePack;
 using Mmogf;
 using Mmogf.Core;
 using System.Collections;
@@ -67,8 +66,6 @@ public class GameObjectRepresentation
     public void OnEntityUpdate(EntityUpdate entityUpdate)
     {
         EntityGameObject entityGm;
-
-        Debug.Log(entityUpdate.ToString());
 
         if (!_entities.TryGetValue(entityUpdate.EntityId, out entityGm))
             return;

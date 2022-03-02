@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Mmogf.Core
 {
     [MessagePackObject]
-    public struct Acls : IEntityComponent
+    public partial struct Acls : IEntityComponent
     {
         public static int ComponentId = 4;
         public int GetComponentId() { return ComponentId; }
