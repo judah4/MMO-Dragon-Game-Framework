@@ -1,4 +1,5 @@
 ﻿using MessagePack;
+using MessagePack.Resolvers;
 using Mmogf;
 using Mmogf.Core;
 using System.Collections;
@@ -57,10 +58,10 @@ public class GameObjectRepresentation
         foreach (var pair in entity.EntityData)
         {
             entityGm.Data.Remove(pair.Key);
-            entityGm.Data.Add(pair.Key, pair.Value);
+            var type = ComponentMappings.GetType(pair.Key);
+            
+            entityGm.Data.Add(pair.Key, (IEntityComponent)MessagePackSerializer.Deserialize(type, pair.Value));
         }
-
-
     }
 
     public void OnEntityUpdate(EntityUpdate entityUpdate)
@@ -71,7 +72,10 @@ public class GameObjectRepresentation
             return;
 
         entityGm.Data.Remove(entityUpdate.ComponentId);
-        entityGm.Data.Add(entityUpdate.ComponentId, entityUpdate.Info);
+        var type = ComponentMappings.GetType(entityUpdate.ComponentId);
+
+        var data = (IEntityComponent)MessagePackSerializer.Deserialize(type, entityUpdate.Info);
+        entityGm.Data.Add(entityUpdate.ComponentId, data);
 
         entityGm.EntityUpdated();
     }
@@ -83,7 +87,7 @@ public class GameObjectRepresentation
             return;
 
         entityGm.Data.Remove(componentId);
-        entityGm.Data.Add(componentId, MessagePackSerializer.Serialize(message));
+        entityGm.Data.Add(componentId, message);
 
         entityGm.EntityUpdated();
 

@@ -24,7 +24,7 @@ namespace Mmogf.Core
             if(Time.time - updateTime < updateTick)
                 return;
 
-            var rot = MessagePackSerializer.Deserialize<Rotation>(Entity.Data[Rotation.ComponentId]);
+            var rot = (Rotation)Entity.Data[Rotation.ComponentId];
             if(UpdateRotation) 
             { 
                 var currentRot = rot.ToQuaternion();
@@ -33,7 +33,7 @@ namespace Mmogf.Core
                     Server.UpdateEntity(Entity.EntityId, Rotation.ComponentId, transform.rotation.ToRotation());
                 }
             }
-            var pos = MessagePackSerializer.Deserialize<Position>(Entity.Data[Position.ComponentId]);
+            var pos = (Position)Entity.Data[Position.ComponentId];
 
             var currentPos = Server.PositionToClient(pos);
 
@@ -51,7 +51,7 @@ namespace Mmogf.Core
                 //send destroy at some point
             }
 
-            if (Mathf.Abs((currentPos - transform.position).sqrMagnitude) > .22f)
+            if (Mathf.Abs((currentPos - transform.position).sqrMagnitude) > .1f)
             {
                 Server.UpdateEntity(Entity.EntityId, Position.ComponentId, new PositionUpdate(Server, transform.position).Get());
                 updateTime = Time.time;

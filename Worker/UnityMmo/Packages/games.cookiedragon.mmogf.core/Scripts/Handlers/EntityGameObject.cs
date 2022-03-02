@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Mmogf;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,7 @@ using UnityEngine;
 public class EntityGameObject : MonoBehaviour
 {
     public int EntityId;
-    public Dictionary<int, byte[]> Data = new Dictionary<int, byte[]>();
+    public Dictionary<int, IEntityComponent> Data = new Dictionary<int, IEntityComponent>();
 
     public event Action OnEntityUpdate;
 
@@ -17,7 +18,6 @@ public class EntityGameObject : MonoBehaviour
         OnEntityUpdate?.Invoke();
 
     }
-
-    
+ 
 }
 

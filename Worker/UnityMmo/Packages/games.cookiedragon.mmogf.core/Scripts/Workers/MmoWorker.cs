@@ -59,6 +59,9 @@ namespace Mmogf.Core
 
         public void Update()
         {
+            s_client.FlushSendQueue();
+
+
             GotMessage(s_client);
 
             InternalBehaviors();
@@ -177,8 +180,7 @@ namespace Mmogf.Core
         {
             NetOutgoingMessage om = s_client.CreateMessage();
             om.Write(MessagePackSerializer.Serialize(message));
-            s_client.SendMessage(om, NetDeliveryMethod.UnreliableSequenced);
-            s_client.FlushSendQueue();
+            s_client.SendMessage(om, NetDeliveryMethod.ReliableUnordered);
         }
 
         public void SendInterestChange(Position position)
@@ -226,7 +228,7 @@ namespace Mmogf.Core
         {
             var timespan = DateTime.UtcNow - _pingRequestAt;
             Ping = (int)timespan.TotalMilliseconds;
-            OnLog?.Invoke($"Ping: {Ping}");
+            OnLog?.Invoke($"Ping: {Ping} - {WorkerType}");
         }
         public void SendCommand<T>(int entityId, int componentId, T command, Action<CommandResponse> callback) where T : ICommand
         {

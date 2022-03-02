@@ -20,8 +20,8 @@ namespace Mmogf.Core
 
         void OnUpdate()
         {
-            var position = MessagePackSerializer.Deserialize<Position>(Entity.Data[Position.ComponentId]);
-            var rotation = MessagePackSerializer.Deserialize<Rotation>(Entity.Data[Rotation.ComponentId]);
+            var position = (Position)Entity.Data[Position.ComponentId];
+            var rotation = (Rotation)Entity.Data[Rotation.ComponentId];
             var localPos = Server.PositionToClient(position);
 
             var updatedRot = rotation.ToQuaternion();
