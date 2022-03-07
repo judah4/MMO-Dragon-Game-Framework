@@ -17,8 +17,39 @@ namespace MmoGameFramework
         static void Main(string[] args)
         {
             random = new Random();
+
+            if(random.Next(1) == 1)
+            {
+                Console.WriteLine(@"
+                                   __ 
+                                  / _|
+  _ __ ___  _ __ ___   ___   __ _| |_ 
+ | '_ ` _ \| '_ ` _ \ / _ \ / _` |  _|
+ | | | | | | | | | | | (_) | (_| | |  
+ |_| |_| |_|_| |_| |_|\___/ \__, |_|  
+                             __/ |    
+                            |___/     
+");
+            }
+            else
+            {
+                Console.WriteLine(@"
+      _                                    __ 
+     | |                                  / _|
+   __| |_ __ __ _  __ _  ___  _ __   __ _| |_ 
+  / _` | '__/ _` |/ _` |/ _ \| '_ \ / _` |  _|
+ | (_| | | | (_| | (_| | (_) | | | | (_| | |  
+  \__,_|_|  \__,_|\__, |\___/|_| |_|\__, |_|  
+                   __/ |             __/ |    
+                  |___/             |___/     
+");
+            }
+            
+
+            Console.WriteLine("Attaching Entity Storage.");
             _entityStore = new EntityStore();
 
+            Console.WriteLine("Creating Test Cube.");
             //create starter objects
             _entityStore.Create("Cube", new Position() {X = 3, Z = 3}, new List<Acl>()
             {
@@ -27,6 +58,7 @@ namespace MmoGameFramework
                 new Acl() { ComponentId = Acls.ComponentId, WorkerType = "Dragon-Worker" },
             });
 
+            Console.WriteLine("Starting Dragon-Client connections. Port 1337");
             // create and start the server
             server = new MmoServer(_entityStore, new NetPeerConfiguration("Dragon-Client")
             {
@@ -34,7 +66,7 @@ namespace MmoGameFramework
                 Port = 1337,
             });
             server.Start();
-
+            Console.WriteLine("Starting Dragon-Worker connections. Port 1338.");
             workerServer = new MmoServer(_entityStore, new NetPeerConfiguration("Dragon-Worker")
             {
                 MaximumConnections = 100,
@@ -42,6 +74,7 @@ namespace MmoGameFramework
             });
             workerServer.Start();
 
+            Console.WriteLine("Dragongf is ready.");
             bool loop = true;
             Console.WriteLine("ESC to close.");
 
