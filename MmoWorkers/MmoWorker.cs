@@ -94,11 +94,6 @@ namespace MmoWorkers
                                 //OnLog?.Invoke("Client connected msg");
                                 //OnConnect?.Invoke();
                                 break;
-                            case ServerCodes.GameData:
-                                var gameData = MessagePackSerializer.Deserialize<GameData>(simpleData.Info);
-                                //OnLog?.Invoke($"Client Game Data: {BitConverter.ToString(gameData.Info)}");
-
-                                break;
                             case ServerCodes.EntityInfo:
                                 var entityInfo = MessagePackSerializer.Deserialize<EntityInfo>(simpleData.Info);
                                 //OnLog?.Invoke($"Client Entity Info: {entityInfo.EntityId}");

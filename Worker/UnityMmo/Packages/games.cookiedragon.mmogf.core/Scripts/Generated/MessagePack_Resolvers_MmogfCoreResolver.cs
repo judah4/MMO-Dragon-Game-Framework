@@ -49,7 +49,7 @@ namespace MessagePack.Resolvers
 
         static MmogfCoreResolverGetFormatterHelper()
         {
-            lookup = new global::System.Collections.Generic.Dictionary<Type, int>(21)
+            lookup = new global::System.Collections.Generic.Dictionary<Type, int>(22)
             {
                 { typeof(global::System.Collections.Generic.Dictionary<int, byte[]>), 0 },
                 { typeof(global::System.Collections.Generic.List<global::Mmogf.Core.Acl>), 1 },
@@ -65,13 +65,14 @@ namespace MessagePack.Resolvers
                 { typeof(global::Mmogf.Core.EntityType), 11 },
                 { typeof(global::Mmogf.Core.EntityUpdate), 12 },
                 { typeof(global::Mmogf.Core.EventData), 13 },
-                { typeof(global::Mmogf.Core.GameData), 14 },
-                { typeof(global::Mmogf.Core.MmoMessage), 15 },
-                { typeof(global::Mmogf.Core.Position), 16 },
-                { typeof(global::Mmogf.Core.Rotation), 17 },
-                { typeof(global::Mmogf.Core.ServerConnect), 18 },
-                { typeof(global::Mmogf.Core.World.CreateEntity), 19 },
-                { typeof(global::Mmogf.Core.World.DeleteEntity), 20 },
+                { typeof(global::Mmogf.Core.EventRequest), 14 },
+                { typeof(global::Mmogf.Core.GameData), 15 },
+                { typeof(global::Mmogf.Core.MmoMessage), 16 },
+                { typeof(global::Mmogf.Core.Position), 17 },
+                { typeof(global::Mmogf.Core.Rotation), 18 },
+                { typeof(global::Mmogf.Core.ServerConnect), 19 },
+                { typeof(global::Mmogf.Core.World.CreateEntity), 20 },
+                { typeof(global::Mmogf.Core.World.DeleteEntity), 21 },
             };
         }
 
@@ -99,13 +100,14 @@ namespace MessagePack.Resolvers
                 case 11: return new MessagePack.Formatters.Mmogf.Core.EntityTypeFormatter();
                 case 12: return new MessagePack.Formatters.Mmogf.Core.EntityUpdateFormatter();
                 case 13: return new MessagePack.Formatters.Mmogf.Core.EventDataFormatter();
-                case 14: return new MessagePack.Formatters.Mmogf.Core.GameDataFormatter();
-                case 15: return new MessagePack.Formatters.Mmogf.Core.MmoMessageFormatter();
-                case 16: return new MessagePack.Formatters.Mmogf.Core.PositionFormatter();
-                case 17: return new MessagePack.Formatters.Mmogf.Core.RotationFormatter();
-                case 18: return new MessagePack.Formatters.Mmogf.Core.ServerConnectFormatter();
-                case 19: return new MessagePack.Formatters.Mmogf.Core.World_CreateEntityFormatter();
-                case 20: return new MessagePack.Formatters.Mmogf.Core.World_DeleteEntityFormatter();
+                case 14: return new MessagePack.Formatters.Mmogf.Core.EventRequestFormatter();
+                case 15: return new MessagePack.Formatters.Mmogf.Core.GameDataFormatter();
+                case 16: return new MessagePack.Formatters.Mmogf.Core.MmoMessageFormatter();
+                case 17: return new MessagePack.Formatters.Mmogf.Core.PositionFormatter();
+                case 18: return new MessagePack.Formatters.Mmogf.Core.RotationFormatter();
+                case 19: return new MessagePack.Formatters.Mmogf.Core.ServerConnectFormatter();
+                case 20: return new MessagePack.Formatters.Mmogf.Core.World_CreateEntityFormatter();
+                case 21: return new MessagePack.Formatters.Mmogf.Core.World_DeleteEntityFormatter();
                 default: return null;
             }
         }

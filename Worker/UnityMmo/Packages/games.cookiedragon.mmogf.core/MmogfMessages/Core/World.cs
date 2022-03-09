@@ -9,6 +9,9 @@ namespace Mmogf.Core
         [MessagePackObject]
         public struct CreateEntity : ICommand
         {
+            public const int CommandId = 100;
+            public int GetCommandId() => CommandId;
+
             [Key(0)]
             public string EntityType { get; set; }
             [Key(1)]
@@ -35,6 +38,9 @@ namespace Mmogf.Core
         [MessagePackObject]
         public struct DeleteEntity : ICommand
         {
+            public const int CommandId = 101;
+            public int GetCommandId() => CommandId;
+
             [Key(0)]
             public int EntityId { get; set; }
 

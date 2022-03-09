@@ -31,7 +31,7 @@ namespace Mmogf.Core
         [Key(5)]
         public int ComponentId { get; set; }
         [Key(6)]
-        public string Command { get; set; }
+        public int CommandId { get; set; }
         [Key(7)]
         public byte[] Payload { get; set; }
 
@@ -43,7 +43,7 @@ namespace Mmogf.Core
             RequesterId = request.RequesterId;
             EntityId = request.EntityId;
             ComponentId = request.ComponentId;
-            Command = request.Command;
+            CommandId = request.CommandId;
             Payload = null;
         }
 

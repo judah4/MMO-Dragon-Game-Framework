@@ -23,18 +23,25 @@ public class FireBehavior: BaseEntityBehavior
         {
             if (Server.CommandRequests[cnt].ComponentId != Cannon.ComponentId)
                 continue;
-
             var request = Server.CommandRequests[cnt];
-
             //we need a way to identify what command this is... Components will be able to have more commands
+            //use ids!
+            switch (request.CommandId)
+            {
+                case Cannon.FireCommand.CommandId:
+                    var payload = MessagePackSerializer.Deserialize<Cannon.FireCommand>(request.Payload);
+                    HandleFire(request, payload);
+                    break;
+            }
 
-            HandleFire(request);
         }
     }
 
-    void HandleFire(CommandRequest request)
+    void HandleFire(CommandRequest request, Cannon.FireCommand payload)
     {
         Debug.Log("Got Cannon Fire!");
+
+        Server.SendEvent(request.EntityId, Cannon.ComponentId, new Cannon.FireEvent() { Left = payload.Left });;
         //make empty response object
         Server.SendCommandResponse(request, new Cannon.FireCommand());
     }

@@ -1,6 +1,7 @@
 ﻿using MessagePack;
 using Mmogf;
 using Mmogf.Core;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,20 +9,50 @@ using UnityEngine;
 public class FireVisualizer : BaseEntityBehavior
 {
 
-    bool _left = false;
-
     void OnEnable()
     {
     }
 
     void Update()
     {
-        if(Input.GetKeyDown(KeyCode.Space))
+        HandleFireEvents();
+
+        if(Input.GetKeyDown(KeyCode.A))
         {
-            Server.SendCommand(Entity.EntityId, Cannon.ComponentId, new Cannon.FireCommand() { Left = _left }, response => {
-                Debug.Log("Fired Cannon!");
+            Server.SendCommand(Entity.EntityId, Cannon.ComponentId, new Cannon.FireCommand() { Left = true }, response => {
+                Debug.Log("Fired Cannon Left!");
             });
-            _left = !_left;
         }
+        if (Input.GetKeyDown(KeyCode.D))
+        {
+            Server.SendCommand(Entity.EntityId, Cannon.ComponentId, new Cannon.FireCommand() { Left = false }, response => {
+                Debug.Log("Fired Cannon Right!");
+            });
+        }
+    }
+
+    private void HandleFireEvents()
+    {
+        for (int cnt = 0; cnt < Server.EventRequests.Count; cnt++)
+        {
+            if (Server.EventRequests[cnt].ComponentId != Cannon.ComponentId)
+                continue;
+            var request = Server.EventRequests[cnt];
+            //we need a way to identify what command this is... Components will be able to have more commands
+            //use ids!
+            switch (request.EventId)
+            {
+                case Cannon.FireEvent.EventId:
+                    var payload = MessagePackSerializer.Deserialize<Cannon.FireEvent>(request.Payload);
+                    HandleFireEvent(request, payload);
+                    break;
+            }
+
+        }
+    }
+
+    private void HandleFireEvent(EventRequest request, Cannon.FireEvent payload)
+    {
+        Debug.Log($"Fire cannon event! Left:{payload.Left}");
     }
 }

@@ -29,6 +29,7 @@ namespace MmoGameFramework
             _entities.OnEntityCommand += OnEntityCommand;
             _entities.OnEntityCommandResponse += OnEntityCommandResponse;
             _entities.OnUpdateEntityPartial += OnEntityUpdatePartial;
+            _entities.OnEntityEvent += OnEntityEvent;
         }
 
         public void Start()
@@ -105,11 +106,6 @@ namespace MmoGameFramework
 
                                 switch ((ServerCodes)simpleData.MessageId)
                                 {
-                                    case ServerCodes.GameData:
-                                        var gameData = MessagePackSerializer.Deserialize<GameData>(simpleData.Info);
-                                        Console.WriteLine(
-                                            $"Server Game Data: {BitConverter.ToString(gameData.Info)}");
-                                        break;
                                     case ServerCodes.ChangeInterestArea:
                                         var interestArea = MessagePackSerializer.Deserialize<ChangeInterestArea>(simpleData.Info);
                                         WorkerConnection worker;
@@ -128,12 +124,14 @@ namespace MmoGameFramework
                                                     Info = MessagePackSerializer.Serialize(entityInfo),
                                                 });
                                             }
-
                                         }
 
                                         break;
                                     case ServerCodes.EntityUpdate:
                                         HandleEntityUpdate(im, simpleData);
+                                        break;
+                                    case ServerCodes.EntityEvent:
+                                        HandleEntityEvent(im, simpleData);
                                         break;
                                     case ServerCodes.EntityCommandRequest:
                                         HandleEntityCommand(im, simpleData);
@@ -247,9 +245,9 @@ namespace MmoGameFramework
                 return;
             }
 
-            switch(commandRequest.Command)
+            switch(commandRequest.CommandId)
             {
-                case nameof(World.CreateEntity):
+                case World.CreateEntity.CommandId:
                     var createEntity = MessagePackSerializer.Deserialize<World.CreateEntity>(commandRequest.Payload);
 
                     var entityInfo = _entities.Create(createEntity.EntityType, createEntity.Position, createEntity.Acls, createEntity.Rotation, createEntity.Components);
@@ -265,7 +263,7 @@ namespace MmoGameFramework
                         }),
                     });
                     break;
-                case nameof(World.DeleteEntity):
+                case World.DeleteEntity.CommandId:
                     var deleteEntity = MessagePackSerializer.Deserialize<World.DeleteEntity>(commandRequest.Payload);
 
                     //_entities.Delete(deleteEntity.EntityId);
@@ -335,6 +333,31 @@ namespace MmoGameFramework
 
         }
 
+        void HandleEntityEvent(NetIncomingMessage im, MmoMessage simpleData)
+        {
+            var eventRequest = MessagePackSerializer.Deserialize<EventRequest>(simpleData.Info);
+            var entityInfo = _entities.GetEntity(eventRequest.EntityId);
+
+            if (entityInfo == null)
+                return;
+
+            WorkerConnection worker;
+            if (!_connections.TryGetValue(im.SenderConnection.RemoteUniqueIdentifier, out worker))
+            {
+                //disconnected??
+                return;
+            }
+            var acls = entityInfo.Value.Acls;
+            if (!acls.CanWrite(eventRequest.ComponentId, worker.ConnectionType))
+            {
+                //log
+                return;
+            }
+
+            _entities.SendEvent(eventRequest);
+
+        }
+
         public void Send(NetConnection connection, MmoMessage message)
         {
             NetOutgoingMessage om = s_server.CreateMessage();
@@ -400,6 +423,23 @@ namespace MmoGameFramework
             };
 
             Console.WriteLine("Sending Entity Update");
+            SendArea(entity.Value.Position, message);
+        }
+
+        private void OnEntityEvent(EventRequest eventRequest)
+        {
+            var entity = _entities.GetEntity(eventRequest.EntityId);
+            if (entity == null)
+                return;
+
+            var message = new MmoMessage()
+            {
+                MessageId = ServerCodes.EntityEvent,
+
+                Info = MessagePackSerializer.Serialize(eventRequest),
+            };
+
+            Console.WriteLine("Sending Entity Event");
             SendArea(entity.Value.Position, message);
         }
 

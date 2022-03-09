@@ -19,23 +19,19 @@ namespace MessagePack.Formatters.Mmogf.Core
     using global::System.Buffers;
     using global::MessagePack;
 
-    public sealed class CommandRequestFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Mmogf.Core.CommandRequest>
+    public sealed class EventRequestFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Mmogf.Core.EventRequest>
     {
 
-        public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Mmogf.Core.CommandRequest value, global::MessagePack.MessagePackSerializerOptions options)
+        public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Mmogf.Core.EventRequest value, global::MessagePack.MessagePackSerializerOptions options)
         {
-            global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
-            writer.WriteArrayHeader(7);
-            formatterResolver.GetFormatterWithVerify<string>().Serialize(ref writer, value.RequestId, options);
-            writer.Write(value.RequesterId);
-            formatterResolver.GetFormatterWithVerify<string>().Serialize(ref writer, value.RequestorWorkerType, options);
+            writer.WriteArrayHeader(4);
             writer.Write(value.EntityId);
             writer.Write(value.ComponentId);
-            writer.Write(value.CommandId);
+            writer.Write(value.EventId);
             writer.Write(value.Payload);
         }
 
-        public global::Mmogf.Core.CommandRequest Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
+        public global::Mmogf.Core.EventRequest Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
         {
             if (reader.TryReadNil())
             {
@@ -43,33 +39,23 @@ namespace MessagePack.Formatters.Mmogf.Core
             }
 
             options.Security.DepthStep(ref reader);
-            global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
             var length = reader.ReadArrayHeader();
-            var ____result = new global::Mmogf.Core.CommandRequest();
+            var ____result = new global::Mmogf.Core.EventRequest();
 
             for (int i = 0; i < length; i++)
             {
                 switch (i)
                 {
                     case 0:
-                        ____result.RequestId = formatterResolver.GetFormatterWithVerify<string>().Deserialize(ref reader, options);
-                        break;
-                    case 1:
-                        ____result.RequesterId = reader.ReadInt64();
-                        break;
-                    case 2:
-                        ____result.RequestorWorkerType = formatterResolver.GetFormatterWithVerify<string>().Deserialize(ref reader, options);
-                        break;
-                    case 3:
                         ____result.EntityId = reader.ReadInt32();
                         break;
-                    case 4:
+                    case 1:
                         ____result.ComponentId = reader.ReadInt32();
                         break;
-                    case 5:
-                        ____result.CommandId = reader.ReadInt32();
+                    case 2:
+                        ____result.EventId = reader.ReadInt32();
                         break;
-                    case 6:
+                    case 3:
                         ____result.Payload = reader.ReadBytes()?.ToArray();
                         break;
                     default:

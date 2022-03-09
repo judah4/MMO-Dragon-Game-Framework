@@ -32,7 +32,7 @@ namespace MessagePack.Formatters.Mmogf.Core
             writer.Write(value.RequesterId);
             writer.Write(value.EntityId);
             writer.Write(value.ComponentId);
-            formatterResolver.GetFormatterWithVerify<string>().Serialize(ref writer, value.Command, options);
+            writer.Write(value.CommandId);
             writer.Write(value.Payload);
         }
 
@@ -71,7 +71,7 @@ namespace MessagePack.Formatters.Mmogf.Core
                         ____result.ComponentId = reader.ReadInt32();
                         break;
                     case 6:
-                        ____result.Command = formatterResolver.GetFormatterWithVerify<string>().Deserialize(ref reader, options);
+                        ____result.CommandId = reader.ReadInt32();
                         break;
                     case 7:
                         ____result.Payload = reader.ReadBytes()?.ToArray();

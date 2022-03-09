@@ -20,7 +20,7 @@ namespace Mmogf.Core
         [Key(4)]
         public int ComponentId { get; set; }
         [Key(5)]
-        public string Command { get; set; }
+        public int CommandId { get; set; }
         [Key(6)]
         public byte[] Payload { get; set; }
     }

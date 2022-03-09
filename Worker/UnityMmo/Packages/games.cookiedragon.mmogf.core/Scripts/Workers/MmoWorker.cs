@@ -25,6 +25,7 @@ namespace Mmogf.Core
         public event Action<EntityInfo> OnEntityCreation;
         public event Action<CommandRequest> OnEntityCommand;
         public event Action<EntityUpdate> OnEntityUpdate;
+        public event Action<EventRequest> OnEntityEvent;
         public event Action OnConnect;
 
         public event Action<string> OnLog;
@@ -60,7 +61,6 @@ namespace Mmogf.Core
         public void Update()
         {
             s_client.FlushSendQueue();
-
 
             GotMessage(s_client);
 
@@ -104,7 +104,7 @@ namespace Mmogf.Core
 
                         }
 
-                        string reason = im.ReadString();
+                        //string reason = im.ReadString();
                         //OnLog(status.ToString() + ": " + reason);
 
                         break;
@@ -118,11 +118,6 @@ namespace Mmogf.Core
                                 //OnLog?.Invoke("My Client Id is " + ClientId);
                                 //OnLog?.Invoke("Client connected msg");
                                 //OnConnect?.Invoke();
-                                break;
-                            case ServerCodes.GameData:
-                                var gameData = MessagePackSerializer.Deserialize<GameData>(simpleData.Info);
-                                //OnLog?.Invoke($"Client Game Data: {BitConverter.ToString(gameData.Info)}");
-
                                 break;
                             case ServerCodes.EntityInfo:
                                 var entityInfo = MessagePackSerializer.Deserialize<EntityInfo>(simpleData.Info);
@@ -138,7 +133,11 @@ namespace Mmogf.Core
                                 var entityUpdate = MessagePackSerializer.Deserialize<EntityUpdate>(simpleData.Info);
                                 OnEntityUpdate?.Invoke(entityUpdate);
                                 break;
-                        case ServerCodes.EntityCommandRequest:
+                            case ServerCodes.EntityEvent:
+                                var eventRequest = MessagePackSerializer.Deserialize<EventRequest>(simpleData.Info);
+                                OnEntityEvent?.Invoke(eventRequest);
+                                break;
+                            case ServerCodes.EntityCommandRequest:
                             var commandRequest = MessagePackSerializer.Deserialize<CommandRequest>(simpleData.Info);
                             OnEntityCommand?.Invoke(commandRequest);
                             break;
@@ -232,7 +231,6 @@ namespace Mmogf.Core
         }
         public void SendCommand<T>(int entityId, int componentId, T command, Action<CommandResponse> callback) where T : ICommand
         {
-
             var requestId = Guid.NewGuid().ToString();
 
             //register callback
@@ -247,13 +245,13 @@ namespace Mmogf.Core
                     RequestorWorkerType = WorkerType,
                     EntityId = entityId,
                     ComponentId = componentId,
-                    Command = command.GetType().Name,
+                    CommandId = command.GetCommandId(),
                     Payload = MessagePackSerializer.Serialize(command),
                 }),
             });
         }
 
-        internal void SendCommandResponse<T>(CommandRequest request, T responsePayload) where T : ICommand
+        public void SendCommandResponse<T>(CommandRequest request, T responsePayload) where T : ICommand
         {
             Send(new MmoMessage()
             {
@@ -262,6 +260,21 @@ namespace Mmogf.Core
                 {
                     CommandStatus = CommandStatus.Success,
                     Payload = MessagePackSerializer.Serialize(responsePayload),
+                }),
+            });
+        }
+
+        public void SendEvent<T>(int entityId, int componentId, T eventPayload) where T : IEvent
+        {
+            Send(new MmoMessage()
+            {
+                MessageId = ServerCodes.EntityEvent,
+                Info = MessagePackSerializer.Serialize(new EventRequest()
+                {
+                    EntityId = entityId,
+                    ComponentId = componentId,
+                    EventId = eventPayload.GetEventId(),
+                    Payload = MessagePackSerializer.Serialize(eventPayload),
                 }),
             });
         }

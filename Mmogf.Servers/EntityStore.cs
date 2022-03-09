@@ -16,6 +16,7 @@ namespace MmoGameFramework
         public event Action<CommandRequest> OnEntityCommand;
         public event Action<CommandResponse> OnEntityCommandResponse;
         public event Action<EntityUpdate> OnUpdateEntityPartial;
+        public event Action<EventRequest> OnEntityEvent;
 
         public EntityInfo Create(string entityType, Position position, List<Acl> acls, Rotation? rotation = null, Dictionary<int, byte[]> additionalData = null)
         {
@@ -94,6 +95,11 @@ namespace MmoGameFramework
         public void SendCommandResponse(CommandResponse commandResponse)
         {
             OnEntityCommandResponse?.Invoke(commandResponse);
+        }
+
+        public void SendEvent(EventRequest eventRequest)
+        {
+            OnEntityEvent?.Invoke(eventRequest);
         }
     }
 }

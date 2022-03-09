@@ -10,11 +10,11 @@ namespace Mmogf.Core
         ClientConnect,
         ServerConnect,
         EntityInfo,
-        GameData,
         ChangeInterestArea,
         EntityUpdate,
         EntityCommandRequest,
         EntityCommandResponse,
         Ping,
+        EntityEvent,
     }
 }

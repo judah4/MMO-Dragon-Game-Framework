@@ -13,6 +13,8 @@ namespace Mmogf.Core
         protected MmoWorker Client;
 
         public List<CommandRequest> CommandRequests = new List<CommandRequest>();
+        public List<EventRequest> EventRequests = new List<EventRequest>();
+
 
         public string WorkerType = "Dragon-Worker";
         public string ipAddress = "localhost";
@@ -71,6 +73,7 @@ namespace Mmogf.Core
             Client.OnLog += Debug.Log;
             Client.OnEntityCreation += GameObjectRepresentation.OnEntityCreation;
             Client.OnEntityUpdate += GameObjectRepresentation.OnEntityUpdate;
+            Client.OnEntityEvent += OnEntityEvent;
             Client.OnEntityCommand += OnEntityCommand;
 
             Client.OnConnect += OnConnect;
@@ -89,6 +92,7 @@ namespace Mmogf.Core
         void Update()
         {
             CommandRequests.Clear(); //reset every tick
+            EventRequests.Clear();
 
             Client.Update();
 
@@ -150,6 +154,12 @@ namespace Mmogf.Core
             CommandRequests.Add(request); 
         }
 
+        private void OnEntityEvent(EventRequest eventRequest)
+        {
+            //add to list to be handled
+            EventRequests.Add(eventRequest);
+        }
+
 
         public void SendCommand<T>(int entityId, int componentId, T fireCommand, System.Action<CommandResponse> callback = null) where T : ICommand
         {
@@ -158,6 +168,10 @@ namespace Mmogf.Core
         public void SendCommandResponse<T>(CommandRequest request, T responsePayload) where T : ICommand
         {
             Client.SendCommandResponse(request, responsePayload);
+        }
+        public void SendEvent<T>(int entityId, int componentId, T eventPayload) where T : IEvent
+        {
+            Client.SendEvent(entityId, componentId, eventPayload);
         }
 
     }
