@@ -17,6 +17,7 @@ namespace MmoGameFramework
         public event Action<CommandResponse> OnEntityCommandResponse;
         public event Action<EntityUpdate> OnUpdateEntityPartial;
         public event Action<EventRequest> OnEntityEvent;
+        public event Action<EntityInfo> OnEntityDelete;
 
         public EntityInfo Create(string entityType, Position position, List<Acl> acls, Rotation? rotation = null, Dictionary<int, byte[]> additionalData = null)
         {
@@ -100,6 +101,17 @@ namespace MmoGameFramework
         public void SendEvent(EventRequest eventRequest)
         {
             OnEntityEvent?.Invoke(eventRequest);
+        }
+
+        public void Delete(int entityId)
+        {
+            var entity = GetEntity(entityId);
+            if(entity == null)
+                return;
+
+            _entities.Remove(entityId);
+
+            OnEntityDelete?.Invoke(entity.Value);
         }
     }
 }

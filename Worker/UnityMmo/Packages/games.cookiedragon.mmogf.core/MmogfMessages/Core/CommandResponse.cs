@@ -35,17 +35,21 @@ namespace Mmogf.Core
         [Key(7)]
         public byte[] Payload { get; set; }
 
-        public CommandResponse(CommandRequest request)
+        public static CommandResponse Create(CommandRequest request, CommandStatus commandStatus = CommandStatus.Success, string message = "", byte[] payload = null)
         {
-            RequestId = request.RequestId;
-            CommandStatus = CommandStatus.Success;
-            Message = "";
-            RequesterId = request.RequesterId;
-            EntityId = request.EntityId;
-            ComponentId = request.ComponentId;
-            CommandId = request.CommandId;
-            Payload = null;
+            return new CommandResponse()
+            {
+                RequestId = request.RequestId,
+                CommandStatus = commandStatus,
+                Message = message,
+                RequesterId = request.RequesterId,
+                EntityId = request.EntityId,
+                ComponentId = request.ComponentId,
+                CommandId = request.CommandId,
+                Payload = payload,
+            };
         }
+        
 
     }
 }

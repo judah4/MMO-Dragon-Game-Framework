@@ -62,6 +62,21 @@ namespace Mmogf
                     });
             }
 
+            if (Input.GetKeyDown(KeyCode.Delete))
+            {
+                foreach(var entity in _serverHandler.GameObjectRepresentation.Entities)
+                {
+                    if(((EntityType)entity.Value.Data[EntityType.ComponentId]).Name == "Ship")
+                    {
+                        Debug.Log($"Requesting delete: {entity.Key}");
+                        _serverHandler.SendCommand(0, 0, new World.DeleteEntity(entity.Key), response => {
+                            Debug.Log($"Deleted Entity! {response.CommandStatus} - {response.Message}");
+                        });
+                        break;
+                    }
+                }
+            }
+
         }
 
         Quaternion RandomHeading()

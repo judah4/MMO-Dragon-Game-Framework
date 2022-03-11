@@ -9,7 +9,10 @@ namespace Mmogf.Core
 
     public class CommonHandler : MonoBehaviour
     {
-        protected GameObjectRepresentation GameObjectRepresentation;
+        public GameObjectRepresentation GameObjectRepresentation { get; protected set; }
+
+        [SerializeField]
+        private GameObjectRepresentation _gameObjectRepresentation;
         protected MmoWorker Client;
 
         public List<CommandRequest> CommandRequests = new List<CommandRequest>();
@@ -75,6 +78,7 @@ namespace Mmogf.Core
             Client.OnEntityUpdate += GameObjectRepresentation.OnEntityUpdate;
             Client.OnEntityEvent += OnEntityEvent;
             Client.OnEntityCommand += OnEntityCommand;
+            Client.OnEntityDelete += GameObjectRepresentation.OnEntityDelete;
 
             Client.OnConnect += OnConnect;
 

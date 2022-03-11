@@ -16,5 +16,6 @@ namespace Mmogf.Core
         EntityCommandResponse,
         Ping,
         EntityEvent,
+        EntityDelete,
     }
 }

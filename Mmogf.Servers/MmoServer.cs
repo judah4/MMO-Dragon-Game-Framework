@@ -26,6 +26,8 @@ namespace MmoGameFramework
             s_server = new NetServer(_config);
 
             _entities.OnUpdateEntity += OnEntityUpdate;
+            _entities.OnEntityDelete += OnEntityDelete;
+            _entities.OnEntityEvent += OnEntityEvent;
             _entities.OnEntityCommand += OnEntityCommand;
             _entities.OnEntityCommandResponse += OnEntityCommandResponse;
             _entities.OnUpdateEntityPartial += OnEntityUpdatePartial;
@@ -193,11 +195,7 @@ namespace MmoGameFramework
                 //send failure
                 Send(im.SenderConnection, new MmoMessage() {
                     MessageId = ServerCodes.EntityCommandResponse,
-                    Info = MessagePackSerializer.Serialize(new CommandResponse(commandRequest)
-                    {
-                        CommandStatus = CommandStatus.InvalidRequest,
-                        Message = "No Worker Identified",
-                    }),
+                    Info = MessagePackSerializer.Serialize(CommandResponse.Create(commandRequest, CommandStatus.InvalidRequest, "No Worker Identified", null)),
                 });
             }
 
@@ -220,11 +218,7 @@ namespace MmoGameFramework
                 Send(im.SenderConnection, new MmoMessage()
                 {
                     MessageId = ServerCodes.EntityCommandResponse,
-                    Info = MessagePackSerializer.Serialize(new CommandResponse(commandRequest)
-                    {
-                        CommandStatus = CommandStatus.InvalidRequest,
-                        Message = "No Worker Identified",
-                    }),
+                    Info = MessagePackSerializer.Serialize(CommandResponse.Create(commandRequest, CommandStatus.InvalidRequest, "No Worker Identified", null)),
                 });
                 return;
             }
@@ -236,11 +230,7 @@ namespace MmoGameFramework
                 Send(im.SenderConnection, new MmoMessage()
                 {
                     MessageId = ServerCodes.EntityCommandResponse,
-                    Info = MessagePackSerializer.Serialize(new CommandResponse(commandRequest)
-                    {
-                        CommandStatus = CommandStatus.InvalidRequest,
-                        Message = "No permission to create entities.",
-                    }),
+                    Info = MessagePackSerializer.Serialize(CommandResponse.Create(commandRequest, CommandStatus.InvalidRequest, "No permission to create entities.", null)),
                 });
                 return;
             }
@@ -255,32 +245,20 @@ namespace MmoGameFramework
                     Send(im.SenderConnection, new MmoMessage()
                     {
                         MessageId = ServerCodes.EntityCommandResponse,
-                        Info = MessagePackSerializer.Serialize(new CommandResponse(commandRequest)
-                        {
-                            CommandStatus = CommandStatus.Success,
-                            Message = "",
-                            Payload = MessagePackSerializer.Serialize(entityInfo),
-                        }),
+                        Info = MessagePackSerializer.Serialize(CommandResponse.Create(commandRequest, CommandStatus.Success, "", MessagePackSerializer.Serialize(entityInfo))),
                     });
                     break;
                 case World.DeleteEntity.CommandId:
                     var deleteEntity = MessagePackSerializer.Deserialize<World.DeleteEntity>(commandRequest.Payload);
 
-                    //_entities.Delete(deleteEntity.EntityId);
-                    //_entities.UpdateEntity(entityInfo);
+                    _entities.Delete(deleteEntity.EntityId);
                     Send(im.SenderConnection, new MmoMessage()
                     {
                         MessageId = ServerCodes.EntityCommandResponse,
-                        Info = MessagePackSerializer.Serialize(new CommandResponse(commandRequest)
-                        {
-                            CommandStatus = CommandStatus.Failure,
-                            Message = "Not Implemented",
-                            Payload = null,
-                        }),
+                        Info = MessagePackSerializer.Serialize(CommandResponse.Create(commandRequest, CommandStatus.Success, "", MessagePackSerializer.Serialize(deleteEntity))),
                     });
                     break;
             }
-
         }
 
         private void HandleEntityCommandResponse(NetIncomingMessage im, MmoMessage simpleData)
@@ -332,6 +310,7 @@ namespace MmoGameFramework
             _entities.UpdateEntityPartial(entityUpdate);
 
         }
+
 
         void HandleEntityEvent(NetIncomingMessage im, MmoMessage simpleData)
         {
@@ -405,6 +384,20 @@ namespace MmoGameFramework
             };
 
             Console.WriteLine("Sending Entity Info" );
+            SendArea(entityInfo.Position, message);
+        }
+
+        private void OnEntityDelete(EntityInfo entityInfo)
+        {
+            //find who has checked out
+            var message = new MmoMessage()
+            {
+                MessageId = ServerCodes.EntityDelete,
+
+                Info = MessagePackSerializer.Serialize(entityInfo),
+            };
+
+            Console.WriteLine($"Deleting Entity {entityInfo.EntityId}");
             SendArea(entityInfo.Position, message);
         }
 

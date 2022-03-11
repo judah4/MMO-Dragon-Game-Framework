@@ -26,6 +26,7 @@ namespace Mmogf.Core
         public event Action<CommandRequest> OnEntityCommand;
         public event Action<EntityUpdate> OnEntityUpdate;
         public event Action<EventRequest> OnEntityEvent;
+        public event Action<EntityInfo> OnEntityDelete;
         public event Action OnConnect;
 
         public event Action<string> OnLog;
@@ -132,6 +133,10 @@ namespace Mmogf.Core
                             case ServerCodes.EntityUpdate:
                                 var entityUpdate = MessagePackSerializer.Deserialize<EntityUpdate>(simpleData.Info);
                                 OnEntityUpdate?.Invoke(entityUpdate);
+                                break;
+                            case ServerCodes.EntityDelete:
+                                var entityDelete = MessagePackSerializer.Deserialize<EntityInfo>(simpleData.Info);
+                                OnEntityDelete?.Invoke(entityDelete);
                                 break;
                             case ServerCodes.EntityEvent:
                                 var eventRequest = MessagePackSerializer.Deserialize<EventRequest>(simpleData.Info);
@@ -256,11 +261,7 @@ namespace Mmogf.Core
             Send(new MmoMessage()
             {
                 MessageId = ServerCodes.EntityCommandResponse,
-                Info = MessagePackSerializer.Serialize(new CommandResponse(request)
-                {
-                    CommandStatus = CommandStatus.Success,
-                    Payload = MessagePackSerializer.Serialize(responsePayload),
-                }),
+                Info = MessagePackSerializer.Serialize(CommandResponse.Create(request, CommandStatus.Success, "", MessagePackSerializer.Serialize(responsePayload))),
             });
         }
 

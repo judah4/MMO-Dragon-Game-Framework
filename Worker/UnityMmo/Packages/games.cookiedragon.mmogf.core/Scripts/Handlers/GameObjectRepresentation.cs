@@ -9,6 +9,9 @@ using UnityEngine;
 
 public class GameObjectRepresentation
 {
+
+    public Dictionary<int, EntityGameObject> Entities => _entities;
+
     private Dictionary<int, EntityGameObject> _entities = new Dictionary<int, EntityGameObject>();
 
     private CommonHandler _server;
@@ -78,6 +81,23 @@ public class GameObjectRepresentation
         entityGm.Data.Add(entityUpdate.ComponentId, data);
 
         entityGm.EntityUpdated();
+    }
+
+    public void OnEntityDelete(EntityInfo entity)
+    {
+        EntityGameObject entityGm;
+
+        var entityType = MessagePackSerializer.Deserialize<EntityType>(entity.EntityData[EntityType.ComponentId]);
+        var position = MessagePackSerializer.Deserialize<Position>(entity.EntityData[Position.ComponentId]);
+        var rot = MessagePackSerializer.Deserialize<Rotation>(entity.EntityData[Rotation.ComponentId]);
+        var adjustedPos = _server.PositionToClient(position);
+        var rotation = rot.ToQuaternion();
+
+        if (!_entities.TryGetValue(entity.EntityId, out entityGm))
+            return;
+
+        Object.Destroy(entityGm.gameObject);
+        _entities.Remove(entity.EntityId);
     }
 
     public void UpdateEntity<T>(int entityId, int componentId, T message) where T : IEntityComponent
