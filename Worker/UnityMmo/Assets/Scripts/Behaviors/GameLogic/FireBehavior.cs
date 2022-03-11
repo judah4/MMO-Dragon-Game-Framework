@@ -35,14 +35,6 @@ public class FireBehavior: BaseEntityBehavior
             }
 
         }
-
-        if(Input.GetKeyDown(KeyCode.Delete))
-        {
-            Server.SendCommand(0, 0, new World.DeleteEntity(Entity.EntityId), (response) =>
-            {
-                Debug.Log($"Deleted Entity! {response.CommandStatus} - {response.Message}");
-            });
-        }
     }
 
     void HandleFire(CommandRequest request, Cannon.FireCommand payload)
