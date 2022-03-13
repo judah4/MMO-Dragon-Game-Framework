@@ -20,6 +20,9 @@ namespace Mmogf.Core
         [Key(1)]
         public string WorkerType { get; set; }
 
+        [Key(2)]
+        public long WorkerId { get; set; }
+
     }
 
 }

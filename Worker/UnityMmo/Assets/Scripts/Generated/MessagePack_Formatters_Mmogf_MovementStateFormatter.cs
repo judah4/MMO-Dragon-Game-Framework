@@ -14,24 +14,22 @@
 #pragma warning disable SA1403 // File may only contain a single namespace
 #pragma warning disable SA1649 // File name should match first type name
 
-namespace MessagePack.Formatters.Mmogf.Core
+namespace MessagePack.Formatters.Mmogf
 {
     using global::System.Buffers;
     using global::MessagePack;
 
-    public sealed class AclFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Mmogf.Core.Acl>
+    public sealed class MovementStateFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Mmogf.MovementState>
     {
 
-        public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Mmogf.Core.Acl value, global::MessagePack.MessagePackSerializerOptions options)
+        public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Mmogf.MovementState value, global::MessagePack.MessagePackSerializerOptions options)
         {
-            global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
-            writer.WriteArrayHeader(3);
-            writer.Write(value.ComponentId);
-            formatterResolver.GetFormatterWithVerify<string>().Serialize(ref writer, value.WorkerType, options);
-            writer.Write(value.WorkerId);
+            writer.WriteArrayHeader(2);
+            writer.Write(value.Forward);
+            writer.Write(value.Heading);
         }
 
-        public global::Mmogf.Core.Acl Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
+        public global::Mmogf.MovementState Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
         {
             if (reader.TryReadNil())
             {
@@ -39,22 +37,18 @@ namespace MessagePack.Formatters.Mmogf.Core
             }
 
             options.Security.DepthStep(ref reader);
-            global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
             var length = reader.ReadArrayHeader();
-            var ____result = new global::Mmogf.Core.Acl();
+            var ____result = new global::Mmogf.MovementState();
 
             for (int i = 0; i < length; i++)
             {
                 switch (i)
                 {
                     case 0:
-                        ____result.ComponentId = reader.ReadInt32();
+                        ____result.Forward = reader.ReadSingle();
                         break;
                     case 1:
-                        ____result.WorkerType = formatterResolver.GetFormatterWithVerify<string>().Deserialize(ref reader, options);
-                        break;
-                    case 2:
-                        ____result.WorkerId = reader.ReadInt64();
+                        ____result.Heading = reader.ReadSingle();
                         break;
                     default:
                         reader.Skip();

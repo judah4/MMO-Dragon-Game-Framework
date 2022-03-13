@@ -8,6 +8,7 @@ namespace Mmogf.Core
         Failure,
         Success,
         InvalidRequest,
+        Timeout,
     }
 
     [MessagePackObject]

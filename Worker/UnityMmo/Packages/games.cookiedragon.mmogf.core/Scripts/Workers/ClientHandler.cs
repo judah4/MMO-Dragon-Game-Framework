@@ -7,5 +7,12 @@ namespace Mmogf.Core
 {
     public class ClientHandler : CommonHandler
     {
+        protected override void OnConnect()
+        {
+            SendCommand(1, PlayerCreator.ComponentId, new PlayerCreator.ConnectPlayer() { PlayerId = "Dev", }, response =>
+            {
+                Debug.Log($"Player connect! {response.CommandStatus} - {response.Message}");
+            });
+        }
     }
 }

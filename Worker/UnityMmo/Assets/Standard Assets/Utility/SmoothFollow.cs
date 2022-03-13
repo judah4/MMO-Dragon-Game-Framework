@@ -58,5 +58,10 @@ namespace UnityStandardAssets.Utility
 			// Always look at the target
 			transform.LookAt(target);
 		}
+
+		public void SetTarget(Transform target)
+        {
+			this.target = target;
+        }
 	}
 }

@@ -80,16 +80,23 @@ namespace Mmogf.Core
             Client.OnEntityCommand += OnEntityCommand;
             Client.OnEntityDelete += GameObjectRepresentation.OnEntityDelete;
 
-            Client.OnConnect += OnConnect;
+            Client.OnConnect += OnConnectHandle;
 
             Client.Connect(WorkerType, ipAddress, port);
 
 
         }
 
-        void OnConnect()
+        void OnConnectHandle()
         {
             UpdateInterestArea(transform.position);
+
+            OnConnect();
+        }
+
+        protected virtual void OnConnect()
+        {
+
         }
 
         // Update is called once per frame

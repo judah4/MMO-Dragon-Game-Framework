@@ -11,6 +11,9 @@ namespace Mmogf
         [SerializeField]
         ServerHandler _serverHandler;
 
+        [SerializeField]
+        ClientHandler _localClient;
+
         // Start is called before the first frame update
         void Start()
         {
@@ -29,6 +32,7 @@ namespace Mmogf
                     new Dictionary<int, byte[]>() 
                     {
                         { Cannon.ComponentId, MessagePack.MessagePackSerializer.Serialize(new Cannon()) },
+                        { Health.ComponentId, MessagePack.MessagePackSerializer.Serialize(new Health() { Current = 100, Max = 100, }) },
                     }, 
                     new List<Acl>() 
                     {
@@ -36,6 +40,7 @@ namespace Mmogf
                         new Acl() { ComponentId = Rotation.ComponentId, WorkerType = "Dragon-Worker" },
                         new Acl() { ComponentId = Acls.ComponentId, WorkerType = "Dragon-Worker" },
                         new Acl() { ComponentId = Cannon.ComponentId, WorkerType = "Dragon-Worker" },
+                        new Acl() { ComponentId = Health.ComponentId, WorkerType = "Dragon-Worker" },
                     }), 
                     response => {
                         Debug.Log($"Create Entity! {response.CommandStatus} - {response.Message}");
@@ -55,7 +60,6 @@ namespace Mmogf
                         new Acl() { ComponentId = Position.ComponentId, WorkerType = "Dragon-Worker" },
                         new Acl() { ComponentId = Rotation.ComponentId, WorkerType = "Dragon-Worker" },
                         new Acl() { ComponentId = Acls.ComponentId, WorkerType = "Dragon-Worker" },
-                        new Acl() { ComponentId = Cannon.ComponentId, WorkerType = "Dragon-Worker" },
                     }),
                     response => {
                         Debug.Log($"Create Entity! {response.CommandStatus} - {response.Message}");

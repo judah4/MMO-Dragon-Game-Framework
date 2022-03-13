@@ -5,19 +5,35 @@ using System.Threading;
 using Lidgren.Network;
 using MessagePack;
 using Mmogf.Core.Behaviors;
+using UnityEngine;
 
 namespace Mmogf.Core 
 {
 
     public class MmoWorker
     {
-        public long ClientId { get; private set; }
+        public class CommandHolder
+        {
+            public CommandRequest Request { get; set; }
+            public Action<CommandResponse> Response { get; set; }
+            public float TimeoutTimer { get; set; }
+
+            public CommandHolder(CommandRequest request, Action<CommandResponse> response, float timeoutTimer)
+            {
+                Request = request;
+                Response = response;
+                TimeoutTimer = timeoutTimer;
+            }
+
+        }
+
+        public long ClientId => s_client.UniqueIdentifier;
         public string WorkerType { get; private set; }
         public int Ping { get; private set; }
 
         private NetClient s_client;
         private DateTime _pingRequestAt;
-        private Dictionary<string, Action<CommandResponse>> _commandCallbacks = new Dictionary<string, Action<CommandResponse>>();
+        private Dictionary<string, CommandHolder> _commandCallbacks = new Dictionary<string, CommandHolder>();
 
         public bool Connected => s_client.ConnectionStatus == NetConnectionStatus.Connected;
         public NetConnectionStatus Status => s_client.ConnectionStatus;
@@ -66,6 +82,7 @@ namespace Mmogf.Core
             GotMessage(s_client);
 
             InternalBehaviors();
+            CommandTimeouts();
         }
 
         private void InternalBehaviors()
@@ -74,6 +91,30 @@ namespace Mmogf.Core
             {
                 _internalBehaviors[cnt].Update();
             }
+        }
+
+        private void CommandTimeouts()
+        {
+            Dictionary<string, CommandHolder> updates = new Dictionary<string, CommandHolder>(_commandCallbacks);
+
+            foreach (var commandTimeout in updates)
+            {
+                var holder = commandTimeout.Value;
+                holder.TimeoutTimer -= Time.deltaTime;
+
+                if(holder.TimeoutTimer <= 0)
+                {
+                    var response = CommandResponse.Create(holder.Request, CommandStatus.Timeout, "Request timed out with no response.");
+                    holder.Response?.Invoke(response);
+                    _commandCallbacks.Remove(commandTimeout.Key);
+                }
+            }
+
+            //foreach(var update in updates)
+            //{
+            //    _commandCallbacks[update.Key] = update.Value;
+            //}
+
         }
 
         public void GotMessage(object peer)
@@ -149,7 +190,7 @@ namespace Mmogf.Core
                             case ServerCodes.EntityCommandResponse:
                                 var commandResponse = MessagePackSerializer.Deserialize<CommandResponse>(simpleData.Info);
 
-                                Action<CommandResponse> callback;
+                                CommandHolder callback;
                                 //get from dictionary
                                 if (_commandCallbacks.TryGetValue(commandResponse.RequestId, out callback))
                                 {
@@ -157,7 +198,7 @@ namespace Mmogf.Core
                                     _commandCallbacks.Remove(commandResponse.RequestId);
                                     try
                                     {
-                                        callback?.Invoke(commandResponse);
+                                        callback.Response?.Invoke(commandResponse);
                                     }
                                     catch(Exception e)
                                     {
@@ -238,21 +279,23 @@ namespace Mmogf.Core
         {
             var requestId = Guid.NewGuid().ToString();
 
+            var request = new CommandRequest()
+            {
+                RequestId = requestId,
+                RequestorWorkerType = WorkerType,
+                EntityId = entityId,
+                ComponentId = componentId,
+                CommandId = command.GetCommandId(),
+                Payload = MessagePackSerializer.Serialize(command),
+            };
+
             //register callback
-            _commandCallbacks.Add(requestId, callback);
+            _commandCallbacks.Add(requestId, new CommandHolder(request, callback, 5f));
 
             Send(new MmoMessage()
             {
                 MessageId = ServerCodes.EntityCommandRequest,
-                Info = MessagePackSerializer.Serialize(new CommandRequest()
-                {
-                    RequestId = requestId,
-                    RequestorWorkerType = WorkerType,
-                    EntityId = entityId,
-                    ComponentId = componentId,
-                    CommandId = command.GetCommandId(),
-                    Payload = MessagePackSerializer.Serialize(command),
-                }),
+                Info = MessagePackSerializer.Serialize(request),
             });
         }
 

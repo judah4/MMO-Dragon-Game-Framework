@@ -19,19 +19,17 @@ namespace MessagePack.Formatters.Mmogf.Core
     using global::System.Buffers;
     using global::MessagePack;
 
-    public sealed class AclFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Mmogf.Core.Acl>
+    public sealed class PlayerCreator_ConnectPlayerFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Mmogf.Core.PlayerCreator.ConnectPlayer>
     {
 
-        public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Mmogf.Core.Acl value, global::MessagePack.MessagePackSerializerOptions options)
+        public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Mmogf.Core.PlayerCreator.ConnectPlayer value, global::MessagePack.MessagePackSerializerOptions options)
         {
             global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
-            writer.WriteArrayHeader(3);
-            writer.Write(value.ComponentId);
-            formatterResolver.GetFormatterWithVerify<string>().Serialize(ref writer, value.WorkerType, options);
-            writer.Write(value.WorkerId);
+            writer.WriteArrayHeader(1);
+            formatterResolver.GetFormatterWithVerify<string>().Serialize(ref writer, value.PlayerId, options);
         }
 
-        public global::Mmogf.Core.Acl Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
+        public global::Mmogf.Core.PlayerCreator.ConnectPlayer Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
         {
             if (reader.TryReadNil())
             {
@@ -41,20 +39,14 @@ namespace MessagePack.Formatters.Mmogf.Core
             options.Security.DepthStep(ref reader);
             global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
             var length = reader.ReadArrayHeader();
-            var ____result = new global::Mmogf.Core.Acl();
+            var ____result = new global::Mmogf.Core.PlayerCreator.ConnectPlayer();
 
             for (int i = 0; i < length; i++)
             {
                 switch (i)
                 {
                     case 0:
-                        ____result.ComponentId = reader.ReadInt32();
-                        break;
-                    case 1:
-                        ____result.WorkerType = formatterResolver.GetFormatterWithVerify<string>().Deserialize(ref reader, options);
-                        break;
-                    case 2:
-                        ____result.WorkerId = reader.ReadInt64();
+                        ____result.PlayerId = formatterResolver.GetFormatterWithVerify<string>().Deserialize(ref reader, options);
                         break;
                     default:
                         reader.Skip();

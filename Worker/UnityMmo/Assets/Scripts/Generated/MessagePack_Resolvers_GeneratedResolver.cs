@@ -49,11 +49,14 @@ namespace MessagePack.Resolvers
 
         static GeneratedResolverGetFormatterHelper()
         {
-            lookup = new global::System.Collections.Generic.Dictionary<Type, int>(3)
+            lookup = new global::System.Collections.Generic.Dictionary<Type, int>(6)
             {
                 { typeof(global::Mmogf.Cannon), 0 },
                 { typeof(global::Mmogf.Cannon.FireCommand), 1 },
                 { typeof(global::Mmogf.Cannon.FireEvent), 2 },
+                { typeof(global::Mmogf.ClientAuthCheck), 3 },
+                { typeof(global::Mmogf.Health), 4 },
+                { typeof(global::Mmogf.MovementState), 5 },
             };
         }
 
@@ -70,6 +73,9 @@ namespace MessagePack.Resolvers
                 case 0: return new MessagePack.Formatters.Mmogf.CannonFormatter();
                 case 1: return new MessagePack.Formatters.Mmogf.Cannon_FireCommandFormatter();
                 case 2: return new MessagePack.Formatters.Mmogf.Cannon_FireEventFormatter();
+                case 3: return new MessagePack.Formatters.Mmogf.ClientAuthCheckFormatter();
+                case 4: return new MessagePack.Formatters.Mmogf.HealthFormatter();
+                case 5: return new MessagePack.Formatters.Mmogf.MovementStateFormatter();
                 default: return null;
             }
         }

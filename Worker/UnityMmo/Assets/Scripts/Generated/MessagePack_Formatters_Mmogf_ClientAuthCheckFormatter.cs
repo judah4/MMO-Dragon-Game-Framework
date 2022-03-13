@@ -14,24 +14,21 @@
 #pragma warning disable SA1403 // File may only contain a single namespace
 #pragma warning disable SA1649 // File name should match first type name
 
-namespace MessagePack.Formatters.Mmogf.Core
+namespace MessagePack.Formatters.Mmogf
 {
     using global::System.Buffers;
     using global::MessagePack;
 
-    public sealed class AclFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Mmogf.Core.Acl>
+    public sealed class ClientAuthCheckFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Mmogf.ClientAuthCheck>
     {
 
-        public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Mmogf.Core.Acl value, global::MessagePack.MessagePackSerializerOptions options)
+        public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Mmogf.ClientAuthCheck value, global::MessagePack.MessagePackSerializerOptions options)
         {
-            global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
-            writer.WriteArrayHeader(3);
-            writer.Write(value.ComponentId);
-            formatterResolver.GetFormatterWithVerify<string>().Serialize(ref writer, value.WorkerType, options);
+            writer.WriteArrayHeader(1);
             writer.Write(value.WorkerId);
         }
 
-        public global::Mmogf.Core.Acl Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
+        public global::Mmogf.ClientAuthCheck Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
         {
             if (reader.TryReadNil())
             {
@@ -39,21 +36,14 @@ namespace MessagePack.Formatters.Mmogf.Core
             }
 
             options.Security.DepthStep(ref reader);
-            global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
             var length = reader.ReadArrayHeader();
-            var ____result = new global::Mmogf.Core.Acl();
+            var ____result = new global::Mmogf.ClientAuthCheck();
 
             for (int i = 0; i < length; i++)
             {
                 switch (i)
                 {
                     case 0:
-                        ____result.ComponentId = reader.ReadInt32();
-                        break;
-                    case 1:
-                        ____result.WorkerType = formatterResolver.GetFormatterWithVerify<string>().Deserialize(ref reader, options);
-                        break;
-                    case 2:
                         ____result.WorkerId = reader.ReadInt64();
                         break;
                     default:

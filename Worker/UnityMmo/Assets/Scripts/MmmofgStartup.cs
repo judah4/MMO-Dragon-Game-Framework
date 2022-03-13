@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Mmogf
 {
-    public class MmogfStartup
+    public static class MmogfStartup
     {
         static bool serializerRegistered = false;
 
@@ -25,6 +25,8 @@ namespace Mmogf
 
                 MessagePackSerializer.DefaultOptions = option;
                 serializerRegistered = true;
+
+                PlayerCreatorHandler.CreatePlayer += CreatePlayer;
 
                 LoadEntityComponentTypesList();
             }
@@ -54,6 +56,40 @@ namespace Mmogf
             }
 
             ComponentMappings.Init(types);
+        }
+
+        static World.CreateEntity CreatePlayer(PlayerCreator.ConnectPlayer connect, CommandRequest request)
+        {
+            var clientId = request.RequesterId;
+
+            //pass in player id and load data at some point
+            //connect.PlayerId;
+
+            var createEntity = new World.CreateEntity("Player", new Position() { Y = 0, }, Rotation.Identity,
+                new Dictionary<int, byte[]>()
+                {
+                    { Cannon.ComponentId, MessagePack.MessagePackSerializer.Serialize(new Cannon()) },
+                    { Health.ComponentId, MessagePack.MessagePackSerializer.Serialize(new Health() { Current = 100, Max = 100, }) },
+                    { ClientAuthCheck.ComponentId, MessagePack.MessagePackSerializer.Serialize(new ClientAuthCheck() {  WorkerId = clientId, }) },
+                    { MovementState.ComponentId, MessagePack.MessagePackSerializer.Serialize(new MovementState() {  Forward = 0, Heading = 0, }) },
+                    { PlayerHeartbeatServer.ComponentId, MessagePack.MessagePackSerializer.Serialize(new PlayerHeartbeatServer() { MissedHeartbeats = 0 }) },
+                    { PlayerHeartbeatClient.ComponentId, MessagePack.MessagePackSerializer.Serialize(new PlayerHeartbeatClient() { }) },
+                },
+                new List<Acl>()
+                {
+                    new Acl() { ComponentId = Position.ComponentId, WorkerType = "Dragon-Worker" },
+                    new Acl() { ComponentId = Rotation.ComponentId, WorkerType = "Dragon-Worker" },
+                    new Acl() { ComponentId = Acls.ComponentId, WorkerType = "Dragon-Worker" },
+                    new Acl() { ComponentId = Cannon.ComponentId, WorkerType = "Dragon-Worker" },
+                    new Acl() { ComponentId = Health.ComponentId, WorkerType = "Dragon-Worker" },
+                    new Acl() { ComponentId = ClientAuthCheck.ComponentId, WorkerType = $"Dragon-Client", WorkerId = clientId, },
+                    new Acl() { ComponentId = MovementState.ComponentId, WorkerType = $"Dragon-Client", WorkerId = clientId, },
+                    new Acl() { ComponentId = PlayerHeartbeatServer.ComponentId, WorkerType = "Dragon-Worker" },
+                    new Acl() { ComponentId = PlayerHeartbeatClient.ComponentId, WorkerType = $"Dragon-Client", WorkerId = clientId, },
+
+                });
+
+            return createEntity;
         }
 
     //#if UNITY_EDITOR
