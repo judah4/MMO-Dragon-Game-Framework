@@ -1,4 +1,5 @@
 using MessagePack;
+using Microsoft.Extensions.Logging;
 using Mmogf.Core;
 using System;
 using System.Collections.Generic;
@@ -12,12 +13,19 @@ namespace MmoGameFramework
 
         private Dictionary<int, EntityInfo> _entities = new Dictionary<int, EntityInfo>();
 
+        ILogger _logger;
+
         public event Action<EntityInfo> OnUpdateEntity;
         public event Action<CommandRequest> OnEntityCommand;
         public event Action<CommandResponse> OnEntityCommandResponse;
         public event Action<EntityUpdate> OnUpdateEntityPartial;
         public event Action<EventRequest> OnEntityEvent;
         public event Action<EntityInfo> OnEntityDelete;
+
+        public EntityStore(ILogger<EntityStore> logger)
+        {
+            _logger = logger;
+        }
 
         public EntityInfo Create(string entityType, Position position, List<Acl> acls, Rotation? rotation = null, Dictionary<int, byte[]> additionalData = null)
         {

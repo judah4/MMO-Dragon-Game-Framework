@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Lidgren.Network;
 using MessagePack;
+using Microsoft.Extensions.Logging;
 using Mmogf.Core;
 
 namespace MmoGameFramework
@@ -12,18 +13,20 @@ namespace MmoGameFramework
         private NetServer s_server;
         private EntityStore _entities;
         NetPeerConfiguration _config;
+        ILogger _logger;
         public bool Active => s_server.Status == NetPeerStatus.Running;
         public string WorkerType => _config.AppIdentifier;
 
         public Dictionary<long, WorkerConnection> _connections = new Dictionary<long, WorkerConnection>();
 
-        public MmoServer(EntityStore entities, NetPeerConfiguration config)
+        public MmoServer(EntityStore entities, NetPeerConfiguration config, ILogger<MmoServer> logger)
         {
             _entities = entities;
 
             // set up network
             _config = config;
             s_server = new NetServer(_config);
+            _logger = logger;
 
             _entities.OnUpdateEntity += OnEntityUpdate;
             _entities.OnEntityDelete += OnEntityDelete;
@@ -63,24 +66,33 @@ namespace MmoGameFramework
                         switch (im.MessageType)
                         {
                             case NetIncomingMessageType.DebugMessage:
-                            case NetIncomingMessageType.ErrorMessage:
-                            case NetIncomingMessageType.WarningMessage:
-                            case NetIncomingMessageType.VerboseDebugMessage:
                                 string text = im.ReadString();
-                                Console.WriteLine(text);
+                                _logger.LogDebug(text);
                                 break;
-
+                            case NetIncomingMessageType.ErrorMessage:
+                                string text2 = im.ReadString();
+                                _logger.LogError(text2);
+                                break;
+                            case NetIncomingMessageType.WarningMessage:
+                                string text3 = im.ReadString();
+                                _logger.LogWarning(text3);
+                                break;
+                            case NetIncomingMessageType.VerboseDebugMessage:
+                                string text4 = im.ReadString();
+                                _logger.LogDebug(text4);
+                                break;
                             case NetIncomingMessageType.StatusChanged:
                                 NetConnectionStatus status = (NetConnectionStatus)im.ReadByte();
 
                                 string reason = im.ReadString();
-                                Console.WriteLine(im.SenderConnection.RemoteUniqueIdentifier + " " + status + ": " + reason);
+                                if(_logger.IsEnabled(LogLevel.Debug))
+                                    _logger.LogDebug(im.SenderConnection.RemoteUniqueIdentifier + " " + status + ": " + reason);
 
                                 if (status == NetConnectionStatus.Connected)
                                 {
                                     //todo: do some sort of worker type validation from a config
                                     _connections.Add(im.SenderConnection.RemoteUniqueIdentifier, new WorkerConnection(im.SenderConnection.RemoteHailMessage.ReadString(), im.SenderConnection, new Position()));
-                                    Console.WriteLine("Remote hail: " + im.SenderConnection.RemoteHailMessage.ReadString());
+                                        _logger.LogInformation("Remote hail: " + im.SenderConnection.RemoteHailMessage.ReadString());
                                     var message = new MmoMessage()
                                     {
                                         MessageId = ServerCodes.ClientConnect,
@@ -95,18 +107,19 @@ namespace MmoGameFramework
                                 }
                                 else if(status == NetConnectionStatus.Disconnected)
                                 {
-                                    Console.WriteLine("Server " + im.SenderConnection.RemoteUniqueIdentifier + " Disconnected");
+                                    _logger.LogInformation("Server " + im.SenderConnection.RemoteUniqueIdentifier + " Disconnected");
                                     _connections.Remove(im.SenderConnection.RemoteUniqueIdentifier);
                                 }
 
                                 break;
                             case NetIncomingMessageType.Data:
-
-                                Console.WriteLine(im.SenderConnection.RemoteUniqueIdentifier +" - '" + BitConverter.ToString(im.Data) + "'");
+                                if(_logger.IsEnabled(LogLevel.Debug))
+                                    _logger.LogDebug(im.SenderConnection.RemoteUniqueIdentifier +" - '" + BitConverter.ToString(im.Data) + "'");
                                 var simpleData = MessagePackSerializer.Deserialize<MmoMessage>(im.Data);
-                                Console.WriteLine((ServerCodes)simpleData.MessageId);
+                                if (_logger.IsEnabled(LogLevel.Debug))
+                                    _logger.LogDebug($"Serve Codes {simpleData.MessageId}");
 
-                                switch ((ServerCodes)simpleData.MessageId)
+                                switch (simpleData.MessageId)
                                 {
                                     case ServerCodes.ChangeInterestArea:
                                         var interestArea = MessagePackSerializer.Deserialize<ChangeInterestArea>(simpleData.Info);
@@ -152,23 +165,22 @@ namespace MmoGameFramework
                                         // incoming chat message from a client
                                         //string chat = im.ReadString();
 
-                                        //Console.WriteLine("What is this data? '" + chat + "'");
                                         break;
                                 }
                                 
                                 break;
                             default:
-                                Console.WriteLine("Unhandled type: " + im.MessageType + " " + im.LengthBytes + " bytes " + im.DeliveryMethod + "|" + im.SequenceChannel);
+                                _logger.LogError("Unhandled type: " + im.MessageType + " " + im.LengthBytes + " bytes " + im.DeliveryMethod + "|" + im.SequenceChannel);
                                 break;
                         }
                         s_server.Recycle(im);
                     }
 
-                    Thread.Sleep(1);
+                    Thread.Sleep(0);
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e.ToString());
+                    _logger.LogError(e, e.Message);
                 }
             }
         }
@@ -300,10 +312,10 @@ namespace MmoGameFramework
             entityInfo.Value.EntityData.Remove(entityUpdate.ComponentId);
             entityInfo.Value.EntityData.Add(entityUpdate.ComponentId, entityUpdate.Info);
 
-            if (entityUpdate.ComponentId == Position.ComponentId)
+            if (_logger.IsEnabled(LogLevel.Debug) && entityUpdate.ComponentId == Position.ComponentId)
             {
                 var position = MessagePackSerializer.Deserialize<Position>(entityUpdate.Info);
-                Console.WriteLine($"Entiy: {entityInfo.Value.EntityId} position to {position.ToString()}");
+                _logger.LogDebug($"Entiy: {entityInfo.Value.EntityId} position to {position.ToString()}");
             }
 
 
@@ -382,8 +394,8 @@ namespace MmoGameFramework
 
                 Info = MessagePackSerializer.Serialize(entityInfo),
             };
-
-            Console.WriteLine("Sending Entity Info" );
+            if(_logger.IsEnabled(LogLevel.Debug))
+                _logger.LogDebug("Sending Entity Info" );
             SendArea(entityInfo.Position, message);
         }
 
@@ -397,7 +409,7 @@ namespace MmoGameFramework
                 Info = MessagePackSerializer.Serialize(entityInfo),
             };
 
-            Console.WriteLine($"Deleting Entity {entityInfo.EntityId}");
+            _logger.LogInformation($"Deleting Entity {entityInfo.EntityId}");
             SendArea(entityInfo.Position, message);
         }
 
@@ -414,8 +426,8 @@ namespace MmoGameFramework
 
                 Info = MessagePackSerializer.Serialize(entityUpdate),
             };
-
-            Console.WriteLine("Sending Entity Update");
+            if (_logger.IsEnabled(LogLevel.Debug))
+                _logger.LogDebug("Sending Entity Update");
             SendArea(entity.Value.Position, message);
         }
 
@@ -432,7 +444,8 @@ namespace MmoGameFramework
                 Info = MessagePackSerializer.Serialize(eventRequest),
             };
 
-            Console.WriteLine("Sending Entity Event");
+            if (_logger.IsEnabled(LogLevel.Debug))
+                _logger.LogDebug("Sending Entity Event");
             SendArea(entity.Value.Position, message);
         }
 
@@ -465,7 +478,8 @@ namespace MmoGameFramework
                 Info = MessagePackSerializer.Serialize(commandRequest),
             };
 
-            Console.WriteLine("Sending Command Request");
+            if (_logger.IsEnabled(LogLevel.Debug))
+                _logger.LogDebug($"Sending Command Request {commandRequest.ComponentId} {commandRequest.RequestId}");
             SendToAuthority(message);
         }
 
@@ -494,8 +508,8 @@ namespace MmoGameFramework
 
                 Info = MessagePackSerializer.Serialize(commandResponse),
             };
-
-            Console.WriteLine("Sending Command Response");
+            if (_logger.IsEnabled(LogLevel.Debug))
+                _logger.LogDebug($"Sending Command Response {commandResponse.ComponentId} {commandResponse.RequestId}");
             Send(worker.Connection, message);
         }
 

@@ -11,9 +11,6 @@ namespace Mmogf
         [SerializeField]
         ServerHandler _serverHandler;
 
-        [SerializeField]
-        ClientHandler _localClient;
-
         // Start is called before the first frame update
         void Start()
         {

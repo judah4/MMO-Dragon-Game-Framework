@@ -10,6 +10,13 @@ using UnityEngine;
 namespace Mmogf.Core 
 {
 
+    public enum LogLevel
+    {
+        Debug,
+        Warning,
+        Error,
+    }
+
     public class MmoWorker
     {
         public class CommandHolder
@@ -45,7 +52,7 @@ namespace Mmogf.Core
         public event Action<EntityInfo> OnEntityDelete;
         public event Action OnConnect;
 
-        public event Action<string> OnLog;
+        public event Action<LogLevel, string> OnLog;
 
         List<IInternalBehavior> _internalBehaviors;
 
@@ -126,18 +133,24 @@ namespace Mmogf.Core
                 switch (im.MessageType)
                 {
                     case NetIncomingMessageType.DebugMessage:
+                        OnLog?.Invoke(LogLevel.Debug, im.ReadString());
+                        break;
                     case NetIncomingMessageType.ErrorMessage:
+                        OnLog?.Invoke(LogLevel.Error, im.ReadString());
+                        break;
                     case NetIncomingMessageType.WarningMessage:
+                        OnLog?.Invoke(LogLevel.Warning, im.ReadString());
+                        break;
                     case NetIncomingMessageType.VerboseDebugMessage:
                         string text = im.ReadString();
-                        OnLog?.Invoke(text);
+                        OnLog?.Invoke(LogLevel.Debug, text);
                         break;
                     case NetIncomingMessageType.StatusChanged:
                         NetConnectionStatus status = (NetConnectionStatus)im.ReadByte();
 
                         if (status == NetConnectionStatus.Connected)
                         {
-                            OnLog?.Invoke("Client connected");
+                            OnLog?.Invoke(LogLevel.Debug, "Client connected");
                             //if self
                             OnConnect?.Invoke();
                         }
@@ -202,7 +215,7 @@ namespace Mmogf.Core
                                     }
                                     catch(Exception e)
                                     {
-                                        OnLog?.Invoke(e.ToString());
+                                        OnLog?.Invoke(LogLevel.Error, e.ToString());
                                     }
                                 }
                                 break;
@@ -214,7 +227,7 @@ namespace Mmogf.Core
                         }
                         break;
                     default:
-                        OnLog?.Invoke("Unhandled type: " + im.MessageType + " " + im.LengthBytes + " bytes");
+                        OnLog?.Invoke(LogLevel.Error, "Unhandled type: " + im.MessageType + " " + im.LengthBytes + " bytes");
                         break;
                 }
                 s_client.Recycle(im);
@@ -273,7 +286,7 @@ namespace Mmogf.Core
         {
             var timespan = DateTime.UtcNow - _pingRequestAt;
             Ping = (int)timespan.TotalMilliseconds;
-            OnLog?.Invoke($"Ping: {Ping} - {WorkerType}");
+            OnLog?.Invoke(LogLevel.Debug, $"Ping: {Ping} - {WorkerType}");
         }
         public void SendCommand<T>(int entityId, int componentId, T command, Action<CommandResponse> callback) where T : ICommand
         {

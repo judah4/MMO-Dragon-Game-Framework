@@ -73,7 +73,21 @@ namespace Mmogf.Core
             var config = new NetPeerConfiguration(WorkerType);
 
             Client = new MmoWorker(config);
-            Client.OnLog += Debug.Log;
+            Client.OnLog += (logLevel, message) => {
+                switch(logLevel)
+                {
+                    case LogLevel.Debug:
+                    default:
+                        Debug.Log(message);
+                        break;
+                    case LogLevel.Warning:
+                        Debug.LogWarning(message);
+                        break;
+                    case LogLevel.Error:
+                        Debug.LogError(message);
+                        break;
+                }
+            };
             Client.OnEntityCreation += GameObjectRepresentation.OnEntityCreation;
             Client.OnEntityUpdate += GameObjectRepresentation.OnEntityUpdate;
             Client.OnEntityEvent += OnEntityEvent;

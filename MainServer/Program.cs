@@ -1,8 +1,12 @@
 ﻿using Lidgren.Network;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Mmogf.Core;
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace MmoGameFramework
 {
@@ -12,31 +16,24 @@ namespace MmoGameFramework
         private static MmoServer workerServer;
         private static EntityStore _entityStore;
 
-        private static Random random;
-
-        static void Main(string[] args)
+        static Task Main(string[] args)
         {
-            random = new Random(Environment.TickCount);
+            IHost host = Host.CreateDefaultBuilder(args)
+                .ConfigureLogging(builder =>
+                {
+                    builder.AddSimpleConsole(options =>
+                    {
+                        options.IncludeScopes = true;
+                        options.SingleLine = true;
+                        options.TimestampFormat = "hh:mm:ss ";
+                    });
+                })
+                .Build();
 
-            if(random.Next(2) == 1)
-            {
-                Console.WriteLine(@"
-                                   __ 
-                                  / _|
-  _ __ ___  _ __ ___   ___   __ _| |_ 
- | '_ ` _ \| '_ ` _ \ / _ \ / _` |  _|
- | | | | | | | | | | | (_) | (_| | |  
- |_| |_| |_|_| |_| |_|\___/ \__, |_|  
-                             __/ |    
-                            |___/     
-");
-            }
-            else
-            {
+            var logger = host.Services.GetRequiredService<ILogger<Program>>();
+
                 Console.WriteLine(
                     @"
-
-
      _                             _____ ______ 
     | |                           |  __ \|  ___|
   __| |_ __ __ _  __ _  ___  _ __ | |  \/| |_   
@@ -45,16 +42,13 @@ namespace MmoGameFramework
  \__,_|_|  \__,_|\__, |\___/|_| |_|\____/\_|    
                   __/ |                         
                  |___/                          
-
-
 ");
-            }
-            
 
-            Console.WriteLine("Attaching Entity Storage.");
-            _entityStore = new EntityStore();
 
-            Console.WriteLine("Creating PlayerCreator.");
+            logger.LogInformation("Attaching Entity Storage.");
+            _entityStore = new EntityStore(host.Services.GetRequiredService<ILogger<EntityStore>>());
+
+            logger.LogInformation("Creating PlayerCreator.");
 
             _entityStore.Create("PlayerCreator", new Position() { X = 0, Z = 0 }, new List<Acl>()
             {
@@ -67,7 +61,7 @@ namespace MmoGameFramework
                 { PlayerCreator.ComponentId, MessagePack.MessagePackSerializer.Serialize(new PlayerCreator() { }) },
             });
 
-            Console.WriteLine("Creating Test Cube.");
+            logger.LogDebug("Creating Test Cube.");
             //create starter objects
             _entityStore.Create("Cube", new Position() {X = 3, Z = 3}, new List<Acl>()
             {
@@ -76,25 +70,25 @@ namespace MmoGameFramework
                 new Acl() { ComponentId = Acls.ComponentId, WorkerType = "Dragon-Worker" },
             });
 
-            Console.WriteLine("Starting Dragon-Client connections. Port 1337");
+            logger.LogInformation("Starting Dragon-Client connections. Port 1337");
             // create and start the server
             server = new MmoServer(_entityStore, new NetPeerConfiguration("Dragon-Client")
             {
                 MaximumConnections = 100,
                 Port = 1337,
-            });
+            }, host.Services.GetRequiredService<ILogger<MmoServer>>());
             server.Start();
-            Console.WriteLine("Starting Dragon-Worker connections. Port 1338.");
+            logger.LogInformation("Starting Dragon-Worker connections. Port 1338.");
             workerServer = new MmoServer(_entityStore, new NetPeerConfiguration("Dragon-Worker")
             {
                 MaximumConnections = 100,
                 Port = 1338,
-            });
+            }, host.Services.GetRequiredService<ILogger<MmoServer>>());
             workerServer.Start();
 
-            Console.WriteLine("Dragongf/Mmogf is ready.");
+            logger.LogInformation("Dragongf/Mmogf is ready.");
             bool loop = true;
-            Console.WriteLine("ESC to close.");
+            logger.LogInformation("ESC to close.");
 
             while (loop)
             {
@@ -109,15 +103,17 @@ namespace MmoGameFramework
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e);
+                    logger.LogError(e, e.Message);
                 }
                
             }
 
             server.Stop();
             workerServer.Stop();
-        }
 
+            return host.RunAsync();
+
+        }
 
     }
 }
