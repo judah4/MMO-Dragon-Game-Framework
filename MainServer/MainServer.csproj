@@ -6,6 +6,11 @@
     <RootNamespace>MmoGameFramework</RootNamespace>
     <AssemblyName>MmogfMainServer</AssemblyName>
     <Version>0.0.5</Version>
+	  
+	  <DebugType>embedded</DebugType>
+	  <PublishSingleFile>true</PublishSingleFile>
+	  <SelfContained>false</SelfContained>
+	  <RuntimeIdentifier>win-x64</RuntimeIdentifier>
   </PropertyGroup>
 
   <ItemGroup>
