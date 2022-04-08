@@ -303,7 +303,7 @@ namespace Mmogf.Core
             };
 
             //register callback
-            _commandCallbacks.Add(requestId, new CommandHolder(request, callback, 5f));
+            _commandCallbacks.Add(requestId, new CommandHolder(request, callback, 10f));
 
             Send(new MmoMessage()
             {

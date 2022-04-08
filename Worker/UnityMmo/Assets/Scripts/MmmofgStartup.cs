@@ -49,7 +49,7 @@ namespace Mmogf
                     if(type.IsAssignableFrom(t) && t.IsInterface == false)
                     {
                         var component = (IEntityComponent)System.Activator.CreateInstance(t);
-                        Debug.Log($"{component.GetComponentId()}, {t.Name}");
+                        //Debug.Log($"{component.GetComponentId()}, {t.Name}");
                         types.Add(component.GetComponentId(), t);
                     }
                 }
@@ -64,6 +64,8 @@ namespace Mmogf
 
             //pass in player id and load data at some point
             //connect.PlayerId;
+
+            Debug.Log($"Creating Player {clientId}");
 
             var createEntity = new World.CreateEntity("Player", new Position() { Y = 0, }, Rotation.Identity,
                 new Dictionary<int, byte[]>()
