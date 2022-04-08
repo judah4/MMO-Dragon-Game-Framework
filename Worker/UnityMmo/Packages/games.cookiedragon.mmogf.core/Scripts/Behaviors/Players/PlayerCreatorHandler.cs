@@ -13,9 +13,11 @@ namespace Mmogf.Core
         {
             for (int cnt = 0; cnt < Server.CommandRequests.Count; cnt++)
             {
+                var request = Server.CommandRequests[cnt];
+
+                Debug.Log($"{request.CommandId} {request.ComponentId}");
                 if (Server.CommandRequests[cnt].ComponentId != PlayerCreator.ComponentId)
                     continue;
-                var request = Server.CommandRequests[cnt];
                 //we need a way to identify what command this is... Components will be able to have more commands
                 //use ids!
                 switch (request.CommandId)

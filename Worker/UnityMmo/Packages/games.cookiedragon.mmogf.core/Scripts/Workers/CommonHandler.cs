@@ -14,6 +14,7 @@ namespace Mmogf.Core
         [SerializeField]
         private GameObjectRepresentation _gameObjectRepresentation;
         protected MmoWorker Client;
+        protected float ConnectDelay = 0;
 
         public List<CommandRequest> CommandRequests = new List<CommandRequest>();
         public List<EventRequest> EventRequests = new List<EventRequest>();
@@ -41,9 +42,22 @@ namespace Mmogf.Core
         {
         }
 
+        protected virtual void Init()
+        {
+
+        }
+
         // Start is called before the first frame update
         void Start()
         {
+            Init();
+            StartCoroutine(ConnectGame());
+        }
+
+        IEnumerator ConnectGame()
+        {      
+            yield return new WaitForSeconds(ConnectDelay);
+
             if (Application.isEditor == false)
             {
                 var newIp = GetArg("hostIp");
@@ -116,6 +130,9 @@ namespace Mmogf.Core
         // Update is called once per frame
         void Update()
         {
+            if(Client == null)
+                return;
+
             CommandRequests.Clear(); //reset every tick
             EventRequests.Clear();
 
@@ -126,6 +143,8 @@ namespace Mmogf.Core
 
         void OnApplicationQuit()
         {
+            if (Client == null)
+                return;
             Client.Stop();
         }
 
