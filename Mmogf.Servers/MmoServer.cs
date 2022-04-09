@@ -142,7 +142,7 @@ namespace MmoGameFramework
                                                 {
                                                     MessageId = ServerCodes.EntityInfo,
                                                     Info = MessagePackSerializer.Serialize(entityInfo),
-                                                });
+                                                }, NetDeliveryMethod.ReliableSequenced);
                                             }
                                         }
 
@@ -263,7 +263,7 @@ namespace MmoGameFramework
                     {
                         MessageId = ServerCodes.EntityCommandResponse,
                         Info = MessagePackSerializer.Serialize(CommandResponse.Create(commandRequest, CommandStatus.Success, "", MessagePackSerializer.Serialize(entityInfo))),
-                    });
+                    }, NetDeliveryMethod.ReliableSequenced);
                     break;
                 case World.DeleteEntity.CommandId:
                     var deleteEntity = MessagePackSerializer.Deserialize<World.DeleteEntity>(commandRequest.Payload);
@@ -273,7 +273,7 @@ namespace MmoGameFramework
                     {
                         MessageId = ServerCodes.EntityCommandResponse,
                         Info = MessagePackSerializer.Serialize(CommandResponse.Create(commandRequest, CommandStatus.Success, "", MessagePackSerializer.Serialize(deleteEntity))),
-                    });
+                    }, NetDeliveryMethod.ReliableSequenced);
                     break;
             }
         }
@@ -354,14 +354,14 @@ namespace MmoGameFramework
 
         }
 
-        public void Send(NetConnection connection, MmoMessage message)
+        public void Send(NetConnection connection, MmoMessage message, NetDeliveryMethod deliveryMethod = NetDeliveryMethod.UnreliableSequenced)
         {
             NetOutgoingMessage om = s_server.CreateMessage();
             om.Write(MessagePackSerializer.Serialize(message));
-            s_server.SendMessage(om, connection, NetDeliveryMethod.UnreliableSequenced);
+            s_server.SendMessage(om, connection, deliveryMethod);
         }
 
-        public void SendArea(Position position, MmoMessage message)
+        public void SendArea(Position position, MmoMessage message, NetDeliveryMethod deliveryMethod = NetDeliveryMethod.UnreliableSequenced)
         {
             var connections = new List<NetConnection>();
             foreach (var workerConnection in _connections)
@@ -379,7 +379,7 @@ namespace MmoGameFramework
 
             NetOutgoingMessage om = s_server.CreateMessage();
             om.Write(MessagePackSerializer.Serialize(message));
-            s_server.SendMessage(om, connections, NetDeliveryMethod.UnreliableSequenced, 0);
+            s_server.SendMessage(om, connections, deliveryMethod, 0);
         }
 
         public void SendToAuthority(MmoMessage message)
@@ -401,7 +401,7 @@ namespace MmoGameFramework
             };
             if(_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug("Sending Entity Info" );
-            SendArea(entityInfo.Position, message);
+            SendArea(entityInfo.Position, message, NetDeliveryMethod.ReliableSequenced);
         }
 
         private void OnEntityDelete(EntityInfo entityInfo)
@@ -451,7 +451,7 @@ namespace MmoGameFramework
 
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug("Sending Entity Event");
-            SendArea(entity.Value.Position, message);
+            SendArea(entity.Value.Position, message, NetDeliveryMethod.ReliableSequenced);
         }
 
         private void OnEntityCommand(CommandRequest commandRequest)
@@ -515,7 +515,7 @@ namespace MmoGameFramework
             };
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"Sending Command Response {commandResponse.ComponentId} {commandResponse.RequestId}");
-            Send(worker.Connection, message);
+            Send(worker.Connection, message, NetDeliveryMethod.ReliableSequenced);
         }
 
     }
