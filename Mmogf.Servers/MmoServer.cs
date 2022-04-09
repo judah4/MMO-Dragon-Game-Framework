@@ -131,8 +131,13 @@ namespace MmoGameFramework
                                             var entities = _entities.GetInArea(worker.InterestPosition,
                                                 worker.InterestRange);
 
+
                                             foreach (var entityInfo in entities)
                                             {
+                                                worker.EntitiesInRange.Add(entityInfo.EntityId);
+
+                                                //send of entities checkout change
+
                                                 Send(im.SenderConnection, new MmoMessage()
                                                 {
                                                     MessageId = ServerCodes.EntityInfo,
