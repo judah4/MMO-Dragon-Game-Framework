@@ -144,7 +144,7 @@ namespace MmoGameFramework
                                                 {
                                                     MessageId = ServerCodes.EntityInfo,
                                                     Info = MessagePackSerializer.Serialize(entityInfo),
-                                                }, NetDeliveryMethod.ReliableSequenced);
+                                                }, NetDeliveryMethod.ReliableOrdered);
                                             }
 
                                             Send(im.SenderConnection, new MmoMessage()
@@ -155,7 +155,7 @@ namespace MmoGameFramework
                                                     Checkouts = newEntityIds,
                                                     Remove = false,
                                                 }),
-                                            }, NetDeliveryMethod.ReliableSequenced);
+                                            }, NetDeliveryMethod.ReliableOrdered);
                                         }
 
                                         break;
@@ -275,7 +275,7 @@ namespace MmoGameFramework
                     {
                         MessageId = ServerCodes.EntityCommandResponse,
                         Info = MessagePackSerializer.Serialize(CommandResponse.Create(commandRequest, CommandStatus.Success, "", MessagePackSerializer.Serialize(entityInfo))),
-                    }, NetDeliveryMethod.ReliableSequenced);
+                    }, NetDeliveryMethod.ReliableOrdered);
                     break;
                 case World.DeleteEntity.CommandId:
                     var deleteEntity = MessagePackSerializer.Deserialize<World.DeleteEntity>(commandRequest.Payload);
@@ -285,7 +285,7 @@ namespace MmoGameFramework
                     {
                         MessageId = ServerCodes.EntityCommandResponse,
                         Info = MessagePackSerializer.Serialize(CommandResponse.Create(commandRequest, CommandStatus.Success, "", MessagePackSerializer.Serialize(deleteEntity))),
-                    }, NetDeliveryMethod.ReliableSequenced);
+                    }, NetDeliveryMethod.ReliableOrdered);
                     break;
             }
         }
@@ -326,8 +326,7 @@ namespace MmoGameFramework
                 return;
             }
 
-            entityInfo.Value.EntityData.Remove(entityUpdate.ComponentId);
-            entityInfo.Value.EntityData.Add(entityUpdate.ComponentId, entityUpdate.Info);
+            entityInfo.Value.EntityData[entityUpdate.ComponentId] = entityUpdate.Info;
 
             if (_logger.IsEnabled(LogLevel.Debug) && entityUpdate.ComponentId == Position.ComponentId)
             {
@@ -440,7 +439,8 @@ namespace MmoGameFramework
             };
             if(_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug("Sending Entity Info" );
-            SendArea(entityInfo.Position, message, NetDeliveryMethod.ReliableSequenced);
+            //SendCheckedout(entityInfo.EntityId, message, NetDeliveryMethod.ReliableOrdered);
+            SendArea(entityInfo.Position, message, NetDeliveryMethod.ReliableOrdered);
         }
 
         private void OnEntityDelete(EntityInfo entityInfo)
@@ -454,6 +454,7 @@ namespace MmoGameFramework
             };
 
             _logger.LogInformation($"Deleting Entity {entityInfo.EntityId}");
+            //SendCheckedout(entityInfo.EntityId, message, NetDeliveryMethod.ReliableOrdered);
             SendArea(entityInfo.Position, message);
         }
 
@@ -490,7 +491,7 @@ namespace MmoGameFramework
 
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug("Sending Entity Event");
-            SendArea(entity.Value.Position, message, NetDeliveryMethod.ReliableSequenced);
+            SendArea(entity.Value.Position, message, NetDeliveryMethod.ReliableOrdered);
         }
 
         private void OnEntityCommand(CommandRequest commandRequest)
@@ -557,7 +558,7 @@ namespace MmoGameFramework
             };
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"Sending Command Response {commandResponse.ComponentId} {commandResponse.RequestId}");
-            Send(worker.Connection, message, NetDeliveryMethod.ReliableSequenced);
+            Send(worker.Connection, message, NetDeliveryMethod.ReliableOrdered);
         }
 
     }
