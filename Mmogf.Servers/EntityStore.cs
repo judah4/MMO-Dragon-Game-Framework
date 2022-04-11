@@ -45,7 +45,6 @@ namespace MmoGameFramework
                     { Position.ComponentId, MessagePackSerializer.Serialize(position) },
                     { Rotation.ComponentId, MessagePackSerializer.Serialize(rotation) },
                     { Acls.ComponentId, MessagePackSerializer.Serialize(new Acls() { AclList = acls }) },
-                    { EntityCheckout.ComponentId, MessagePackSerializer.Serialize(new EntityCheckout() { Checkouts = new List<long>(), }) },
                 }
             };
 

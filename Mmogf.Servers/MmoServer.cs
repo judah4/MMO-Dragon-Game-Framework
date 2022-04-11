@@ -131,9 +131,11 @@ namespace MmoGameFramework
                                             var entities = _entities.GetInArea(worker.InterestPosition,
                                                 worker.InterestRange);
 
+                                            var newEntityIds = new List<int>();
 
                                             foreach (var entityInfo in entities)
                                             {
+                                                newEntityIds.Add(entityInfo.EntityId);
                                                 worker.EntitiesInRange.Add(entityInfo.EntityId);
 
                                                 //send of entities checkout change
@@ -144,6 +146,16 @@ namespace MmoGameFramework
                                                     Info = MessagePackSerializer.Serialize(entityInfo),
                                                 }, NetDeliveryMethod.ReliableSequenced);
                                             }
+
+                                            Send(im.SenderConnection, new MmoMessage()
+                                            {
+                                                MessageId = ServerCodes.EntityCheckout,
+                                                Info = MessagePackSerializer.Serialize(new EntityCheckout()
+                                                {
+                                                    Checkouts = newEntityIds,
+                                                    Remove = false,
+                                                }),
+                                            }, NetDeliveryMethod.ReliableSequenced);
                                         }
 
                                         break;
@@ -361,6 +373,26 @@ namespace MmoGameFramework
             s_server.SendMessage(om, connection, deliveryMethod);
         }
 
+        public void SendCheckedout(int entityId, MmoMessage message, NetDeliveryMethod deliveryMethod = NetDeliveryMethod.UnreliableSequenced)
+        {
+            var connections = new List<NetConnection>();
+            foreach (var workerConnection in _connections)
+            {
+                if(!workerConnection.Value.EntitiesInRange.Contains(entityId))
+                    continue;
+
+                connections.Add(workerConnection.Value.Connection);
+           
+            }
+
+            if (connections.Count < 1)
+                return;
+
+            NetOutgoingMessage om = s_server.CreateMessage();
+            om.Write(MessagePackSerializer.Serialize(message));
+            s_server.SendMessage(om, connections, deliveryMethod, 0);
+        }
+
         public void SendArea(Position position, MmoMessage message, NetDeliveryMethod deliveryMethod = NetDeliveryMethod.UnreliableSequenced)
         {
             var connections = new List<NetConnection>();
@@ -382,13 +414,20 @@ namespace MmoGameFramework
             s_server.SendMessage(om, connections, deliveryMethod, 0);
         }
 
-        public void SendToAuthority(MmoMessage message)
+        public void SendToAuthority(MmoMessage message, long workerId)
         {
             //send to all for now
 
             NetOutgoingMessage om = s_server.CreateMessage();
             om.Write(MessagePackSerializer.Serialize(message));
-            s_server.SendToAll(om, NetDeliveryMethod.ReliableOrdered);
+            if(workerId > 0 && _connections.TryGetValue(workerId, out var connection))
+            {
+                s_server.SendMessage(om, connection.Connection, NetDeliveryMethod.ReliableOrdered);
+            }
+            else
+            {
+                s_server.SendToAll(om, NetDeliveryMethod.ReliableOrdered);
+            }
         }
 
         private void OnEntityUpdate(EntityInfo entityInfo)
@@ -464,6 +503,7 @@ namespace MmoGameFramework
             //todo: get ACL and find who has authority over the command
             var acls = entity.Value.Acls;
             Acl? entityAcl = null;
+            long workerId = 0;
             foreach(var acl in acls.AclList)
             {
                 if(acl.ComponentId != commandRequest.ComponentId)
@@ -476,6 +516,8 @@ namespace MmoGameFramework
             if(entityAcl.Value.WorkerType != WorkerType)
                 return;
 
+            workerId = entityAcl.Value.WorkerId;
+
             var message = new MmoMessage()
             {
                 MessageId = ServerCodes.EntityCommandRequest,
@@ -485,7 +527,7 @@ namespace MmoGameFramework
 
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"Sending Command Request {commandRequest.ComponentId} {commandRequest.RequestId}");
-            SendToAuthority(message);
+            SendToAuthority(message, workerId);
         }
 
         private void OnEntityCommandResponse(CommandResponse commandResponse)
