@@ -85,19 +85,25 @@ public class GameObjectRepresentation
 
     public void OnEntityDelete(EntityInfo entity)
     {
+
+        //var entityType = MessagePackSerializer.Deserialize<EntityType>(entity.EntityData[EntityType.ComponentId]);
+        //var position = MessagePackSerializer.Deserialize<Position>(entity.EntityData[Position.ComponentId]);
+        //var rot = MessagePackSerializer.Deserialize<Rotation>(entity.EntityData[Rotation.ComponentId]);
+        //var adjustedPos = _server.PositionToClient(position);
+        //var rotation = rot.ToQuaternion();
+
+        DeleteEntity(entity.EntityId);
+    }
+
+    public void DeleteEntity(int entityId)
+    {
         EntityGameObject entityGm;
 
-        var entityType = MessagePackSerializer.Deserialize<EntityType>(entity.EntityData[EntityType.ComponentId]);
-        var position = MessagePackSerializer.Deserialize<Position>(entity.EntityData[Position.ComponentId]);
-        var rot = MessagePackSerializer.Deserialize<Rotation>(entity.EntityData[Rotation.ComponentId]);
-        var adjustedPos = _server.PositionToClient(position);
-        var rotation = rot.ToQuaternion();
-
-        if (!_entities.TryGetValue(entity.EntityId, out entityGm))
+        if (!_entities.TryGetValue(entityId, out entityGm))
             return;
 
         Object.Destroy(entityGm.gameObject);
-        _entities.Remove(entity.EntityId);
+        _entities.Remove(entityId);
     }
 
     public void UpdateEntity<T>(int entityId, int componentId, T message) where T : IEntityComponent
