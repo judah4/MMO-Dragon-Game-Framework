@@ -46,6 +46,7 @@ namespace Mmogf.Core
         public NetConnectionStatus Status => s_client.ConnectionStatus;
 
         public event Action<EntityInfo> OnEntityCreation;
+        public event Action<EntityCheckout> OnEntityCheckout;
         public event Action<CommandRequest> OnEntityCommand;
         public event Action<EntityUpdate> OnEntityUpdate;
         public event Action<EventRequest> OnEntityEvent;
@@ -183,6 +184,11 @@ namespace Mmogf.Core
                                 //}
 
                                 OnEntityCreation?.Invoke(entityInfo);
+                                break;
+                            case ServerCodes.EntityCheckout:
+                                var entityCheckout = MessagePackSerializer.Deserialize<EntityCheckout>(simpleData.Info);
+
+                                OnEntityCheckout?.Invoke(entityCheckout);
                                 break;
                             case ServerCodes.EntityUpdate:
                                 var entityUpdate = MessagePackSerializer.Deserialize<EntityUpdate>(simpleData.Info);

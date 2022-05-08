@@ -5,7 +5,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <RootNamespace>MmoGameFramework</RootNamespace>
     <AssemblyName>MmogfMainServer</AssemblyName>
-    <Version>0.0.5</Version>
+    <Version>0.0.6</Version>
 	  
 	  <DebugType>embedded</DebugType>
 	  <PublishSingleFile>true</PublishSingleFile>

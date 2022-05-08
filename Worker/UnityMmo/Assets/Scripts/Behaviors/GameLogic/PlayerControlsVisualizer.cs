@@ -12,16 +12,25 @@ namespace Mmogf
         [Range(-1, 1)]
         public float Forward;
 
+        [SerializeField]
+        float _turnSpeed = 120f;
+        [SerializeField]
+        float _moveSpeed = 5f;
+
+        bool inited = false;
+
         // Start is called before the first frame update
-        void Start()
+        void OnEnable()
         {
             var clientAuthCheck = GetEntityComponent<ClientAuthCheck>(ClientAuthCheck.ComponentId);
             var hasAuth = clientAuthCheck.HasValue && clientAuthCheck.Value.WorkerId == Server.ClientId;
-            Debug.Log($"Player auth: {hasAuth} - {Server.ClientId}");
+            Debug.Log($"Player auth: {hasAuth} - AuthId:{clientAuthCheck.Value.WorkerId} ServerId:{Server.ClientId} - Type:{Server.WorkerType}");
             if(hasAuth)
             {
-                CameraSystem.Instance.SetTarget(transform);
+                Init();
             }
+
+            Entity.OnEntityUpdate += Entity_OnEntityUpdate;
 
         }
 
@@ -37,11 +46,15 @@ namespace Mmogf
             HandleMovement();
         }
 
+        void Init()
+        {
+            CameraSystem.Instance.SetTarget(transform);
+            inited = true;
+        }
+
         void HandleMovement()
         {
             inputTimer -= Time.deltaTime;
-            if (inputTimer > 0)
-                return;
 
             var moveState = (MovementState)Entity.Data[MovementState.ComponentId];
 
@@ -61,23 +74,32 @@ namespace Mmogf
                 hasUpdate = true;
             }
 
-            if (hasUpdate)
+            var forwardMove = forward * _moveSpeed;
+            var headingMove = heading * _turnSpeed;
+
+            //local move
+            transform.Rotate(0, headingMove * Time.deltaTime, 0, Space.Self);
+            transform.Translate(new Vector3(0, 0, forwardMove * Time.deltaTime), Space.Self);
+
+            if (hasUpdate && inputTimer <= 0)
             {
                 Server.UpdateEntity(Entity.EntityId, MovementState.ComponentId, moveState);
                 inputTimer = .10f;
             }
         }
 
-        T? GetEntityComponent<T>(int componentId) where T : struct, IEntityComponent 
+        private void Entity_OnEntityUpdate()
         {
-            IEntityComponent component;
-            if (Entity.Data.TryGetValue(componentId, out component))
+            if(inited)
+                return;
+
+            var clientAuthCheck = GetEntityComponent<ClientAuthCheck>(ClientAuthCheck.ComponentId);
+            var hasAuth = clientAuthCheck.HasValue && clientAuthCheck.Value.WorkerId == Server.ClientId;
+            if (hasAuth)
             {
-                return (T)component;
+                Init();
             }
-
-            return null;
-
         }
+
     }
 }

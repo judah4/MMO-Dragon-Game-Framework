@@ -10,7 +10,7 @@ namespace Mmogf.Core
         protected override void Init()
         {
             #if UNITY_EDITOR
-            ConnectDelay = 5f;
+            ConnectDelay = 2.5f;
             #endif
         }
 
