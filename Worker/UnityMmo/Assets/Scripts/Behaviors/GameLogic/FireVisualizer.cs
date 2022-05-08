@@ -17,13 +17,13 @@ public class FireVisualizer : BaseEntityBehavior
     {
         HandleFireEvents();
 
-        if(Input.GetKeyDown(KeyCode.A))
+        if(Input.GetKeyDown(KeyCode.Q))
         {
             Server.SendCommand(Entity.EntityId, Cannon.ComponentId, new Cannon.FireCommand() { Left = true }, response => {
                 Debug.Log("Fired Cannon Left!");
             });
         }
-        if (Input.GetKeyDown(KeyCode.D))
+        if (Input.GetKeyDown(KeyCode.E))
         {
             Server.SendCommand(Entity.EntityId, Cannon.ComponentId, new Cannon.FireCommand() { Left = false }, response => {
                 Debug.Log("Fired Cannon Right!");
