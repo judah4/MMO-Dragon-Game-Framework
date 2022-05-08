@@ -381,7 +381,6 @@ namespace MmoGameFramework
                     continue;
 
                 connections.Add(workerConnection.Value.Connection);
-           
             }
 
             if (connections.Count < 1)

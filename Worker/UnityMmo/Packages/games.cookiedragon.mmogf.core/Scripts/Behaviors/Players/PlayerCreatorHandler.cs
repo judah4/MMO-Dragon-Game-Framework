@@ -32,7 +32,7 @@ namespace Mmogf.Core
 
         void HandleConnect(CommandRequest request)
         {
-            Debug.Log("Got player connect!");
+            Debug.Log($"Got player connect! {request.RequesterId} {request.RequestorWorkerType}");
             var connectPlayer = MessagePack.MessagePackSerializer.Deserialize<PlayerCreator.ConnectPlayer>(request.Payload);
             var createPayload = CreatePlayer.Invoke(connectPlayer, request);
             Server.SendCommand(0, 0, createPayload,
