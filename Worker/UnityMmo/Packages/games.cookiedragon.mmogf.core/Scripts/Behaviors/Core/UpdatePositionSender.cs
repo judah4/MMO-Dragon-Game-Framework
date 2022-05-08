@@ -17,8 +17,6 @@ namespace Mmogf.Core
         {
         }
 
-    
-
         void Update()
         {
             if(Time.time - updateTime < updateTick)

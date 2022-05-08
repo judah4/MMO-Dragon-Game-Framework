@@ -31,6 +31,8 @@ public class GameObjectRepresentation
         var adjustedPos = _server.PositionToClient(position);
         var rotation = rot.ToQuaternion();
 
+        BaseEntityBehavior[] entityBehaviors = null;
+
         if (!_entities.TryGetValue(entity.EntityId, out entityGm))
         {
             var prefab = Resources.Load<GameObject>($"Prefabs/{_server.WorkerType}/{entityType.Name}");
@@ -46,12 +48,11 @@ public class GameObjectRepresentation
 
             entityGm = gm.AddComponent<EntityGameObject>();
 
-            var entityBehaviors = entityGm.GetComponents<BaseEntityBehavior>();
+            entityBehaviors = entityGm.GetComponents<BaseEntityBehavior>();
             for (int cnt = 0; cnt < entityBehaviors.Length; cnt++)
             {
                 entityBehaviors[cnt].Server = _server;
                 entityBehaviors[cnt].Entity = entityGm;
-                entityBehaviors[cnt].enabled = true;
             }
 
             entityGm.EntityId = entity.EntityId;
@@ -64,6 +65,14 @@ public class GameObjectRepresentation
             var type = ComponentMappings.GetType(pair.Key);
             
             entityGm.Data.Add(pair.Key, (IEntityComponent)MessagePackSerializer.Deserialize(type, pair.Value));
+        }
+
+        if(entityBehaviors != null) 
+        {
+            for (int cnt = 0; cnt < entityBehaviors.Length; cnt++)
+            {
+                entityBehaviors[cnt].enabled = true;
+            }
         }
     }
 

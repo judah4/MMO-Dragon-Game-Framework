@@ -7,19 +7,24 @@ namespace Mmogf.Core
 {
     public class UpdatePositionReceiver : BaseEntityBehavior
     {
+        [SerializeField]
+        protected bool LocalControl;
+
         void OnEnable()
         {
-            Entity.OnEntityUpdate += OnUpdate;
-
+            //Entity.OnEntityUpdate += OnUpdate;
         }
 
         void OnDisable()
         {
-            Entity.OnEntityUpdate -= OnUpdate;
+            //Entity.OnEntityUpdate -= OnUpdate;
         }
 
-        void OnUpdate()
+        void Update()
         {
+            if(LocalControl)
+                return;
+
             var position = (Position)Entity.Data[Position.ComponentId];
             var rotation = (Rotation)Entity.Data[Rotation.ComponentId];
             var localPos = Server.PositionToClient(position);
