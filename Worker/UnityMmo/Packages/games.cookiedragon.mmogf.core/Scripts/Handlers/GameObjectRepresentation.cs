@@ -31,6 +31,8 @@ public class GameObjectRepresentation
         var adjustedPos = _server.PositionToClient(position);
         var rotation = rot.ToQuaternion();
 
+        BaseEntityBehavior[] entityBehaviors = null;
+
         if (!_entities.TryGetValue(entity.EntityId, out entityGm))
         {
             var prefab = Resources.Load<GameObject>($"Prefabs/{_server.WorkerType}/{entityType.Name}");
@@ -46,12 +48,11 @@ public class GameObjectRepresentation
 
             entityGm = gm.AddComponent<EntityGameObject>();
 
-            var entityBehaviors = entityGm.GetComponents<BaseEntityBehavior>();
+            entityBehaviors = entityGm.GetComponents<BaseEntityBehavior>();
             for (int cnt = 0; cnt < entityBehaviors.Length; cnt++)
             {
                 entityBehaviors[cnt].Server = _server;
                 entityBehaviors[cnt].Entity = entityGm;
-                entityBehaviors[cnt].enabled = true;
             }
 
             entityGm.EntityId = entity.EntityId;
@@ -64,6 +65,14 @@ public class GameObjectRepresentation
             var type = ComponentMappings.GetType(pair.Key);
             
             entityGm.Data.Add(pair.Key, (IEntityComponent)MessagePackSerializer.Deserialize(type, pair.Value));
+        }
+
+        if(entityBehaviors != null) 
+        {
+            for (int cnt = 0; cnt < entityBehaviors.Length; cnt++)
+            {
+                entityBehaviors[cnt].enabled = true;
+            }
         }
     }
 
@@ -85,19 +94,25 @@ public class GameObjectRepresentation
 
     public void OnEntityDelete(EntityInfo entity)
     {
+
+        //var entityType = MessagePackSerializer.Deserialize<EntityType>(entity.EntityData[EntityType.ComponentId]);
+        //var position = MessagePackSerializer.Deserialize<Position>(entity.EntityData[Position.ComponentId]);
+        //var rot = MessagePackSerializer.Deserialize<Rotation>(entity.EntityData[Rotation.ComponentId]);
+        //var adjustedPos = _server.PositionToClient(position);
+        //var rotation = rot.ToQuaternion();
+
+        DeleteEntity(entity.EntityId);
+    }
+
+    public void DeleteEntity(int entityId)
+    {
         EntityGameObject entityGm;
 
-        var entityType = MessagePackSerializer.Deserialize<EntityType>(entity.EntityData[EntityType.ComponentId]);
-        var position = MessagePackSerializer.Deserialize<Position>(entity.EntityData[Position.ComponentId]);
-        var rot = MessagePackSerializer.Deserialize<Rotation>(entity.EntityData[Rotation.ComponentId]);
-        var adjustedPos = _server.PositionToClient(position);
-        var rotation = rot.ToQuaternion();
-
-        if (!_entities.TryGetValue(entity.EntityId, out entityGm))
+        if (!_entities.TryGetValue(entityId, out entityGm))
             return;
 
         Object.Destroy(entityGm.gameObject);
-        _entities.Remove(entity.EntityId);
+        _entities.Remove(entityId);
     }
 
     public void UpdateEntity<T>(int entityId, int componentId, T message) where T : IEntityComponent

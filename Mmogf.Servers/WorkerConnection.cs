@@ -12,12 +12,15 @@ namespace MmoGameFramework
         public float InterestRange { get; set; }
         public Lidgren.Network.NetConnection Connection { get; set; }
 
+        public HashSet<int> EntitiesInRange { get; set; }
+
         public WorkerConnection(string connectionType, Lidgren.Network.NetConnection senderConnection, Position interestPosition)
         {
             ConnectionType = connectionType;
             InterestPosition = interestPosition;
-            InterestRange = 200;
+            InterestRange = 150;
             Connection = senderConnection;
+            EntitiesInRange = new HashSet<int>();
         }
 
     }

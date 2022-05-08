@@ -8,9 +8,15 @@ namespace Mmogf.Core
     {
         private void Update()
         {
+            var hasAuth = HasAuthority(PlayerHeartbeatClient.ComponentId);
+            if (!hasAuth)
+                return;
+
             for (int cnt = 0; cnt < Server.CommandRequests.Count; cnt++)
             {
                 if (Server.CommandRequests[cnt].ComponentId != PlayerHeartbeatClient.ComponentId)
+                    continue;
+                if (Server.CommandRequests[cnt].EntityId != Entity.EntityId)
                     continue;
                 var request = Server.CommandRequests[cnt];
                 //we need a way to identify what command this is... Components will be able to have more commands

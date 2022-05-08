@@ -86,7 +86,7 @@ namespace MmoGameFramework
             }, host.Services.GetRequiredService<ILogger<MmoServer>>());
             workerServer.Start();
 
-            logger.LogInformation("Dragongf/Mmogf is ready.");
+            logger.LogInformation("DragonGF is ready.");
             bool loop = true;
             logger.LogInformation("ESC to close.");
 

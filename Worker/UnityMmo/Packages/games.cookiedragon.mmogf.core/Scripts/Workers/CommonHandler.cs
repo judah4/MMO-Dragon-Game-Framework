@@ -105,6 +105,7 @@ namespace Mmogf.Core
             Client.OnEntityCreation += GameObjectRepresentation.OnEntityCreation;
             Client.OnEntityUpdate += GameObjectRepresentation.OnEntityUpdate;
             Client.OnEntityEvent += OnEntityEvent;
+            Client.OnEntityCheckout += OnEntityCheckout;
             Client.OnEntityCommand += OnEntityCommand;
             Client.OnEntityDelete += GameObjectRepresentation.OnEntityDelete;
 
@@ -113,6 +114,19 @@ namespace Mmogf.Core
             Client.Connect(WorkerType, ipAddress, port);
 
 
+        }
+
+        private void OnEntityCheckout(EntityCheckout checkout)
+        {
+            //save checkout list where?
+
+            if(checkout.Remove)
+            {
+                for(int cnt = 0; cnt < checkout.Checkouts.Count; cnt++)
+                {
+                    _gameObjectRepresentation.DeleteEntity(checkout.Checkouts[cnt]);
+                }
+            }
         }
 
         void OnConnectHandle()
