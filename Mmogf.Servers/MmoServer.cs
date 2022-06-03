@@ -34,7 +34,6 @@ namespace MmoGameFramework
             _entities.OnEntityCommand += OnEntityCommand;
             _entities.OnEntityCommandResponse += OnEntityCommandResponse;
             _entities.OnUpdateEntityPartial += OnEntityUpdatePartial;
-            _entities.OnEntityEvent += OnEntityEvent;
         }
 
         public void Start()
