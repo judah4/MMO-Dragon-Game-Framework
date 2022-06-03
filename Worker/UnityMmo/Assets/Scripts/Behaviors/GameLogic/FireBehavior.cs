@@ -23,6 +23,8 @@ public class FireBehavior: BaseEntityBehavior
         {
             if (Server.CommandRequests[cnt].ComponentId != Cannon.ComponentId)
                 continue;
+            if (Server.CommandRequests[cnt].EntityId != Entity.EntityId)
+                continue;
             var request = Server.CommandRequests[cnt];
             //we need a way to identify what command this is... Components will be able to have more commands
             //use ids!
@@ -41,7 +43,7 @@ public class FireBehavior: BaseEntityBehavior
     {
         Debug.Log("Got Cannon Fire!");
 
-        Server.SendEvent(request.EntityId, Cannon.ComponentId, new Cannon.FireEvent() { Left = payload.Left });;
+        Server.SendEvent(request.EntityId, Cannon.ComponentId, new Cannon.FireEvent() { Left = payload.Left });
         //make empty response object
         Server.SendCommandResponse(request, new Cannon.FireCommand());
     }

@@ -1,4 +1,4 @@
-using MessagePack;
+﻿using MessagePack;
 using Mmogf;
 using Mmogf.Core;
 using System;
@@ -20,7 +20,13 @@ public class FireVisualizer : BaseEntityBehavior
     {
         HandleFireEvents();
 
-        if(Input.GetKeyDown(KeyCode.Q))
+        var clientAuthCheck = GetEntityComponent<ClientAuthCheck>(ClientAuthCheck.ComponentId);
+        var hasAuth = clientAuthCheck.HasValue && clientAuthCheck.Value.WorkerId == Server.ClientId;
+
+        if (!hasAuth)
+            return;
+
+        if (Input.GetKeyDown(KeyCode.Q))
         {
             Server.SendCommand(Entity.EntityId, Cannon.ComponentId, new Cannon.FireCommand() { Left = true }, response => {
                 Debug.Log("Fired Cannon Left!");
@@ -40,6 +46,9 @@ public class FireVisualizer : BaseEntityBehavior
         {
             if (Server.EventRequests[cnt].ComponentId != Cannon.ComponentId)
                 continue;
+            if(Server.EventRequests[cnt].EntityId != Entity.EntityId)
+                continue;
+
             var request = Server.EventRequests[cnt];
             //we need a way to identify what command this is... Components will be able to have more commands
             //use ids!
@@ -56,6 +65,23 @@ public class FireVisualizer : BaseEntityBehavior
 
     private void HandleFireEvent(EventRequest request, Cannon.FireEvent payload)
     {
-        Debug.Log($"Fire cannon event! Left:{payload.Left}");
+        Debug.Log($"Fire cannon event! Left:{payload.Left} {request.EntityId}:{Entity.EntityId}");
+
+        var offset = Vector3.right;
+        if(payload.Left)
+        {
+            offset = Vector3.left;
+        }
+
+        offset += Vector3.up;
+
+        var cannonBall = Instantiate(_cannonballPrefab, transform.position + offset, transform.rotation);
+        var velocity = Vector3.right * 20;
+        if (payload.Left)
+        {
+            velocity *= -1;
+        }
+        var vel = transform.TransformDirection(velocity);
+        cannonBall.velocity = vel;
     }
 }
