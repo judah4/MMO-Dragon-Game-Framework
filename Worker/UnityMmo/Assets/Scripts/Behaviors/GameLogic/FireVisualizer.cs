@@ -1,4 +1,4 @@
-﻿using MessagePack;
+using MessagePack;
 using Mmogf;
 using Mmogf.Core;
 using System;
@@ -8,6 +8,9 @@ using UnityEngine;
 
 public class FireVisualizer : BaseEntityBehavior
 {
+    [SerializeField]
+    private Rigidbody _cannonballPrefab;
+
 
     void OnEnable()
     {
