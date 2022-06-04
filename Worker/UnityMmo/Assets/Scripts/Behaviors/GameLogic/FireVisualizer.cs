@@ -9,7 +9,7 @@ using UnityEngine;
 public class FireVisualizer : BaseEntityBehavior
 {
     [SerializeField]
-    private Rigidbody _cannonballPrefab;
+    private Cannonball _cannonballPrefab;
 
 
     void OnEnable()
@@ -75,13 +75,15 @@ public class FireVisualizer : BaseEntityBehavior
 
         offset += Vector3.up;
 
-        var cannonBall = Instantiate(_cannonballPrefab, transform.position + offset, transform.rotation);
+        var point = transform.TransformPoint(offset);
+
+        var cannonBall = Instantiate(_cannonballPrefab, point, transform.rotation);
         var velocity = Vector3.right * 20;
         if (payload.Left)
         {
             velocity *= -1;
         }
         var vel = transform.TransformDirection(velocity);
-        cannonBall.velocity = vel;
+        cannonBall.Rigidbody.velocity = vel;
     }
 }

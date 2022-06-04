@@ -18,5 +18,20 @@ namespace Mmogf
         public int Current { get; set; }
         [Key(1)]
         public int Max { get; set; }
+
+        #region Commands
+
+        [MessagePackObject]
+        public struct TakeDamageCommand : ICommand
+        {
+            public const int CommandId = 10002;
+            public int GetCommandId() => CommandId;
+
+            [Key(0)]
+            public int Amount { get; set; }
+        }
+
+        #endregion
+
     }
 }

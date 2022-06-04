@@ -7,6 +7,8 @@ using UnityEngine;
 
 public class FireBehavior: BaseEntityBehavior
 {
+    [SerializeField]
+    private Cannonball _cannonballPrefab;
 
     //get command requests
 
@@ -37,6 +39,8 @@ public class FireBehavior: BaseEntityBehavior
             }
 
         }
+
+        HandleFireEvents();
     }
 
     void HandleFire(CommandRequest request, Cannon.FireCommand payload)
@@ -46,5 +50,52 @@ public class FireBehavior: BaseEntityBehavior
         Server.SendEvent(request.EntityId, Cannon.ComponentId, new Cannon.FireEvent() { Left = payload.Left });
         //make empty response object
         Server.SendCommandResponse(request, new Cannon.FireCommand());
+    }
+
+    private void HandleFireEvents()
+    {
+        for (int cnt = 0; cnt < Server.EventRequests.Count; cnt++)
+        {
+            if (Server.EventRequests[cnt].ComponentId != Cannon.ComponentId)
+                continue;
+            if (Server.EventRequests[cnt].EntityId != Entity.EntityId)
+                continue;
+
+            var request = Server.EventRequests[cnt];
+            switch (request.EventId)
+            {
+                case Cannon.FireEvent.EventId:
+                    var payload = MessagePackSerializer.Deserialize<Cannon.FireEvent>(request.Payload);
+                    HandleFireEvent(request, payload);
+                    break;
+            }
+
+        }
+    }
+
+    private void HandleFireEvent(EventRequest request, Cannon.FireEvent payload)
+    {
+        Debug.Log($"Fire cannon event! Left:{payload.Left} {request.EntityId}:{Entity.EntityId}");
+
+        var offset = Vector3.right;
+        if (payload.Left)
+        {
+            offset = Vector3.left;
+        }
+
+        offset += Vector3.up;
+
+        var point = transform.TransformPoint(offset);
+
+        var cannonBall = Instantiate(_cannonballPrefab, point, transform.rotation);
+        var velocity = Vector3.right * 20;
+        if (payload.Left)
+        {
+            velocity *= -1;
+        }
+        var vel = transform.TransformDirection(velocity);
+        cannonBall.Rigidbody.velocity = vel;
+
+        cannonBall.InitServer(this);
     }
 }
