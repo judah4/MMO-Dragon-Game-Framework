@@ -36,7 +36,7 @@ namespace Mmogf
 
                 if(healthBehavior != null)
                 {
-                    _fireBehavior.Server.SendCommand<Health.TakeDamageCommand>(healthBehavior.Entity.EntityId, Health.ComponentId, new Health.TakeDamageCommand() { Amount = 10, }, result =>
+                    _fireBehavior.Server.SendCommand<Health.TakeDamageCommand>(healthBehavior.Entity.EntityId, Health.ComponentId, new Health.TakeDamageCommand() { Request = new TakeDamageCommandRequest() { Amount = 10 }, }, result =>
                     {
                         if(result.CommandStatus != Core.CommandStatus.Success)
                         {
