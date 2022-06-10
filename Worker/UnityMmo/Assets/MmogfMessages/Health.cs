@@ -6,6 +6,13 @@ using UnityEngine;
 namespace Mmogf
 {
 
+    public interface ICommandBase<TRequest,TResponse> : ICommand where TRequest: struct where TResponse: struct
+    {
+        public TRequest? Request { get; set; }
+        public TResponse? Response { get; set; }
+    }
+
+
     [MessagePackObject]
     public struct TakeDamageResponse
     {
@@ -37,18 +44,17 @@ namespace Mmogf
         #region Commands
 
         [MessagePackObject]
-        public struct TakeDamageCommand : ICommand
+        public struct TakeDamageCommand : ICommandBase<TakeDamageCommandRequest, TakeDamageResponse>
         {
             public const int CommandId = 10002;
             public int GetCommandId() => CommandId;
 
-            public TakeDamageCommandRequest Request { get; set; }
-            public TakeDamageResponse Response { get; set; }
-
+            [Key(0)]
+            public TakeDamageCommandRequest? Request { get; set; }
+            [Key(1)]
+            public TakeDamageResponse? Response { get; set; }
 
         }
-
-        
 
         #endregion
 

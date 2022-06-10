@@ -47,7 +47,7 @@ public class FireBehavior: BaseEntityBehavior
     {
         Debug.Log("Got Cannon Fire!");
 
-        Server.SendEvent(request.EntityId, Cannon.ComponentId, new Cannon.FireEvent() { Left = payload.Left });
+        Server.SendEvent(request.EntityId, Cannon.ComponentId, new Cannon.FireEvent() { Left = payload.Request?.Left ?? false });
         //make empty response object
         Server.SendCommandResponse(request, new Cannon.FireCommand());
     }

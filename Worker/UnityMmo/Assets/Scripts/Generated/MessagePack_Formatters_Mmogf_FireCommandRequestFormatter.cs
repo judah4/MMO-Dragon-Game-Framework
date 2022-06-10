@@ -19,18 +19,16 @@ namespace MessagePack.Formatters.Mmogf
     using global::System.Buffers;
     using global::MessagePack;
 
-    public sealed class Health_TakeDamageCommandFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Mmogf.Health.TakeDamageCommand>
+    public sealed class FireCommandRequestFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Mmogf.FireCommandRequest>
     {
 
-        public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Mmogf.Health.TakeDamageCommand value, global::MessagePack.MessagePackSerializerOptions options)
+        public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Mmogf.FireCommandRequest value, global::MessagePack.MessagePackSerializerOptions options)
         {
-            global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
-            writer.WriteArrayHeader(2);
-            formatterResolver.GetFormatterWithVerify<global::Mmogf.TakeDamageCommandRequest?>().Serialize(ref writer, value.Request, options);
-            formatterResolver.GetFormatterWithVerify<global::Mmogf.TakeDamageResponse?>().Serialize(ref writer, value.Response, options);
+            writer.WriteArrayHeader(1);
+            writer.Write(value.Left);
         }
 
-        public global::Mmogf.Health.TakeDamageCommand Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
+        public global::Mmogf.FireCommandRequest Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
         {
             if (reader.TryReadNil())
             {
@@ -38,19 +36,15 @@ namespace MessagePack.Formatters.Mmogf
             }
 
             options.Security.DepthStep(ref reader);
-            global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
             var length = reader.ReadArrayHeader();
-            var ____result = new global::Mmogf.Health.TakeDamageCommand();
+            var ____result = new global::Mmogf.FireCommandRequest();
 
             for (int i = 0; i < length; i++)
             {
                 switch (i)
                 {
                     case 0:
-                        ____result.Request = formatterResolver.GetFormatterWithVerify<global::Mmogf.TakeDamageCommandRequest?>().Deserialize(ref reader, options);
-                        break;
-                    case 1:
-                        ____result.Response = formatterResolver.GetFormatterWithVerify<global::Mmogf.TakeDamageResponse?>().Deserialize(ref reader, options);
+                        ____result.Left = reader.ReadBoolean();
                         break;
                     default:
                         reader.Skip();

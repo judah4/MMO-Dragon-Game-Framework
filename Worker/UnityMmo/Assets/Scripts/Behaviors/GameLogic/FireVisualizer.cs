@@ -28,13 +28,14 @@ public class FireVisualizer : BaseEntityBehavior
 
         if (Input.GetKeyDown(KeyCode.Q))
         {
-            Server.SendCommand(Entity.EntityId, Cannon.ComponentId, new Cannon.FireCommand() { Left = true }, response => {
+            Server.SendCommand(Entity.EntityId, Cannon.ComponentId, new Cannon.FireCommand() { Request = new FireCommandRequest() { Left = true } }, response => {
+                //how should we check the response?
                 Debug.Log("Fired Cannon Left!");
             });
         }
         if (Input.GetKeyDown(KeyCode.E))
         {
-            Server.SendCommand(Entity.EntityId, Cannon.ComponentId, new Cannon.FireCommand() { Left = false }, response => {
+            Server.SendCommand(Entity.EntityId, Cannon.ComponentId, new Cannon.FireCommand() { Request = new FireCommandRequest() { Left = true } }, response => {
                 Debug.Log("Fired Cannon Right!");
             });
         }

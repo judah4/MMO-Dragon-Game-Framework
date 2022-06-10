@@ -8,6 +8,19 @@ using System.Threading.Tasks;
 
 namespace Mmogf
 {
+
+    [MessagePackObject]
+    public struct Nothing
+    {
+    }
+
+    [MessagePackObject]
+    public struct FireCommandRequest
+    {
+        [Key(0)]
+        public bool Left { get; set; }
+    }
+
     [MessagePackObject]
     public struct Cannon : IEntityComponent
     {
@@ -37,13 +50,16 @@ namespace Mmogf
         #region Commands
 
         [MessagePackObject]
-        public struct FireCommand: ICommand
+        public struct FireCommand : ICommandBase<FireCommandRequest, Nothing>
         {
             public const int CommandId = 10001;
             public int GetCommandId() => CommandId;
 
             [Key(0)]
-            public bool Left { get; set; }
+            public FireCommandRequest? Request { get; set; }
+            [Key(1)]
+            public Nothing? Response { get; set; }
+
         }
 
         #endregion
