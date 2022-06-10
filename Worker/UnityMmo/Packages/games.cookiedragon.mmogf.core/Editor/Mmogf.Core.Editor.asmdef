@@ -1,0 +1,17 @@
+{
+    "name": "Mmogf.Core.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:4707a6ec32ddeb949a0fb8ecc251f550",
+        "GUID:bbde805d927e795439d7a746d1749cab"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
