@@ -292,7 +292,7 @@ namespace Mmogf.Core
         {
             var timespan = DateTime.UtcNow - _pingRequestAt;
             Ping = (int)timespan.TotalMilliseconds;
-            OnLog?.Invoke(LogLevel.Debug, $"Ping: {Ping} - {WorkerType}");
+            //OnLog?.Invoke(LogLevel.Debug, $"Ping: {Ping} - {WorkerType}");
         }
         public void SendCommand<T,TRequest,TResponse>(int entityId, int componentId, T command, Action<CommandResponse> callback) where T : ICommandBase<TRequest,TResponse> where TRequest : struct where TResponse : struct
         {
