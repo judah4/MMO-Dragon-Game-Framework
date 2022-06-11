@@ -219,11 +219,11 @@ namespace Mmogf.Core
         }
 
 
-        public void SendCommand<T>(int entityId, int componentId, T fireCommand, System.Action<CommandResponse> callback = null) where T : ICommand
+        public void SendCommand<T, TRequest, TResponse>(int entityId, int componentId, T fireCommand, System.Action<CommandResponse> callback = null) where T : ICommandBase<TRequest, TResponse> where TRequest : struct where TResponse : struct
         {
             Client.SendCommand(entityId, componentId, fireCommand, callback);
         }
-        public void SendCommandResponse<T>(CommandRequest request, T responsePayload) where T : ICommand
+        public void SendCommandResponse<T, TRequest, TResponse>(CommandRequest request, T responsePayload) where T : ICommandBase<TRequest,TResponse> where TRequest : struct where TResponse : struct
         {
             Client.SendCommandResponse(request, responsePayload);
         }

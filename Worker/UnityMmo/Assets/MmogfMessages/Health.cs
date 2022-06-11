@@ -1,17 +1,11 @@
 using MessagePack;
+using Mmogf.Core;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace Mmogf
 {
-
-    public interface ICommandBase<TRequest,TResponse> : ICommand where TRequest: struct where TResponse: struct
-    {
-        public TRequest? Request { get; set; }
-        public TResponse? Response { get; set; }
-    }
-
 
     [MessagePackObject]
     public struct TakeDamageResponse

@@ -294,7 +294,7 @@ namespace Mmogf.Core
             Ping = (int)timespan.TotalMilliseconds;
             OnLog?.Invoke(LogLevel.Debug, $"Ping: {Ping} - {WorkerType}");
         }
-        public void SendCommand<T>(int entityId, int componentId, T command, Action<CommandResponse> callback) where T : ICommand
+        public void SendCommand<T,TRequest,TResponse>(int entityId, int componentId, T command, Action<CommandResponse> callback) where T : ICommandBase<TRequest,TResponse> where TRequest : struct where TResponse : struct
         {
             var requestId = Guid.NewGuid().ToString();
 
@@ -318,7 +318,7 @@ namespace Mmogf.Core
             });
         }
 
-        public void SendCommandResponse<T>(CommandRequest request, T responsePayload) where T : ICommand
+        public void SendCommandResponse<T, TRequest, TResponse>(CommandRequest request, T responsePayload) where T : ICommandBase<TRequest, TResponse> where TRequest : struct where TResponse : struct
         {
             Send(new MmoMessage()
             {

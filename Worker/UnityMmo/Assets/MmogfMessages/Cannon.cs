@@ -1,5 +1,6 @@
 ﻿using MessagePack;
 using Mmogf;
+using Mmogf.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
