@@ -6,6 +6,12 @@ using System.Text;
 namespace Mmogf
 {
 
+    public interface ICommandBase<TRequest, TResponse> : ICommand where TRequest : struct where TResponse : struct
+    {
+        TRequest? Request { get; set; }
+        TResponse? Response { get; set; }
+    }
+
     /// <summary>
     /// Fires to server and expects a response
     /// </summary>

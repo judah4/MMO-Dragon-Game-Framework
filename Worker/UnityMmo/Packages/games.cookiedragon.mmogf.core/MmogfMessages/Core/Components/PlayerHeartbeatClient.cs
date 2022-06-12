@@ -3,6 +3,11 @@ using Mmogf.Core;
 namespace Mmogf.Core
 {
     [MessagePackObject]
+    public struct NothingInternal
+    {
+    }
+
+    [MessagePackObject]
     public struct PlayerHeartbeatClient : IEntityComponent
     {
 

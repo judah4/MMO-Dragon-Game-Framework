@@ -35,7 +35,7 @@ public class FireVisualizer : BaseEntityBehavior
         }
         if (Input.GetKeyDown(KeyCode.E))
         {
-            Server.SendCommand<Cannon.FireCommand, FireCommandRequest, Nothing>(Entity.EntityId, Cannon.ComponentId, new Cannon.FireCommand() { Request = new FireCommandRequest() { Left = true } }, response => {
+            Server.SendCommand<Cannon.FireCommand, FireCommandRequest, Nothing>(Entity.EntityId, Cannon.ComponentId, new Cannon.FireCommand() { Request = new FireCommandRequest() { Left = false } }, response => {
                 Debug.Log("Fired Cannon Right!");
             });
         }

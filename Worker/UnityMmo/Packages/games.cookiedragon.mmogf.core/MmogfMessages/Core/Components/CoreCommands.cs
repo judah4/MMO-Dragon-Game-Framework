@@ -6,8 +6,5 @@ using UnityEngine;
 namespace Mmogf.Core
 {
 
-    [MessagePackObject]
-    public struct NothingInternal
-    {
-    }
+    
 }
