@@ -36,7 +36,7 @@ namespace Mmogf.Core
             Debug.Log("Got client heartbeat!");
 
             //make empty response object
-            Server.SendCommandResponse(request, new PlayerHeartbeatClient.RequestHeartbeat());
+            Server.SendCommandResponse<PlayerHeartbeatClient.RequestHeartbeat,NothingInternal,NothingInternal>(request, new PlayerHeartbeatClient.RequestHeartbeat() { Response = new NothingInternal(), });
         }
     }
 }

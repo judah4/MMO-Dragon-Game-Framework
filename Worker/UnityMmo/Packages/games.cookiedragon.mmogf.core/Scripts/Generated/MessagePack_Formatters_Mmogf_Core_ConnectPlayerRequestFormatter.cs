@@ -19,18 +19,17 @@ namespace MessagePack.Formatters.Mmogf.Core
     using global::System.Buffers;
     using global::MessagePack;
 
-    public sealed class World_DeleteEntityFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Mmogf.Core.World.DeleteEntity>
+    public sealed class ConnectPlayerRequestFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Mmogf.Core.ConnectPlayerRequest>
     {
 
-        public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Mmogf.Core.World.DeleteEntity value, global::MessagePack.MessagePackSerializerOptions options)
+        public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Mmogf.Core.ConnectPlayerRequest value, global::MessagePack.MessagePackSerializerOptions options)
         {
             global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
-            writer.WriteArrayHeader(2);
-            formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.DeleteEntityRequest?>().Serialize(ref writer, value.Request, options);
-            formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.NothingInternal?>().Serialize(ref writer, value.Response, options);
+            writer.WriteArrayHeader(1);
+            formatterResolver.GetFormatterWithVerify<string>().Serialize(ref writer, value.PlayerId, options);
         }
 
-        public global::Mmogf.Core.World.DeleteEntity Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
+        public global::Mmogf.Core.ConnectPlayerRequest Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
         {
             if (reader.TryReadNil())
             {
@@ -40,17 +39,14 @@ namespace MessagePack.Formatters.Mmogf.Core
             options.Security.DepthStep(ref reader);
             global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
             var length = reader.ReadArrayHeader();
-            var ____result = new global::Mmogf.Core.World.DeleteEntity();
+            var ____result = new global::Mmogf.Core.ConnectPlayerRequest();
 
             for (int i = 0; i < length; i++)
             {
                 switch (i)
                 {
                     case 0:
-                        ____result.Request = formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.DeleteEntityRequest?>().Deserialize(ref reader, options);
-                        break;
-                    case 1:
-                        ____result.Response = formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.NothingInternal?>().Deserialize(ref reader, options);
+                        ____result.PlayerId = formatterResolver.GetFormatterWithVerify<string>().Deserialize(ref reader, options);
                         break;
                     default:
                         reader.Skip();

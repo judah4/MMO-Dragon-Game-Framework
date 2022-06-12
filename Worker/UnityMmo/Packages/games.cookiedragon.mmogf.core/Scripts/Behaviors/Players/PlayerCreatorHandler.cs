@@ -35,13 +35,13 @@ namespace Mmogf.Core
             Debug.Log($"Got player connect! {request.RequesterId} {request.RequestorWorkerType}");
             var connectPlayer = MessagePack.MessagePackSerializer.Deserialize<PlayerCreator.ConnectPlayer>(request.Payload);
             var createPayload = CreatePlayer.Invoke(connectPlayer, request);
-            Server.SendCommand(0, 0, createPayload,
+            Server.SendCommand<World.CreateEntity,CreateEntityRequest, NothingInternal>(0, 0, createPayload,
                 response => {
                     Debug.Log($"Create played! {response.CommandStatus} - {response.Message}");
                 });
 
             //make empty response object
-            Server.SendCommandResponse(request, new PlayerCreator.ConnectPlayer());
+            Server.SendCommandResponse<PlayerCreator.ConnectPlayer,ConnectPlayerRequest, NothingInternal>(request, new PlayerCreator.ConnectPlayer());
         }
     }
 }

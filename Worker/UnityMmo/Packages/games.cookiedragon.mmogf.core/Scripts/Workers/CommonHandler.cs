@@ -218,14 +218,13 @@ namespace Mmogf.Core
             EventRequests.Add(eventRequest);
         }
 
-
         public void SendCommand<T, TRequest, TResponse>(int entityId, int componentId, T fireCommand, System.Action<CommandResponse> callback = null) where T : ICommandBase<TRequest, TResponse> where TRequest : struct where TResponse : struct
         {
-            Client.SendCommand(entityId, componentId, fireCommand, callback);
+            Client.SendCommand<T, TRequest, TResponse>(entityId, componentId, fireCommand, callback);
         }
         public void SendCommandResponse<T, TRequest, TResponse>(CommandRequest request, T responsePayload) where T : ICommandBase<TRequest,TResponse> where TRequest : struct where TResponse : struct
         {
-            Client.SendCommandResponse(request, responsePayload);
+            Client.SendCommandResponse<T,TRequest, TResponse>(request, responsePayload);
         }
         public void SendEvent<T>(int entityId, int componentId, T eventPayload) where T : IEvent
         {

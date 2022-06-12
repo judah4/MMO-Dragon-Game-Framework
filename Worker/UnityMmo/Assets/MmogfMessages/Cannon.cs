@@ -11,11 +11,6 @@ namespace Mmogf
 {
 
     [MessagePackObject]
-    public struct Nothing
-    {
-    }
-
-    [MessagePackObject]
     public struct FireCommandRequest
     {
         [Key(0)]

@@ -25,7 +25,7 @@ namespace Mmogf
             if (Input.GetKeyDown(KeyCode.S))
             {
                 //create ship
-                _serverHandler.SendCommand(0, 0, new World.CreateEntity("Ship", new Position() { Y = 0, }, RandomHeading().ToRotation(), 
+                _serverHandler.SendCommand< World.CreateEntity,CreateEntityRequest,NothingInternal> (0, 0, new World.CreateEntity() {  Request = new CreateEntityRequest("Ship", new Position() { Y = 0, }, RandomHeading().ToRotation(), 
                     new Dictionary<int, byte[]>() 
                     {
                         { Cannon.ComponentId, MessagePack.MessagePackSerializer.Serialize(new Cannon()) },
@@ -38,7 +38,7 @@ namespace Mmogf
                         new Acl() { ComponentId = Acls.ComponentId, WorkerType = "Dragon-Worker" },
                         new Acl() { ComponentId = Cannon.ComponentId, WorkerType = "Dragon-Worker" },
                         new Acl() { ComponentId = Health.ComponentId, WorkerType = "Dragon-Worker" },
-                    }), 
+                    }) }, 
                     response => {
                         Debug.Log($"Create Entity! {response.CommandStatus} - {response.Message}");
                     });
@@ -47,7 +47,7 @@ namespace Mmogf
             if (Input.GetKeyDown(KeyCode.D))
             {
                 //create ship
-                _serverHandler.SendCommand(0, 0, new World.CreateEntity("Shark", new Position() { Y = -5, }, RandomHeading().ToRotation(),
+                _serverHandler.SendCommand<World.CreateEntity,CreateEntityRequest,NothingInternal>(0, 0, new World.CreateEntity() { Request = new CreateEntityRequest("Shark", new Position() { Y = -5, }, RandomHeading().ToRotation(),
                     new Dictionary<int, byte[]>()
                     {
                         { Cannon.ComponentId, MessagePack.MessagePackSerializer.Serialize(new Cannon()) },
@@ -57,7 +57,7 @@ namespace Mmogf
                         new Acl() { ComponentId = Position.ComponentId, WorkerType = "Dragon-Worker" },
                         new Acl() { ComponentId = Rotation.ComponentId, WorkerType = "Dragon-Worker" },
                         new Acl() { ComponentId = Acls.ComponentId, WorkerType = "Dragon-Worker" },
-                    }),
+                    }) },
                     response => {
                         Debug.Log($"Create Entity! {response.CommandStatus} - {response.Message}");
                     });
@@ -70,7 +70,7 @@ namespace Mmogf
                     if(((EntityType)entity.Value.Data[EntityType.ComponentId]).Name == "Ship")
                     {
                         Debug.Log($"Requesting delete: {entity.Key}");
-                        _serverHandler.SendCommand(0, 0, new World.DeleteEntity(entity.Key), response => {
+                        _serverHandler.SendCommand<World.DeleteEntity, DeleteEntityRequest, NothingInternal>(0, 0, new World.DeleteEntity() { Request = new DeleteEntityRequest(entity.Key) }, response => {
                             Debug.Log($"Deleted Entity! {response.CommandStatus} - {response.Message}");
                         });
                         break;

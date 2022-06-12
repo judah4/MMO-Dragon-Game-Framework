@@ -67,7 +67,7 @@ namespace Mmogf
 
             Debug.Log($"Creating Player {clientId}");
 
-            var createEntity = new World.CreateEntity("Player", new Position() { Y = 0, }, Rotation.Identity,
+            var createEntity = new World.CreateEntity() { Request = new CreateEntityRequest("Player", new Position() { Y = 0, }, Rotation.Identity,
                 new Dictionary<int, byte[]>()
                 {
                     { Cannon.ComponentId, MessagePack.MessagePackSerializer.Serialize(new Cannon()) },
@@ -89,7 +89,7 @@ namespace Mmogf
                     new Acl() { ComponentId = PlayerHeartbeatServer.ComponentId, WorkerType = "Dragon-Worker" },
                     new Acl() { ComponentId = PlayerHeartbeatClient.ComponentId, WorkerType = $"Dragon-Client", WorkerId = clientId, },
 
-                });
+                } ) };
 
             return createEntity;
         }
