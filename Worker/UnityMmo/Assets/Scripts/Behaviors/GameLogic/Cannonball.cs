@@ -28,8 +28,9 @@ namespace Mmogf
 
         private void OnCollisionEnter(Collision collision)
         {
+            #if UNITY_EDITOR
             Debug.Log($"Colliding with {collision.collider.name} Server:{(_fireBehavior != null)}");
-
+            #endif
             if(_fireBehavior != null)
             {
                 var healthBehavior = collision.collider.GetComponent<HealthBehavior>();
