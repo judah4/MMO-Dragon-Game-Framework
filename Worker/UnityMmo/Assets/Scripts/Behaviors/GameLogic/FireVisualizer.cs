@@ -28,7 +28,7 @@ public class FireVisualizer : BaseEntityBehavior
 
         if (Input.GetKeyDown(KeyCode.Q))
         {
-            Server.SendCommand<Cannon.FireCommand,FireCommandRequest,Nothing>(Entity.EntityId, Cannon.ComponentId, new Cannon.FireCommand() { Request = new FireCommandRequest() { Left = true } }, response => {
+            Server.SendCommand<Cannon.FireCommand,FireCommandRequest,Nothing>(Entity.EntityId, Cannon.ComponentId, new FireCommandRequest() { Left = true }, response => {
                 //how should we check the response?
                 Debug.Log("Fired Cannon Left!");
             });
