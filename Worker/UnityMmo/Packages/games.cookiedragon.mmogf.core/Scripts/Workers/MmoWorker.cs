@@ -22,14 +22,26 @@ namespace Mmogf.Core
         public class CommandHolder
         {
             public CommandRequest Request { get; set; }
-            public Action<CommandResponse> Response { get; set; }
+
             public float TimeoutTimer { get; set; }
 
-            public CommandHolder(CommandRequest request, Action<CommandResponse> response, float timeoutTimer)
+            public CommandHolder(CommandRequest request, float timeoutTimer)
             {
                 Request = request;
-                Response = response;
                 TimeoutTimer = timeoutTimer;
+            }
+
+        }
+
+        public class CommandHolderTyped<TCommand, TRequest, TResponse> : CommandHolder where TCommand : ICommandBase<TRequest, TResponse> where TRequest : struct where TResponse : struct
+        {
+            public ICommandBase<TRequest,TResponse> Command { get; set; }
+            public Action<CommandResult<TCommand, TRequest, TResponse>> Response { get; set; }
+
+            public CommandHolderTyped(CommandRequest request, ICommandBase<TRequest, TResponse> command, Action<CommandResult<TCommand, TRequest, TResponse>> response, float timeoutTimer) : base(request, timeoutTimer)
+            {
+                Response = response;
+                Command = command;
             }
 
         }
@@ -294,7 +306,7 @@ namespace Mmogf.Core
             Ping = (int)timespan.TotalMilliseconds;
             //OnLog?.Invoke(LogLevel.Debug, $"Ping: {Ping} - {WorkerType}");
         }
-        public void SendCommand<T,TRequest,TResponse>(int entityId, int componentId, T command, Action<CommandResponse> callback) where T : ICommandBase<TRequest,TResponse> where TRequest : struct where TResponse : struct
+        public void SendCommand<T,TRequest,TResponse>(int entityId, int componentId, T command, Action<CommandResult<T, TRequest, TResponse>> callback) where T : ICommandBase<TRequest,TResponse> where TRequest : struct where TResponse : struct
         {
             var requestId = Guid.NewGuid().ToString();
 
@@ -305,11 +317,11 @@ namespace Mmogf.Core
                 EntityId = entityId,
                 ComponentId = componentId,
                 CommandId = command.GetCommandId(),
-                Payload = MessagePackSerializer.Serialize(command),
+                Payload = MessagePackSerializer.Serialize(command.Request),
             };
 
             //register callback
-            _commandCallbacks.Add(requestId, new CommandHolder(request, callback, 10f));
+            _commandCallbacks.Add(requestId, new CommandHolderTyped<T, TRequest, TResponse>(request, command, callback, 10f));
 
             Send(new MmoMessage()
             {
@@ -318,7 +330,7 @@ namespace Mmogf.Core
             });
         }
 
-        public void SendCommandResponse<T, TRequest, TResponse>(CommandRequest request, T responsePayload) where T : ICommandBase<TRequest, TResponse> where TRequest : struct where TResponse : struct
+        public void SendCommandResponse<T, TRequest, TResponse>(CommandRequest request, TResponse responsePayload) where T : ICommandBase<TRequest, TResponse> where TRequest : struct where TResponse : struct
         {
             Send(new MmoMessage()
             {

@@ -226,7 +226,7 @@ namespace Mmogf.Core
             };
             Client.SendCommand<T, TRequest, TResponse>(entityId, componentId, command, callback);
         }
-        public void SendCommandResponse<T, TRequest, TResponse>(CommandRequest request, T responsePayload) where T : ICommandBase<TRequest,TResponse> where TRequest : struct where TResponse : struct
+        public void SendCommandResponse<T, TRequest, TResponse>(CommandRequest request, TResponse responsePayload) where T : ICommandBase<TRequest,TResponse> where TRequest : struct where TResponse : struct
         {
             Client.SendCommandResponse<T,TRequest, TResponse>(request, responsePayload);
         }
