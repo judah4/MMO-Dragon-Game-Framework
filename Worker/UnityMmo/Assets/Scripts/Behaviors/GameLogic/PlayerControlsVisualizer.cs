@@ -17,6 +17,9 @@ namespace Mmogf
         [SerializeField]
         float _moveSpeed = 5f;
 
+        [SerializeField]
+        Rigidbody _rigidbody;
+
         bool inited = false;
 
         // Start is called before the first frame update
@@ -74,18 +77,25 @@ namespace Mmogf
                 hasUpdate = true;
             }
 
-            var forwardMove = forward * _moveSpeed;
             var headingMove = heading * _turnSpeed;
 
             //local move
             transform.Rotate(0, headingMove * Time.deltaTime, 0, Space.Self);
-            transform.Translate(new Vector3(0, 0, forwardMove * Time.deltaTime), Space.Self);
+            //transform.Translate(new Vector3(0, 0, forwardMove * Time.deltaTime), Space.Self);
 
             if (hasUpdate && inputTimer <= 0)
             {
                 Server.UpdateEntity(Entity.EntityId, MovementState.ComponentId, moveState);
                 inputTimer = .10f;
             }
+        }
+
+        private void FixedUpdate()
+        {
+            var forwardMove = Forward * _moveSpeed;
+
+            _rigidbody.velocity = (transform.forward * forwardMove);
+
         }
 
         private void Entity_OnEntityUpdate()

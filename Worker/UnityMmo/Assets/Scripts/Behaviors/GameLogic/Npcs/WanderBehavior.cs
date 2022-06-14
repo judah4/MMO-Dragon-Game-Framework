@@ -19,6 +19,11 @@ namespace Mmogf
         [SerializeField]
         float _turnTimer = 3f;
 
+        [SerializeField]
+        Rigidbody _rigidbody;
+
+        bool _alive = true;
+
         // Start is called before the first frame update
         void Start()
         {
@@ -28,6 +33,15 @@ namespace Mmogf
         // Update is called once per frame
         void Update()
         {
+            if(Entity.Data.ContainsKey(Health.ComponentId))
+            {
+                var health = (Health)Entity.Data[Health.ComponentId];
+                _alive = health.Current > 0;
+            }
+
+            if(!_alive)
+                return;
+
             _turnTimer -= Time.deltaTime;
 
             if(_turnTimer <= 0)
@@ -37,7 +51,18 @@ namespace Mmogf
             }
 
             transform.Rotate(0, _turnSpeed * _turnPower * Time.deltaTime, 0, Space.Self);
-            transform.Translate(new Vector3(0, 0, _moveSpeed * Time.deltaTime), Space.Self);
+
+            //transform.Translate(new Vector3(0, 0, _moveSpeed * Time.deltaTime), Space.Self);
+        }
+
+        private void FixedUpdate()
+        {
+            if (!_alive)
+                return;
+            //if(_rigidbody.velocity.magnitude > _moveSpeed)
+            //    return;
+            _rigidbody.velocity = (transform.forward * _moveSpeed);
+
         }
     }
 }
