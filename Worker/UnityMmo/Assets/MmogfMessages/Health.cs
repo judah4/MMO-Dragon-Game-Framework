@@ -12,10 +12,12 @@ namespace Mmogf
     {
         [Key(0)]
         public bool Dead { get; set; }
+        [Key(1)]
+        public bool Killed { get; set; }
     }
 
     [MessagePackObject]
-    public struct TakeDamageCommandRequest
+    public struct TakeDamageRequest
     {
         [Key(0)]
         public int Amount { get; set; }
@@ -38,13 +40,13 @@ namespace Mmogf
         #region Commands
 
         [MessagePackObject]
-        public struct TakeDamageCommand : ICommandBase<TakeDamageCommandRequest, TakeDamageResponse>
+        public struct TakeDamageCommand : ICommandBase<TakeDamageRequest, TakeDamageResponse>
         {
             public const int CommandId = 10002;
             public int GetCommandId() => CommandId;
 
             [Key(0)]
-            public TakeDamageCommandRequest? Request { get; set; }
+            public TakeDamageRequest? Request { get; set; }
             [Key(1)]
             public TakeDamageResponse? Response { get; set; }
 
