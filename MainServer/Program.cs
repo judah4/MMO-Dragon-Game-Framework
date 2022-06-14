@@ -30,6 +30,7 @@ namespace MmoGameFramework
                 })
                 .Build();
 
+
             var logger = host.Services.GetRequiredService<ILogger<Program>>();
 
                 Console.WriteLine(
@@ -44,7 +45,8 @@ namespace MmoGameFramework
                  |___/                          
 ");
 
-
+            var version = System.Reflection.Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "1.0.0";
+            logger.LogInformation($"Dragon Game Framework MMO Networking Version {version}");
             logger.LogInformation("Attaching Entity Storage.");
             _entityStore = new EntityStore(host.Services.GetRequiredService<ILogger<EntityStore>>());
 

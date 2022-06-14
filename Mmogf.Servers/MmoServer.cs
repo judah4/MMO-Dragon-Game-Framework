@@ -275,7 +275,7 @@ namespace MmoGameFramework
                     Send(im.SenderConnection, new MmoMessage()
                     {
                         MessageId = ServerCodes.EntityCommandResponse,
-                        Info = MessagePackSerializer.Serialize(CommandResponse.Create(commandRequest, CommandStatus.Success, "", MessagePackSerializer.Serialize(entityInfo))),
+                        Info = MessagePackSerializer.Serialize(CommandResponse.Create(commandRequest, CommandStatus.Success, "", MessagePackSerializer.Serialize(createEntity))),
                     }, NetDeliveryMethod.ReliableOrdered);
                     break;
                 case World.DeleteEntity.CommandId:
