@@ -19,16 +19,16 @@ namespace MessagePack.Formatters.Mmogf
     using global::System.Buffers;
     using global::MessagePack;
 
-    public sealed class TakeDamageCommandRequestFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Mmogf.TakeDamageCommandRequest>
+    public sealed class TakeDamageRequestFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Mmogf.TakeDamageRequest>
     {
 
-        public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Mmogf.TakeDamageCommandRequest value, global::MessagePack.MessagePackSerializerOptions options)
+        public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Mmogf.TakeDamageRequest value, global::MessagePack.MessagePackSerializerOptions options)
         {
             writer.WriteArrayHeader(1);
             writer.Write(value.Amount);
         }
 
-        public global::Mmogf.TakeDamageCommandRequest Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
+        public global::Mmogf.TakeDamageRequest Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
         {
             if (reader.TryReadNil())
             {
@@ -37,7 +37,7 @@ namespace MessagePack.Formatters.Mmogf
 
             options.Security.DepthStep(ref reader);
             var length = reader.ReadArrayHeader();
-            var ____result = new global::Mmogf.TakeDamageCommandRequest();
+            var ____result = new global::Mmogf.TakeDamageRequest();
 
             for (int i = 0; i < length; i++)
             {

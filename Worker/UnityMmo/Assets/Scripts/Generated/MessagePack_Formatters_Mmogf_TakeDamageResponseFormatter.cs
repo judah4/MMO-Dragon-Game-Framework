@@ -24,8 +24,9 @@ namespace MessagePack.Formatters.Mmogf
 
         public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Mmogf.TakeDamageResponse value, global::MessagePack.MessagePackSerializerOptions options)
         {
-            writer.WriteArrayHeader(1);
+            writer.WriteArrayHeader(2);
             writer.Write(value.Dead);
+            writer.Write(value.Killed);
         }
 
         public global::Mmogf.TakeDamageResponse Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
@@ -45,6 +46,9 @@ namespace MessagePack.Formatters.Mmogf
                 {
                     case 0:
                         ____result.Dead = reader.ReadBoolean();
+                        break;
+                    case 1:
+                        ____result.Killed = reader.ReadBoolean();
                         break;
                     default:
                         reader.Skip();

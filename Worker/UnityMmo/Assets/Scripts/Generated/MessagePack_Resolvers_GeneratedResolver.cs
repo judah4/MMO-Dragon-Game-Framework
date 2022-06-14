@@ -53,7 +53,7 @@ namespace MessagePack.Resolvers
             {
                 { typeof(global::Mmogf.FireCommandRequest?), 0 },
                 { typeof(global::Mmogf.Nothing?), 1 },
-                { typeof(global::Mmogf.TakeDamageCommandRequest?), 2 },
+                { typeof(global::Mmogf.TakeDamageRequest?), 2 },
                 { typeof(global::Mmogf.TakeDamageResponse?), 3 },
                 { typeof(global::Mmogf.Cannon), 4 },
                 { typeof(global::Mmogf.Cannon.FireCommand), 5 },
@@ -64,7 +64,7 @@ namespace MessagePack.Resolvers
                 { typeof(global::Mmogf.Health.TakeDamageCommand), 10 },
                 { typeof(global::Mmogf.MovementState), 11 },
                 { typeof(global::Mmogf.Nothing), 12 },
-                { typeof(global::Mmogf.TakeDamageCommandRequest), 13 },
+                { typeof(global::Mmogf.TakeDamageRequest), 13 },
                 { typeof(global::Mmogf.TakeDamageResponse), 14 },
             };
         }
@@ -81,7 +81,7 @@ namespace MessagePack.Resolvers
             {
                 case 0: return new global::MessagePack.Formatters.NullableFormatter<global::Mmogf.FireCommandRequest>();
                 case 1: return new global::MessagePack.Formatters.NullableFormatter<global::Mmogf.Nothing>();
-                case 2: return new global::MessagePack.Formatters.NullableFormatter<global::Mmogf.TakeDamageCommandRequest>();
+                case 2: return new global::MessagePack.Formatters.NullableFormatter<global::Mmogf.TakeDamageRequest>();
                 case 3: return new global::MessagePack.Formatters.NullableFormatter<global::Mmogf.TakeDamageResponse>();
                 case 4: return new MessagePack.Formatters.Mmogf.CannonFormatter();
                 case 5: return new MessagePack.Formatters.Mmogf.Cannon_FireCommandFormatter();
@@ -92,7 +92,7 @@ namespace MessagePack.Resolvers
                 case 10: return new MessagePack.Formatters.Mmogf.Health_TakeDamageCommandFormatter();
                 case 11: return new MessagePack.Formatters.Mmogf.MovementStateFormatter();
                 case 12: return new MessagePack.Formatters.Mmogf.NothingFormatter();
-                case 13: return new MessagePack.Formatters.Mmogf.TakeDamageCommandRequestFormatter();
+                case 13: return new MessagePack.Formatters.Mmogf.TakeDamageRequestFormatter();
                 case 14: return new MessagePack.Formatters.Mmogf.TakeDamageResponseFormatter();
                 default: return null;
             }

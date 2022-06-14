@@ -218,7 +218,7 @@ namespace Mmogf.Core
             EventRequests.Add(eventRequest);
         }
 
-        public void SendCommand<T, TRequest, TResponse>(int entityId, int componentId, TRequest request, System.Action<CommandResponse> callback = null) where T : ICommandBase<TRequest, TResponse>, new () where TRequest : struct where TResponse : struct
+        public void SendCommand<T, TRequest, TResponse>(int entityId, int componentId, TRequest request, System.Action<CommandResult<T, TRequest, TResponse>> callback = null) where T : ICommandBase<TRequest, TResponse>, new () where TRequest : struct where TResponse : struct
         {
             var command = new T()
             {
@@ -226,9 +226,16 @@ namespace Mmogf.Core
             };
             Client.SendCommand<T, TRequest, TResponse>(entityId, componentId, command, callback);
         }
-        public void SendCommandResponse<T, TRequest, TResponse>(CommandRequest request, TResponse responsePayload) where T : ICommandBase<TRequest,TResponse> where TRequest : struct where TResponse : struct
+        public void SendCommandResponse<T, TRequest, TResponse>(CommandRequest request, T command, TResponse responsePayload) where T : ICommandBase<TRequest,TResponse> where TRequest : struct where TResponse : struct
         {
-            Client.SendCommandResponse<T,TRequest, TResponse>(request, responsePayload);
+            command.Response = responsePayload;
+
+            Client.SendCommandResponse<T,TRequest, TResponse>(request, command);
+        }
+        public void SendCommandResponseFailure(CommandRequest request, string message)
+        {
+
+            Client.SendCommandResponseFailure(request, CommandStatus.Failure, message);
         }
         public void SendEvent<T>(int entityId, int componentId, T eventPayload) where T : IEvent
         {

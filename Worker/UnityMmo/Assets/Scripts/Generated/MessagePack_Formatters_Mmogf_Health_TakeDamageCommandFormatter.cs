@@ -26,7 +26,7 @@ namespace MessagePack.Formatters.Mmogf
         {
             global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
             writer.WriteArrayHeader(2);
-            formatterResolver.GetFormatterWithVerify<global::Mmogf.TakeDamageCommandRequest?>().Serialize(ref writer, value.Request, options);
+            formatterResolver.GetFormatterWithVerify<global::Mmogf.TakeDamageRequest?>().Serialize(ref writer, value.Request, options);
             formatterResolver.GetFormatterWithVerify<global::Mmogf.TakeDamageResponse?>().Serialize(ref writer, value.Response, options);
         }
 
@@ -47,7 +47,7 @@ namespace MessagePack.Formatters.Mmogf
                 switch (i)
                 {
                     case 0:
-                        ____result.Request = formatterResolver.GetFormatterWithVerify<global::Mmogf.TakeDamageCommandRequest?>().Deserialize(ref reader, options);
+                        ____result.Request = formatterResolver.GetFormatterWithVerify<global::Mmogf.TakeDamageRequest?>().Deserialize(ref reader, options);
                         break;
                     case 1:
                         ____result.Response = formatterResolver.GetFormatterWithVerify<global::Mmogf.TakeDamageResponse?>().Deserialize(ref reader, options);

@@ -1,3 +1,4 @@
+using MessagePack;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,7 +8,7 @@ namespace Mmogf.Core
     public class PlayerCreatorHandler : BaseEntityBehavior
     {
 
-        public static System.Func<PlayerCreator.ConnectPlayer, CommandRequest, World.CreateEntity> CreatePlayer;
+        public static System.Func<PlayerCreator.ConnectPlayer, CommandRequest, CreateEntityRequest> CreatePlayer;
 
         private void Update()
         {
@@ -15,7 +16,6 @@ namespace Mmogf.Core
             {
                 var request = Server.CommandRequests[cnt];
 
-                Debug.Log($"{request.CommandId} {request.ComponentId}");
                 if (Server.CommandRequests[cnt].ComponentId != PlayerCreator.ComponentId)
                     continue;
                 //we need a way to identify what command this is... Components will be able to have more commands
@@ -40,8 +40,10 @@ namespace Mmogf.Core
                     Debug.Log($"Create played! {response.CommandStatus} - {response.Message}");
                 });
 
+            var payload = MessagePackSerializer.Deserialize<PlayerCreator.ConnectPlayer>(request.Payload);
+
             //make empty response object
-            Server.SendCommandResponse<PlayerCreator.ConnectPlayer,ConnectPlayerRequest, NothingInternal>(request, new PlayerCreator.ConnectPlayer());
+            Server.SendCommandResponse<PlayerCreator.ConnectPlayer,ConnectPlayerRequest, NothingInternal>(request, payload, new NothingInternal());
         }
     }
 }

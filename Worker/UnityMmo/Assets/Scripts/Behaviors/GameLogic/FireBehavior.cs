@@ -45,11 +45,9 @@ public class FireBehavior: BaseEntityBehavior
 
     void HandleFire(CommandRequest request, Cannon.FireCommand payload)
     {
-        Debug.Log("Got Cannon Fire!");
-
         Server.SendEvent(request.EntityId, Cannon.ComponentId, new Cannon.FireEvent() { Left = payload.Request?.Left ?? false });
         //make empty response object
-        Server.SendCommandResponse<Cannon.FireCommand, FireCommandRequest, Nothing>(request, new Cannon.FireCommand() { Response = new Nothing() });
+        Server.SendCommandResponse<Cannon.FireCommand, FireCommandRequest, Nothing>(request, payload, new Nothing());
     }
 
     private void HandleFireEvents()
@@ -75,7 +73,6 @@ public class FireBehavior: BaseEntityBehavior
 
     private void HandleFireEvent(EventRequest request, Cannon.FireEvent payload)
     {
-        Debug.Log($"Fire cannon event! Left:{payload.Left} {request.EntityId}:{Entity.EntityId}");
 
         var offset = Vector3.right;
         if (payload.Left)

@@ -28,14 +28,24 @@ public class FireVisualizer : BaseEntityBehavior
 
         if (Input.GetKeyDown(KeyCode.Q))
         {
-            Server.SendCommand<Cannon.FireCommand,FireCommandRequest,Nothing>(Entity.EntityId, Cannon.ComponentId, new FireCommandRequest() { Left = true }, response => {
+            Server.SendCommand<Cannon.FireCommand,FireCommandRequest,Nothing>(Entity.EntityId, Cannon.ComponentId, new FireCommandRequest() { Left = true }, result => {
+                if(result.CommandStatus != CommandStatus.Success)
+                {
+                    Debug.LogError($"{result.CommandId}: {result.CommandStatus} - {result.Message}");
+                    return;
+                }
                 //how should we check the response?
                 Debug.Log("Fired Cannon Left!");
             });
         }
         if (Input.GetKeyDown(KeyCode.E))
         {
-            Server.SendCommand<Cannon.FireCommand, FireCommandRequest, Nothing>(Entity.EntityId, Cannon.ComponentId, new Cannon.FireCommand() { Request = new FireCommandRequest() { Left = false } }, response => {
+            Server.SendCommand<Cannon.FireCommand, FireCommandRequest, Nothing>(Entity.EntityId, Cannon.ComponentId,  new FireCommandRequest() { Left = false }, result => {
+                if (result.CommandStatus != CommandStatus.Success)
+                {
+                    Debug.LogError($"{result.CommandId}: {result.CommandStatus} - {result.Message}");
+                    return;
+                }
                 Debug.Log("Fired Cannon Right!");
             });
         }
@@ -66,7 +76,6 @@ public class FireVisualizer : BaseEntityBehavior
 
     private void HandleFireEvent(EventRequest request, Cannon.FireEvent payload)
     {
-        Debug.Log($"Fire cannon event! Left:{payload.Left} {request.EntityId}:{Entity.EntityId}");
 
         var offset = Vector3.right;
         if(payload.Left)

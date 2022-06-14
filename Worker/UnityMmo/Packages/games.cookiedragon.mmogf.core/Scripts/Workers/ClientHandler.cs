@@ -17,9 +17,9 @@ namespace Mmogf.Core
         protected override void OnConnect()
         {
             SendCommand<PlayerCreator.ConnectPlayer,ConnectPlayerRequest, NothingInternal>(1, PlayerCreator.ComponentId, 
-                new PlayerCreator.ConnectPlayer() { Request = new ConnectPlayerRequest() { PlayerId = "Dev" }, }, response =>
+                new ConnectPlayerRequest() { PlayerId = "Dev" }, response =>
             {
-                Debug.Log($"Player connect! {response.CommandStatus} - {response.Message}");
+                Debug.Log($"Player connect result! {response.CommandStatus} - {response.Message}");
             });
         }
     }

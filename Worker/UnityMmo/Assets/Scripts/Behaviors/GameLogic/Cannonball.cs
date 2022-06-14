@@ -37,13 +37,15 @@ namespace Mmogf
 
                 if(healthBehavior != null)
                 {
-                    _fireBehavior.Server.SendCommand<Health.TakeDamageCommand, TakeDamageCommandRequest, TakeDamageResponse>(healthBehavior.Entity.EntityId, Health.ComponentId, new Health.TakeDamageCommand() { Request = new TakeDamageCommandRequest() { Amount = 10 }, }, result =>
+                    _fireBehavior.Server.SendCommand<Health.TakeDamageCommand, TakeDamageRequest, TakeDamageResponse>(healthBehavior.Entity.EntityId, Health.ComponentId, new TakeDamageRequest() { Amount = 10 }, result =>
                     {
                         if(result.CommandStatus != Core.CommandStatus.Success)
                         {
                             Debug.LogError($"Take Damage: {result.CommandStatus}: {result.Message}");
                             return;
                         }
+
+                        Debug.Log($"Damage dealt! {result.Request?.Amount}, Dead:{result.Response?.Dead}, Killed:{result.Response?.Killed}");
                     });
                 }
             }

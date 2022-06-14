@@ -20,9 +20,8 @@ namespace Mmogf.Core
             {
                 Debug.Log($"Player {Entity.EntityId} Sending Heartbeat Request.");
 
-                Server.SendCommand<PlayerHeartbeatClient.RequestHeartbeat, NothingInternal, NothingInternal>(Entity.EntityId, PlayerHeartbeatClient.ComponentId, new PlayerHeartbeatClient.RequestHeartbeat() { Request = new NothingInternal(),  }, response => {
+                Server.SendCommand<PlayerHeartbeatClient.RequestHeartbeat, NothingInternal, NothingInternal>(Entity.EntityId, PlayerHeartbeatClient.ComponentId, new NothingInternal(), response => {
                     var heartbeat = (PlayerHeartbeatServer)Entity.Data[PlayerHeartbeatServer.ComponentId];
-                    Debug.Log($"Heartbeat {response.CommandStatus} - {response.Message}");
                     if(response.CommandStatus == CommandStatus.Success)
                     {
                         if(heartbeat.MissedHeartbeats > 0)
@@ -40,7 +39,7 @@ namespace Mmogf.Core
                         {
                             //Delete player
                             Debug.Log($"Deleting Player {Entity.EntityId} for missed Heartbeats.");
-                            Server.SendCommand<World.DeleteEntity,DeleteEntityRequest,NothingInternal>(0, 0, new World.DeleteEntity() { Request = new DeleteEntityRequest(Entity.EntityId) });
+                            Server.SendCommand<World.DeleteEntity,DeleteEntityRequest,NothingInternal>(0, 0, new DeleteEntityRequest(Entity.EntityId));
                         }
                         else
                         {
