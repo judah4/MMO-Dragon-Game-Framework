@@ -14,20 +14,28 @@ namespace Mmogf
         [SerializeField]
         FireBehavior _fireBehavior;
 
-        // Start is called before the first frame update
-        void Start()
-        {
-        
-        }
+        bool _destroy = false;
+        float _destroyTimer = 0.25f;
 
         // Update is called once per frame
         void Update()
         {
-        
+            if(transform.position.y < -10)
+                _destroy = true;
+
+            if(_destroy)
+            {
+                _destroyTimer -= Time.deltaTime;
+                if(_destroyTimer < 0)
+                {
+                    Destroy(gameObject);
+                }
+            }
         }
 
         private void OnCollisionEnter(Collision collision)
         {
+            _destroy = true;
             #if UNITY_EDITOR
             Debug.Log($"Colliding with {collision.collider.name} Server:{(_fireBehavior != null)}");
             #endif
