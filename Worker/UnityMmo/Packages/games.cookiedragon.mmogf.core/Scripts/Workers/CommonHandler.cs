@@ -196,7 +196,11 @@ namespace Mmogf.Core
 
         public Vector3 PositionToClient(Position position)
         {
-            var adjustedPos = new Vector3((int)position.X, (int)position.Y, (int)position.Z) + transform.position;
+            var pos = transform.position;
+            position.X += pos.x;
+            position.Y += pos.y;
+            position.Z += pos.z;
+            var adjustedPos = new Vector3((float)position.X, (float)position.Y, (float)position.Z);
             return adjustedPos;
         }
 
