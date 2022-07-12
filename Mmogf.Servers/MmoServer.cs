@@ -106,7 +106,7 @@ namespace MmoGameFramework
                                 }
                                 else if(status == NetConnectionStatus.Disconnected)
                                 {
-                                    _logger.LogInformation("Server " + im.SenderConnection.RemoteUniqueIdentifier + " Disconnected");
+                                    _logger.LogInformation($"{_config.AppIdentifier} {im.SenderConnection.RemoteUniqueIdentifier} Disconnected");
                                     _connections.Remove(im.SenderConnection.RemoteUniqueIdentifier);
                                 }
 
