@@ -64,6 +64,7 @@ namespace Mmogf
             var forward = Input.GetAxis("Vertical");
             var heading = Input.GetAxis("Horizontal");
             Forward = forward;
+            var position = transform.position;
 
             bool hasUpdate = false;
             if(forward != moveState.Forward)
@@ -74,6 +75,13 @@ namespace Mmogf
             if(heading != moveState.Heading)
             {
                 moveState.Heading = heading;
+                hasUpdate = true;
+            }
+
+            var position3d = position.ToVector3d(Server);
+            if (position3d != moveState.DesiredPosition)
+            {
+                moveState.DesiredPosition = position3d;
                 hasUpdate = true;
             }
 

@@ -15,6 +15,9 @@ namespace Mmogf
         [SerializeField]
         Rigidbody _rigidbody;
 
+        float _desiredDistanceThreshold = 1.0f;
+        bool _restrictVertical = true;
+
         // Update is called once per frame
         void Update()
         {
@@ -31,7 +34,23 @@ namespace Mmogf
         {
             var moveState = (MovementState)Entity.Data[MovementState.ComponentId];
 
+            var desiredPosition = moveState.DesiredPosition.ToVector3(Server);
+
             var forward = moveState.Forward * transform.forward;
+
+            
+            var desiredDirection = desiredPosition - transform.position;
+            if(_restrictVertical)
+                desiredDirection.y = 0;
+
+            //check tolerance variable
+            if (desiredDirection.sqrMagnitude > _desiredDistanceThreshold * _desiredDistanceThreshold)
+            {
+                desiredDirection.Normalize();
+
+                forward += desiredDirection;
+                forward.Normalize();
+            }
 
             _rigidbody.velocity = (forward * _moveSpeed);
         }
