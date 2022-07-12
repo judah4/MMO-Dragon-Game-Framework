@@ -57,11 +57,13 @@ namespace Mmogf
 
         private void FixedUpdate()
         {
+            var move = _moveSpeed;
+
             if (!_alive)
-                return;
+                move = 0;
             //if(_rigidbody.velocity.magnitude > _moveSpeed)
             //    return;
-            _rigidbody.velocity = (transform.forward * _moveSpeed);
+            _rigidbody.velocity = (transform.forward * move);
 
         }
     }
