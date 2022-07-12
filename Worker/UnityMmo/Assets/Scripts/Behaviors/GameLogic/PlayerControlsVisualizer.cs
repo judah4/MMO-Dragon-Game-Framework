@@ -63,6 +63,12 @@ namespace Mmogf
 
             var forward = Input.GetAxis("Vertical");
             var heading = Input.GetAxis("Horizontal");
+            var health = (Health)Entity.Data[Health.ComponentId];
+            if (health.Current <= 0)
+            {
+                forward = 0;
+                heading = 0;
+            }
             Forward = forward;
             var position = transform.position;
 
