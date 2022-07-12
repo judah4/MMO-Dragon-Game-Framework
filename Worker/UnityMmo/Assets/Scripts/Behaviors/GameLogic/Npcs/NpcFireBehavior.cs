@@ -11,6 +11,8 @@ namespace Mmogf
         float _fireTimer = 1f;
         bool left = false;
 
+        bool _alive = true;
+
         void OnEnable()
         {
         }
@@ -18,6 +20,15 @@ namespace Mmogf
         void Update()
         {
             if(!HasAuthority(Cannon.ComponentId))
+                return;
+
+            if (Entity.Data.ContainsKey(Health.ComponentId))
+            {
+                var health = (Health)Entity.Data[Health.ComponentId];
+                _alive = health.Current > 0;
+            }
+
+            if (!_alive)
                 return;
 
             _fireTimer -= Time.deltaTime;

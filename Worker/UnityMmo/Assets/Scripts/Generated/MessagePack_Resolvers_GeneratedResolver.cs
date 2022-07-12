@@ -49,7 +49,7 @@ namespace MessagePack.Resolvers
 
         static GeneratedResolverGetFormatterHelper()
         {
-            lookup = new global::System.Collections.Generic.Dictionary<Type, int>(15)
+            lookup = new global::System.Collections.Generic.Dictionary<Type, int>(17)
             {
                 { typeof(global::Mmogf.FireCommandRequest?), 0 },
                 { typeof(global::Mmogf.Nothing?), 1 },
@@ -66,6 +66,8 @@ namespace MessagePack.Resolvers
                 { typeof(global::Mmogf.Nothing), 12 },
                 { typeof(global::Mmogf.TakeDamageRequest), 13 },
                 { typeof(global::Mmogf.TakeDamageResponse), 14 },
+                { typeof(global::Mmogf.Vector3d), 15 },
+                { typeof(global::Mmogf.Vector3f), 16 },
             };
         }
 
@@ -94,6 +96,8 @@ namespace MessagePack.Resolvers
                 case 12: return new MessagePack.Formatters.Mmogf.NothingFormatter();
                 case 13: return new MessagePack.Formatters.Mmogf.TakeDamageRequestFormatter();
                 case 14: return new MessagePack.Formatters.Mmogf.TakeDamageResponseFormatter();
+                case 15: return new MessagePack.Formatters.Mmogf.Vector3dFormatter();
+                case 16: return new MessagePack.Formatters.Mmogf.Vector3fFormatter();
                 default: return null;
             }
         }

@@ -19,19 +19,18 @@ namespace MessagePack.Formatters.Mmogf
     using global::System.Buffers;
     using global::MessagePack;
 
-    public sealed class MovementStateFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Mmogf.MovementState>
+    public sealed class Vector3fFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Mmogf.Vector3f>
     {
 
-        public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Mmogf.MovementState value, global::MessagePack.MessagePackSerializerOptions options)
+        public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Mmogf.Vector3f value, global::MessagePack.MessagePackSerializerOptions options)
         {
-            global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
             writer.WriteArrayHeader(3);
-            writer.Write(value.Forward);
-            writer.Write(value.Heading);
-            formatterResolver.GetFormatterWithVerify<global::Mmogf.Vector3d>().Serialize(ref writer, value.DesiredPosition, options);
+            writer.Write(value.X);
+            writer.Write(value.Y);
+            writer.Write(value.Z);
         }
 
-        public global::Mmogf.MovementState Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
+        public global::Mmogf.Vector3f Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
         {
             if (reader.TryReadNil())
             {
@@ -39,22 +38,21 @@ namespace MessagePack.Formatters.Mmogf
             }
 
             options.Security.DepthStep(ref reader);
-            global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
             var length = reader.ReadArrayHeader();
-            var ____result = new global::Mmogf.MovementState();
+            var ____result = new global::Mmogf.Vector3f();
 
             for (int i = 0; i < length; i++)
             {
                 switch (i)
                 {
                     case 0:
-                        ____result.Forward = reader.ReadSingle();
+                        ____result.X = reader.ReadSingle();
                         break;
                     case 1:
-                        ____result.Heading = reader.ReadSingle();
+                        ____result.Y = reader.ReadSingle();
                         break;
                     case 2:
-                        ____result.DesiredPosition = formatterResolver.GetFormatterWithVerify<global::Mmogf.Vector3d>().Deserialize(ref reader, options);
+                        ____result.Z = reader.ReadSingle();
                         break;
                     default:
                         reader.Skip();
