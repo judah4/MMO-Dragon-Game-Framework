@@ -30,6 +30,7 @@ namespace MmoGameFramework
                 })
                 .Build();
 
+
             var logger = host.Services.GetRequiredService<ILogger<Program>>();
 
                 Console.WriteLine(
@@ -44,7 +45,8 @@ namespace MmoGameFramework
                  |___/                          
 ");
 
-
+            var version = System.Reflection.Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "1.0.0";
+            logger.LogInformation($"Dragon Game Framework MMO Networking Version {version}");
             logger.LogInformation("Attaching Entity Storage.");
             _entityStore = new EntityStore(host.Services.GetRequiredService<ILogger<EntityStore>>());
 
@@ -64,6 +66,15 @@ namespace MmoGameFramework
             logger.LogDebug("Creating Test Cube.");
             //create starter objects
             _entityStore.Create("Cube", new Position() {X = 3, Z = 3}, new List<Acl>()
+            {
+                new Acl() { ComponentId = Position.ComponentId, WorkerType = "Dragon-Worker" },
+                new Acl() { ComponentId = Rotation.ComponentId, WorkerType = "Dragon-Worker" },
+                new Acl() { ComponentId = Acls.ComponentId, WorkerType = "Dragon-Worker" },
+            });
+
+            logger.LogDebug("Creating Test Npc Spawner.");
+            //create starter objects
+            _entityStore.Create("NpcSpawner", new Position() { X = -3, Y = 0, Z = -25 }, new List<Acl>()
             {
                 new Acl() { ComponentId = Position.ComponentId, WorkerType = "Dragon-Worker" },
                 new Acl() { ComponentId = Rotation.ComponentId, WorkerType = "Dragon-Worker" },

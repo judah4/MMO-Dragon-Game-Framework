@@ -1,10 +1,28 @@
 using MessagePack;
+using Mmogf.Core;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace Mmogf
 {
+
+    [MessagePackObject]
+    public struct TakeDamageResponse
+    {
+        [Key(0)]
+        public bool Dead { get; set; }
+        [Key(1)]
+        public bool Killed { get; set; }
+    }
+
+    [MessagePackObject]
+    public struct TakeDamageRequest
+    {
+        [Key(0)]
+        public int Amount { get; set; }
+    }
+
     [MessagePackObject]
     public struct Health : IEntityComponent
     {
@@ -22,13 +40,16 @@ namespace Mmogf
         #region Commands
 
         [MessagePackObject]
-        public struct TakeDamageCommand : ICommand
+        public struct TakeDamageCommand : ICommandBase<TakeDamageRequest, TakeDamageResponse>
         {
             public const int CommandId = 10002;
             public int GetCommandId() => CommandId;
 
             [Key(0)]
-            public int Amount { get; set; }
+            public TakeDamageRequest? Request { get; set; }
+            [Key(1)]
+            public TakeDamageResponse? Response { get; set; }
+
         }
 
         #endregion

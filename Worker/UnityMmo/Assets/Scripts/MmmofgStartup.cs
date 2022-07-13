@@ -58,7 +58,7 @@ namespace Mmogf
             ComponentMappings.Init(types);
         }
 
-        static World.CreateEntity CreatePlayer(PlayerCreator.ConnectPlayer connect, CommandRequest request)
+        static CreateEntityRequest CreatePlayer(PlayerCreator.ConnectPlayer connect, CommandRequest request)
         {
             var clientId = request.RequesterId;
 
@@ -67,13 +67,13 @@ namespace Mmogf
 
             Debug.Log($"Creating Player {clientId}");
 
-            var createEntity = new World.CreateEntity("Player", new Position() { Y = 0, }, Rotation.Identity,
+            var createEntity = new CreateEntityRequest("Player", new Position() { Y = 0, }, Rotation.Identity,
                 new Dictionary<int, byte[]>()
                 {
                     { Cannon.ComponentId, MessagePack.MessagePackSerializer.Serialize(new Cannon()) },
                     { Health.ComponentId, MessagePack.MessagePackSerializer.Serialize(new Health() { Current = 100, Max = 100, }) },
                     { ClientAuthCheck.ComponentId, MessagePack.MessagePackSerializer.Serialize(new ClientAuthCheck() {  WorkerId = clientId, }) },
-                    { MovementState.ComponentId, MessagePack.MessagePackSerializer.Serialize(new MovementState() {  Forward = 0, Heading = 0, }) },
+                    { MovementState.ComponentId, MessagePack.MessagePackSerializer.Serialize(new MovementState() {  Forward = 0, Heading = 0, DesiredPosition = new Vector3d() { Y = 0, } }) },
                     { PlayerHeartbeatServer.ComponentId, MessagePack.MessagePackSerializer.Serialize(new PlayerHeartbeatServer() { MissedHeartbeats = 0 }) },
                     { PlayerHeartbeatClient.ComponentId, MessagePack.MessagePackSerializer.Serialize(new PlayerHeartbeatClient() { }) },
                 },
@@ -89,7 +89,7 @@ namespace Mmogf
                     new Acl() { ComponentId = PlayerHeartbeatServer.ComponentId, WorkerType = "Dragon-Worker" },
                     new Acl() { ComponentId = PlayerHeartbeatClient.ComponentId, WorkerType = $"Dragon-Client", WorkerId = clientId, },
 
-                });
+                } );
 
             return createEntity;
         }

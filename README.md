@@ -49,3 +49,13 @@ MmogfMessages
 -o
 Scripts/Generated
 
+# Docker Build
+
+Build Server build in the `Builds/Linux` folder.  
+Run in the main folder.  
+
+
+`docker build -f Docker/Worker/Dockerfile -t cookiedragon/testgame:v0.0.8 -t cookiedragon/testgame:latest .`
+
+`docker build -f Docker/MainServer/Dockerfile -t cookiedragon/dragongf:v0.0.8 -t cookiedragon/dragongf:latest .`
+

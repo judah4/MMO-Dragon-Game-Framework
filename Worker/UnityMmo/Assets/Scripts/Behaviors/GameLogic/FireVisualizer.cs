@@ -8,9 +8,9 @@ using UnityEngine;
 
 public class FireVisualizer : BaseEntityBehavior
 {
-    [SerializeField]
-    private Cannonball _cannonballPrefab;
 
+    [SerializeField]
+    private CannonFiring _cannonFiring;
 
     void OnEnable()
     {
@@ -28,13 +28,24 @@ public class FireVisualizer : BaseEntityBehavior
 
         if (Input.GetKeyDown(KeyCode.Q))
         {
-            Server.SendCommand(Entity.EntityId, Cannon.ComponentId, new Cannon.FireCommand() { Left = true }, response => {
+            Server.SendCommand<Cannon.FireCommand,FireCommandRequest,Nothing>(Entity.EntityId, Cannon.ComponentId, new FireCommandRequest() { Left = true }, result => {
+                if(result.CommandStatus != CommandStatus.Success)
+                {
+                    Debug.LogError($"{result.CommandId}: {result.CommandStatus} - {result.Message}");
+                    return;
+                }
+                //how should we check the response?
                 Debug.Log("Fired Cannon Left!");
             });
         }
         if (Input.GetKeyDown(KeyCode.E))
         {
-            Server.SendCommand(Entity.EntityId, Cannon.ComponentId, new Cannon.FireCommand() { Left = false }, response => {
+            Server.SendCommand<Cannon.FireCommand, FireCommandRequest, Nothing>(Entity.EntityId, Cannon.ComponentId,  new FireCommandRequest() { Left = false }, result => {
+                if (result.CommandStatus != CommandStatus.Success)
+                {
+                    Debug.LogError($"{result.CommandId}: {result.CommandStatus} - {result.Message}");
+                    return;
+                }
                 Debug.Log("Fired Cannon Right!");
             });
         }
@@ -65,25 +76,7 @@ public class FireVisualizer : BaseEntityBehavior
 
     private void HandleFireEvent(EventRequest request, Cannon.FireEvent payload)
     {
-        Debug.Log($"Fire cannon event! Left:{payload.Left} {request.EntityId}:{Entity.EntityId}");
 
-        var offset = Vector3.right;
-        if(payload.Left)
-        {
-            offset = Vector3.left;
-        }
-
-        offset += Vector3.up;
-
-        var point = transform.TransformPoint(offset);
-
-        var cannonBall = Instantiate(_cannonballPrefab, point, transform.rotation);
-        var velocity = Vector3.right * 20;
-        if (payload.Left)
-        {
-            velocity *= -1;
-        }
-        var vel = transform.TransformDirection(velocity);
-        cannonBall.Rigidbody.velocity = vel;
+        _cannonFiring.SpawnCannonball(payload.Left);
     }
 }

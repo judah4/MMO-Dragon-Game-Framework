@@ -24,8 +24,10 @@ namespace MessagePack.Formatters.Mmogf
 
         public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Mmogf.Health.TakeDamageCommand value, global::MessagePack.MessagePackSerializerOptions options)
         {
-            writer.WriteArrayHeader(1);
-            writer.Write(value.Amount);
+            global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
+            writer.WriteArrayHeader(2);
+            formatterResolver.GetFormatterWithVerify<global::Mmogf.TakeDamageRequest?>().Serialize(ref writer, value.Request, options);
+            formatterResolver.GetFormatterWithVerify<global::Mmogf.TakeDamageResponse?>().Serialize(ref writer, value.Response, options);
         }
 
         public global::Mmogf.Health.TakeDamageCommand Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
@@ -36,6 +38,7 @@ namespace MessagePack.Formatters.Mmogf
             }
 
             options.Security.DepthStep(ref reader);
+            global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
             var length = reader.ReadArrayHeader();
             var ____result = new global::Mmogf.Health.TakeDamageCommand();
 
@@ -44,7 +47,10 @@ namespace MessagePack.Formatters.Mmogf
                 switch (i)
                 {
                     case 0:
-                        ____result.Amount = reader.ReadInt32();
+                        ____result.Request = formatterResolver.GetFormatterWithVerify<global::Mmogf.TakeDamageRequest?>().Deserialize(ref reader, options);
+                        break;
+                    case 1:
+                        ____result.Response = formatterResolver.GetFormatterWithVerify<global::Mmogf.TakeDamageResponse?>().Deserialize(ref reader, options);
                         break;
                     default:
                         reader.Skip();

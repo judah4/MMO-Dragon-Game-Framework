@@ -6,6 +6,13 @@ using UnityEngine;
 namespace Mmogf.Core
 {
     [MessagePackObject]
+    public struct ConnectPlayerRequest
+    {
+        [Key(0)]
+        public string PlayerId { get; set; }
+    }
+
+    [MessagePackObject]
     public struct PlayerCreator : IEntityComponent
     {
 
@@ -13,15 +20,16 @@ namespace Mmogf.Core
         public int GetComponentId() => ComponentId;
 
         [MessagePackObject]
-        public struct ConnectPlayer : ICommand
+        public struct ConnectPlayer : ICommandBase<ConnectPlayerRequest, NothingInternal>
         {
             public const int CommandId = 103;
             public int GetCommandId() => CommandId;
 
             [Key(0)]
-            public string PlayerId { get; set; }
+            public ConnectPlayerRequest? Request { get; set; }
 
-
+            [Key(1)]
+            public NothingInternal? Response { get; set; }
         }
 
     }

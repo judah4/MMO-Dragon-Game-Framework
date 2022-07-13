@@ -1,0 +1,18 @@
+{
+    "name": "Mmogf.Generated",
+    "rootNamespace": "",
+    "references": [
+        "GUID:bbde805d927e795439d7a746d1749cab",
+        "GUID:4707a6ec32ddeb949a0fb8ecc251f550",
+        "GUID:0f7ae4401108d7e43821fc8b718ea44e"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

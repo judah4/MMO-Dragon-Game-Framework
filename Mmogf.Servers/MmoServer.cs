@@ -106,7 +106,7 @@ namespace MmoGameFramework
                                 }
                                 else if(status == NetConnectionStatus.Disconnected)
                                 {
-                                    _logger.LogInformation("Server " + im.SenderConnection.RemoteUniqueIdentifier + " Disconnected");
+                                    _logger.LogInformation($"{_config.AppIdentifier} {im.SenderConnection.RemoteUniqueIdentifier} Disconnected");
                                     _connections.Remove(im.SenderConnection.RemoteUniqueIdentifier);
                                 }
 
@@ -268,18 +268,21 @@ namespace MmoGameFramework
                 case World.CreateEntity.CommandId:
                     var createEntity = MessagePackSerializer.Deserialize<World.CreateEntity>(commandRequest.Payload);
 
-                    var entityInfo = _entities.Create(createEntity.EntityType, createEntity.Position, createEntity.Acls, createEntity.Rotation, createEntity.Components);
+                    var requestPayload = createEntity.Request.Value;
+                    var entityInfo = _entities.Create(requestPayload.EntityType, requestPayload.Position, requestPayload.Acls, requestPayload.Rotation, requestPayload.Components);
                     _entities.UpdateEntity(entityInfo);
+                    createEntity.Response = new NothingInternal();
                     Send(im.SenderConnection, new MmoMessage()
                     {
                         MessageId = ServerCodes.EntityCommandResponse,
-                        Info = MessagePackSerializer.Serialize(CommandResponse.Create(commandRequest, CommandStatus.Success, "", MessagePackSerializer.Serialize(entityInfo))),
+                        Info = MessagePackSerializer.Serialize(CommandResponse.Create(commandRequest, CommandStatus.Success, "", MessagePackSerializer.Serialize(createEntity))),
                     }, NetDeliveryMethod.ReliableOrdered);
                     break;
                 case World.DeleteEntity.CommandId:
                     var deleteEntity = MessagePackSerializer.Deserialize<World.DeleteEntity>(commandRequest.Payload);
-
-                    _entities.Delete(deleteEntity.EntityId);
+                    var deleteRequestPayload = deleteEntity.Request.Value;
+                    _entities.Delete(deleteRequestPayload.EntityId);
+                    deleteEntity.Response = new NothingInternal();
                     Send(im.SenderConnection, new MmoMessage()
                     {
                         MessageId = ServerCodes.EntityCommandResponse,
@@ -364,14 +367,14 @@ namespace MmoGameFramework
 
         }
 
-        public void Send(NetConnection connection, MmoMessage message, NetDeliveryMethod deliveryMethod = NetDeliveryMethod.UnreliableSequenced)
+        public void Send(NetConnection connection, MmoMessage message, NetDeliveryMethod deliveryMethod = NetDeliveryMethod.Unreliable)
         {
             NetOutgoingMessage om = s_server.CreateMessage();
             om.Write(MessagePackSerializer.Serialize(message));
             s_server.SendMessage(om, connection, deliveryMethod);
         }
 
-        public void SendCheckedout(int entityId, MmoMessage message, NetDeliveryMethod deliveryMethod = NetDeliveryMethod.UnreliableSequenced)
+        public void SendCheckedout(int entityId, MmoMessage message, NetDeliveryMethod deliveryMethod = NetDeliveryMethod.Unreliable)
         {
             var connections = new List<NetConnection>();
             foreach (var workerConnection in _connections)
@@ -390,7 +393,7 @@ namespace MmoGameFramework
             s_server.SendMessage(om, connections, deliveryMethod, 0);
         }
 
-        public void SendArea(Position position, MmoMessage message, NetDeliveryMethod deliveryMethod = NetDeliveryMethod.UnreliableSequenced)
+        public void SendArea(Position position, MmoMessage message, NetDeliveryMethod deliveryMethod = NetDeliveryMethod.Unreliable)
         {
             var connections = new List<NetConnection>();
             foreach (var workerConnection in _connections)

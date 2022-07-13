@@ -8,8 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MessagePack" Version="2.3.85" />
-    <PackageReference Include="MessagePack.UnityShims" Version="2.3.85" />
+    <PackageReference Include="MessagePack" Version="2.4.35" />
+    <PackageReference Include="MessagePack.UnityShims" Version="2.4.35" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.1" />
   </ItemGroup>
 	<ItemGroup>
