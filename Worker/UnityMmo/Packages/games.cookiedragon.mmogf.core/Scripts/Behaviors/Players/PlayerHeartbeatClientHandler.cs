@@ -13,6 +13,8 @@ namespace Mmogf.Core
             if (!hasAuth)
                 return;
 
+            Server.UpdateInterestArea(transform.position);
+
             for (int cnt = 0; cnt < Server.CommandRequests.Count; cnt++)
             {
                 if (Server.CommandRequests[cnt].ComponentId != PlayerHeartbeatClient.ComponentId)
