@@ -7,8 +7,9 @@ using UnityEngine;
 
 public class FireBehavior: BaseEntityBehavior
 {
+
     [SerializeField]
-    private Cannonball _cannonballPrefab;
+    private CannonFiring _cannonFiring;
 
     //get command requests
 
@@ -74,24 +75,7 @@ public class FireBehavior: BaseEntityBehavior
     private void HandleFireEvent(EventRequest request, Cannon.FireEvent payload)
     {
 
-        var offset = Vector3.right;
-        if (payload.Left)
-        {
-            offset = Vector3.left;
-        }
-
-        offset += Vector3.up;
-
-        var point = transform.TransformPoint(offset);
-
-        var cannonBall = Instantiate(_cannonballPrefab, point, transform.rotation);
-        var velocity = Vector3.right * 20;
-        if (payload.Left)
-        {
-            velocity *= -1;
-        }
-        var vel = transform.TransformDirection(velocity);
-        cannonBall.Rigidbody.velocity = vel;
+        var cannonBall = _cannonFiring.SpawnCannonball(payload.Left);
 
         cannonBall.InitServer(this);
     }

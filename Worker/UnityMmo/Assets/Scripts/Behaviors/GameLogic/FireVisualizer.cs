@@ -8,9 +8,9 @@ using UnityEngine;
 
 public class FireVisualizer : BaseEntityBehavior
 {
-    [SerializeField]
-    private Cannonball _cannonballPrefab;
 
+    [SerializeField]
+    private CannonFiring _cannonFiring;
 
     void OnEnable()
     {
@@ -77,23 +77,6 @@ public class FireVisualizer : BaseEntityBehavior
     private void HandleFireEvent(EventRequest request, Cannon.FireEvent payload)
     {
 
-        var offset = Vector3.right;
-        if(payload.Left)
-        {
-            offset = Vector3.left;
-        }
-
-        offset += Vector3.up;
-
-        var point = transform.TransformPoint(offset);
-
-        var cannonBall = Instantiate(_cannonballPrefab, point, transform.rotation);
-        var velocity = Vector3.right * 20;
-        if (payload.Left)
-        {
-            velocity *= -1;
-        }
-        var vel = transform.TransformDirection(velocity);
-        cannonBall.Rigidbody.velocity = vel;
+        _cannonFiring.SpawnCannonball(payload.Left);
     }
 }

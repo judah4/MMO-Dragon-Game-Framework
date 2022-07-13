@@ -56,6 +56,7 @@ GameObject:
   - component: {fileID: 8996421462683477820}
   - component: {fileID: 4554638122471124575}
   - component: {fileID: 6662192356099069703}
+  - component: {fileID: 5976855078229735171}
   - component: {fileID: 5169813786116534384}
   m_Layer: 0
   m_Name: Ship
@@ -107,6 +108,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _cannonballPrefab: {fileID: -7254135308357062617, guid: 2736b783467f3d540b562b86e7f2ac5f,
     type: 3}
+  _cannonFiring: {fileID: 5976855078229735171}
+--- !u!114 &5976855078229735171
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4450589379758597687}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11c5bfe57b756a641ab2167279ae172b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _cannonballPrefab: {fileID: -7254135308357062617, guid: 2736b783467f3d540b562b86e7f2ac5f,
+    type: 3}
+  _fireSpreadRange: 1.2
+  _numberOfCannons: 2
+  _fireNumber: 0
 --- !u!114 &5169813786116534384
 MonoBehaviour:
   m_ObjectHideFlags: 0
