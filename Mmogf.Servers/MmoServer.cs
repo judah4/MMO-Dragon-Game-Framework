@@ -367,14 +367,14 @@ namespace MmoGameFramework
 
         }
 
-        public void Send(NetConnection connection, MmoMessage message, NetDeliveryMethod deliveryMethod = NetDeliveryMethod.UnreliableSequenced)
+        public void Send(NetConnection connection, MmoMessage message, NetDeliveryMethod deliveryMethod = NetDeliveryMethod.Unreliable)
         {
             NetOutgoingMessage om = s_server.CreateMessage();
             om.Write(MessagePackSerializer.Serialize(message));
             s_server.SendMessage(om, connection, deliveryMethod);
         }
 
-        public void SendCheckedout(int entityId, MmoMessage message, NetDeliveryMethod deliveryMethod = NetDeliveryMethod.UnreliableSequenced)
+        public void SendCheckedout(int entityId, MmoMessage message, NetDeliveryMethod deliveryMethod = NetDeliveryMethod.Unreliable)
         {
             var connections = new List<NetConnection>();
             foreach (var workerConnection in _connections)
@@ -393,7 +393,7 @@ namespace MmoGameFramework
             s_server.SendMessage(om, connections, deliveryMethod, 0);
         }
 
-        public void SendArea(Position position, MmoMessage message, NetDeliveryMethod deliveryMethod = NetDeliveryMethod.UnreliableSequenced)
+        public void SendArea(Position position, MmoMessage message, NetDeliveryMethod deliveryMethod = NetDeliveryMethod.Unreliable)
         {
             var connections = new List<NetConnection>();
             foreach (var workerConnection in _connections)

@@ -19,6 +19,8 @@ namespace Mmogf
 
         [SerializeField]
         Rigidbody _rigidbody;
+        [SerializeField]
+        UiManager _uiManager;
 
         bool inited = false;
 
@@ -34,6 +36,12 @@ namespace Mmogf
             }
 
             Entity.OnEntityUpdate += Entity_OnEntityUpdate;
+
+            _uiManager = Object.FindObjectOfType<UiManager>();
+            if(_uiManager != null)
+            {
+                _uiManager.AttachPlayer(this);
+            }
 
         }
 
@@ -59,7 +67,7 @@ namespace Mmogf
         {
             inputTimer -= Time.deltaTime;
 
-            var moveState = (MovementState)Entity.Data[MovementState.ComponentId];
+            var moveState = GetEntityComponent<MovementState>(MovementState.ComponentId).Value;
 
             var forward = Input.GetAxis("Vertical");
             var heading = Input.GetAxis("Horizontal");
