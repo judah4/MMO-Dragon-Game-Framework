@@ -20,7 +20,7 @@ namespace Mmogf
         // Update is called once per frame
         void Update()
         {
-
+            #if UNITY_EDITOR
             //debugging
             if (Input.GetKeyDown(KeyCode.Z))
             {
@@ -77,7 +77,7 @@ namespace Mmogf
                     }
                 }
             }
-
+            #endif
         }
 
         Quaternion RandomHeading()
