@@ -41,7 +41,7 @@ namespace Mmogf
 
         public static bool operator ==(Vector3d first, Vector3d second)
         {
-            return Equals(first, second);
+            return first.Equals(second);
         }
         public static bool operator !=(Vector3d first, Vector3d second)
         {

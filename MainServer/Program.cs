@@ -72,6 +72,15 @@ namespace MmoGameFramework
                 new Acl() { ComponentId = Acls.ComponentId, WorkerType = "Dragon-Worker" },
             });
 
+            logger.LogDebug("Creating Test Npc Spawner.");
+            //create starter objects
+            _entityStore.Create("NpcSpawner", new Position() { X = -3, Y = 0, Z = -25 }, new List<Acl>()
+            {
+                new Acl() { ComponentId = Position.ComponentId, WorkerType = "Dragon-Worker" },
+                new Acl() { ComponentId = Rotation.ComponentId, WorkerType = "Dragon-Worker" },
+                new Acl() { ComponentId = Acls.ComponentId, WorkerType = "Dragon-Worker" },
+            });
+
             logger.LogInformation("Starting Dragon-Client connections. Port 1337");
             // create and start the server
             server = new MmoServer(_entityStore, new NetPeerConfiguration("Dragon-Client")

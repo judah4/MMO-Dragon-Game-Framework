@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: -8345717820305908343}
   - component: {fileID: -6416508510946945869}
   - component: {fileID: 4733243311960138504}
+  - component: {fileID: 1526328508417754731}
   - component: {fileID: 4713369444726590701}
   - component: {fileID: 9007387733716159937}
   m_Layer: 0
@@ -66,6 +67,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _cannonballPrefab: {fileID: -7254135308357062617, guid: 2736b783467f3d540b562b86e7f2ac5f,
     type: 3}
+  _cannonFiring: {fileID: 1526328508417754731}
 --- !u!114 &-8345717820305908343
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -106,6 +108,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 51316792de83c474f842fa165bf4b829, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1526328508417754731
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4450589379758597687}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11c5bfe57b756a641ab2167279ae172b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _cannonballPrefab: {fileID: -7254135308357062617, guid: 2736b783467f3d540b562b86e7f2ac5f,
+    type: 3}
+  _fireSpreadRange: 1.2
+  _numberOfCannons: 2
+  _fireNumber: 0
 --- !u!65 &4713369444726590701
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -127,7 +146,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4450589379758597687}
   serializedVersion: 2
-  m_Mass: 1
+  m_Mass: 100
   m_Drag: 0
   m_AngularDrag: 0.05
   m_UseGravity: 1
