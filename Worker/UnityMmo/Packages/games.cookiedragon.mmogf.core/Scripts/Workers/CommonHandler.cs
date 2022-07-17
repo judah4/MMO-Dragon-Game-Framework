@@ -238,7 +238,8 @@ namespace Mmogf.Core
             {
                 _interestCenter = position;
                 //adjust position this way to not lose precision
-                var sendPos = PositionToServer(position);
+                //var sendPos = PositionToServer(position);
+                var sendPos = new Position() { X = (double)position.x, Y = (double)position.y, Z = (double)position.z, };
                 Client.SendInterestChange(sendPos);
             }
 
