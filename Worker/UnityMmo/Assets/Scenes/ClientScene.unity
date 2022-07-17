@@ -317,10 +317,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 0}
-  distance: 10
+  distance: 15
   height: 5
-  rotationDamping: 0
-  heightDamping: 0
+  rotationDamping: 10
+  heightDamping: 10
 --- !u!114 &534669907
 MonoBehaviour:
   m_ObjectHideFlags: 0

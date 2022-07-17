@@ -12,9 +12,9 @@ services:
 
   dragon-test-game:
       image: cookiedragon/testgame:latest
-      command: --hostIp=127.0.0.1
+      command: --hostIp=172.31.0.1
       restart: unless-stopped
-      links:
+      depends_on:
         - dragon-server
       environment: 
         VIRTUAL_HOST: value-test=asdf
