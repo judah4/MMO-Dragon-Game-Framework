@@ -59,3 +59,4 @@ Run in the main folder.
 
 `docker build -f Docker/MainServer/Dockerfile -t cookiedragon/dragongf:v0.0.8 -t cookiedragon/dragongf:latest .`
 
+`docker compose -f Docker/Compose/docker-compose.yml up -d`

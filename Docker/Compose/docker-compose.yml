@@ -12,7 +12,7 @@ services:
 
   dragon-test-game:
       image: cookiedragon/testgame:latest
-      command: --hostIp=172.31.0.1
+      command: --hostIp=172.31.0.1    #Make sure this is your local ip for testing. This is my wsl ip for docker
       restart: unless-stopped
       depends_on:
         - dragon-server
