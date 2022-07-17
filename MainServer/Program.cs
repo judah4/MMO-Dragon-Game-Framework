@@ -99,23 +99,12 @@ namespace MmoGameFramework
 
             logger.LogInformation("DragonGF is ready.");
             bool loop = true;
-            logger.LogInformation("ESC to close.");
 
             while (loop)
             {
-                try
-                {
-                    var key = Console.ReadKey();
-                    if (key.Key == ConsoleKey.Escape)
-                    {
-                        loop = false;
-                        break;
-                    }
-                }
-                catch (Exception e)
-                {
-                    logger.LogError(e, e.Message);
-                }
+                //how do we want to quit?
+                var task = Task.CompletedTask;
+                task.Wait();
                
             }
 

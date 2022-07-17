@@ -18,7 +18,7 @@ namespace MmoGameFramework
         {
             ConnectionType = connectionType;
             InterestPosition = interestPosition;
-            InterestRange = 150;
+            InterestRange = 500;
             Connection = senderConnection;
             EntitiesInRange = new HashSet<int>();
         }

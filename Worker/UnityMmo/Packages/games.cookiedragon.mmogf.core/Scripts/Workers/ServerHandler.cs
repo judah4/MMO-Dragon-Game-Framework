@@ -7,7 +7,9 @@ namespace Mmogf.Core
 {
     public class ServerHandler : CommonHandler
     {
-    
+        protected override void OnConnect()
+        {
+        }
     }
 
 }

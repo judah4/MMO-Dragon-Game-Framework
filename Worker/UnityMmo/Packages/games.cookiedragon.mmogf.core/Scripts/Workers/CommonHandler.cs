@@ -11,6 +11,7 @@ namespace Mmogf.Core
     {
         public GameObjectRepresentation GameObjectRepresentation { get; protected set; }
         public Vector3 InterestCenter => _interestCenter;
+        public bool UpdateInterestFromPosition => _updateInterestFromPosition;
 
         protected MmoWorker Client;
         protected float ConnectDelay = 0;
@@ -28,6 +29,9 @@ namespace Mmogf.Core
 
         [SerializeField]
         private Vector3 _interestCenter = Vector3.zero;
+        [SerializeField]
+        private bool  _updateInterestFromPosition;
+
 
 
         public long ClientId
@@ -66,11 +70,12 @@ namespace Mmogf.Core
 
             if (Application.isEditor == false)
             {
-                var newIp = GetArg("hostIp");
-                var newPort = GetArg("hostPort");
+                var newIp = GetArg("--hostIp");
+                var newPort = GetArg("--hostPort");
 
                 if (newIp != null)
                 {
+                    Debug.Log($"Setting IP {newIp}");
                     ipAddress = newIp;
                 }
 
@@ -79,6 +84,7 @@ namespace Mmogf.Core
                     short portTemp;
                     if (short.TryParse(newPort, out portTemp))
                     {
+                        Debug.Log($"Setting Port {portTemp}");
                         port = portTemp;
                     }
                 }
@@ -87,6 +93,7 @@ namespace Mmogf.Core
             // update even if window isn't focused, otherwise we don't receive.
             Application.runInBackground = true;
 
+            Debug.Log($"Connecting to {ipAddress}:{port}");
 
             GameObjectRepresentation = new GameObjectRepresentation(this);
 
@@ -161,7 +168,12 @@ namespace Mmogf.Core
 
         void OnConnectHandle()
         {
-            UpdateInterestArea(transform.position);
+            var pos = Vector3.zero;
+            if(_updateInterestFromPosition)
+            {
+                pos = transform.position;
+            }
+            UpdateInterestArea(pos, true);
 
             OnConnect();
         }
@@ -203,21 +215,26 @@ namespace Mmogf.Core
         protected static string GetArg(string name)
         {
             var args = System.Environment.GetCommandLineArgs();
+            Debug.Log(string.Join(',', args));
             for (int i = 0; i < args.Length; i++)
             {
-                if (args[i] == name && args.Length > i + 1)
+                if(args[i] == null)
+                    continue;
+                if (args[i].StartsWith(name, System.StringComparison.InvariantCultureIgnoreCase) && args.Length > i)
                 {
-                    return args[i + 1];
+                    var splits = args[i].Split("=");
+
+                    return splits[splits.Length-1];
                 }
             }
             return null;
         }
 
-        public void UpdateInterestArea(Vector3 position)
+        public void UpdateInterestArea(Vector3 position, bool force = false)
         {
             var dif = _interestCenter - position;
 
-            if(dif.sqrMagnitude > 5f * 5f)
+            if(dif.sqrMagnitude > 5f * 5f || force)
             {
                 _interestCenter = position;
                 //adjust position this way to not lose precision
