@@ -13,7 +13,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.1" />
   </ItemGroup>
 	<ItemGroup>
-		<Compile Include="..\Worker\UnityMmo\Packages\games.cookiedragon.mmogf.core\MmogfMessages\Core\**\*.cs" LinkBase="Shared" />
+		<Compile Include="..\..\Worker\UnityMmo\Packages\games.cookiedragon.mmogf.core\MmogfMessages\Core\**\*.cs" LinkBase="Shared" />
 	</ItemGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\Mmogf\Mmogf.csproj" />

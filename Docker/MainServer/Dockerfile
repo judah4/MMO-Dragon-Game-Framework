@@ -9,13 +9,10 @@ ENV DOTNET_EnableDiagnostics=0
 FROM mcr.microsoft.com/dotnet/sdk:6.0  AS build
 
 WORKDIR /src
-COPY ["MainServer/MainServer.csproj", "MainServer/"]
-COPY ["/Libs/", "./Libs/"]
-COPY ["Mmogf.Servers/Mmogf.Servers.csproj", "Mmogf.Servers/"]
-COPY ["Mmogf/Mmogf.csproj", "Mmogf/"]
-RUN dotnet restore "MainServer/MainServer.csproj"
-COPY . .
-WORKDIR "/src/MainServer"
+COPY ["Mmo Game Framework/", "Mmo Game Framework/"]
+COPY ["Worker/UnityMmo/Packages/games.cookiedragon.mmogf.core/MmogfMessages/Core/", "Worker/UnityMmo/Packages/games.cookiedragon.mmogf.core/MmogfMessages/Core/"]
+RUN dotnet restore "Mmo Game Framework/MainServer/MainServer.csproj"
+WORKDIR "/src/Mmo Game Framework/MainServer"
 
 FROM build AS publish
 RUN dotnet publish "MainServer.csproj" -a x64 -c Release -o /app

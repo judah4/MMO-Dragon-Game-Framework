@@ -2,7 +2,7 @@ version: '3'
 
 services:
   dragon-server:
-    image: cookiedragon/dragongf:latest
+    image: ghcr.io/judah4/dragongf:latest
     ports:
       - "1337:1337/udp"
       - "1338:1338/udp"
@@ -11,7 +11,7 @@ services:
       - value-test=asdf
 
   dragon-test-game:
-      image: cookiedragon/testgame:latest
+      image: ghcr.io/judah4/testgame:latest
       command: --hostIp=172.31.0.1    #Make sure this is your local ip for testing. This is my wsl ip for docker
       restart: unless-stopped
       depends_on:
