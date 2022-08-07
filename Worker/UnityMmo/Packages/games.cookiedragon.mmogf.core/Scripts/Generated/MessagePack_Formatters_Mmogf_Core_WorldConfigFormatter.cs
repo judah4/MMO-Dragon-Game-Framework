@@ -19,19 +19,18 @@ namespace MessagePack.Formatters.Mmogf.Core
     using global::System.Buffers;
     using global::MessagePack;
 
-    public sealed class EntityWorldConfigFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Mmogf.Core.EntityWorldConfig>
+    public sealed class WorldConfigFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Mmogf.Core.WorldConfig>
     {
 
-        public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Mmogf.Core.EntityWorldConfig value, global::MessagePack.MessagePackSerializerOptions options)
+        public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Mmogf.Core.WorldConfig value, global::MessagePack.MessagePackSerializerOptions options)
         {
             global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
-            writer.WriteArrayHeader(3);
-            formatterResolver.GetFormatterWithVerify<string>().Serialize(ref writer, value.Name, options);
-            writer.Write(value.EntityId);
-            formatterResolver.GetFormatterWithVerify<global::System.Collections.Generic.Dictionary<int, byte[]>>().Serialize(ref writer, value.EntityData, options);
+            writer.WriteArrayHeader(2);
+            formatterResolver.GetFormatterWithVerify<string>().Serialize(ref writer, value.Version, options);
+            formatterResolver.GetFormatterWithVerify<global::System.Collections.Generic.List<global::Mmogf.Core.EntityWorldConfig>>().Serialize(ref writer, value.Entities, options);
         }
 
-        public global::Mmogf.Core.EntityWorldConfig Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
+        public global::Mmogf.Core.WorldConfig Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
         {
             if (reader.TryReadNil())
             {
@@ -41,20 +40,17 @@ namespace MessagePack.Formatters.Mmogf.Core
             options.Security.DepthStep(ref reader);
             global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
             var length = reader.ReadArrayHeader();
-            var ____result = new global::Mmogf.Core.EntityWorldConfig();
+            var ____result = new global::Mmogf.Core.WorldConfig();
 
             for (int i = 0; i < length; i++)
             {
                 switch (i)
                 {
                     case 0:
-                        ____result.Name = formatterResolver.GetFormatterWithVerify<string>().Deserialize(ref reader, options);
+                        ____result.Version = formatterResolver.GetFormatterWithVerify<string>().Deserialize(ref reader, options);
                         break;
                     case 1:
-                        ____result.EntityId = reader.ReadInt32();
-                        break;
-                    case 2:
-                        ____result.EntityData = formatterResolver.GetFormatterWithVerify<global::System.Collections.Generic.Dictionary<int, byte[]>>().Deserialize(ref reader, options);
+                        ____result.Entities = formatterResolver.GetFormatterWithVerify<global::System.Collections.Generic.List<global::Mmogf.Core.EntityWorldConfig>>().Deserialize(ref reader, options);
                         break;
                     default:
                         reader.Skip();

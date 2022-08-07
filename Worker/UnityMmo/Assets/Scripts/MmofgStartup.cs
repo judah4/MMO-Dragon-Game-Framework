@@ -9,22 +9,31 @@ namespace Mmogf
     public static class MmogfStartup
     {
         static bool serializerRegistered = false;
-
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        static void Initialize()
+        static bool setupRun = false;
+        public static void RegisterSerializers()
         {
-            if (!serializerRegistered)
-            {
-                StaticCompositeResolver.Instance.Register(
+            if(serializerRegistered)
+                return;
+
+            StaticCompositeResolver.Instance.Register(
                     MessagePack.Resolvers.MmogfCoreResolver.Instance,
                     MessagePack.Resolvers.GeneratedResolver.Instance,
                     MessagePack.Resolvers.StandardResolver.Instance
                 );
 
-                var option = MessagePackSerializerOptions.Standard.WithResolver(StaticCompositeResolver.Instance);
+            var option = MessagePackSerializerOptions.Standard.WithResolver(StaticCompositeResolver.Instance);
 
-                MessagePackSerializer.DefaultOptions = option;
-                serializerRegistered = true;
+            MessagePackSerializer.DefaultOptions = option;
+            serializerRegistered = true;
+        }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        public static void Initialize()
+        {
+            RegisterSerializers();
+            if (!setupRun)
+            {
+                setupRun = true;
 
                 PlayerCreatorHandler.CreatePlayer += CreatePlayer;
 

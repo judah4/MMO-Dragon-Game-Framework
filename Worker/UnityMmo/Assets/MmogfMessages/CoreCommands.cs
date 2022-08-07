@@ -29,13 +29,25 @@ namespace Mmogf
 
         public override bool Equals(object obj)
         {
-            if(obj is not Vector3d)
-                return false;
-            return Equals((Vector3d)obj);
+            if (obj is Vector3d)
+            {
+                return Equals((Vector3d)obj);
+            }
+            return false;
         }
 
         public override int GetHashCode()
         {
+            ////https://stackoverflow.com/questions/1646807/quick-and-simple-hash-code-combinations
+            //unchecked
+            //{
+            //    int hash = 17;
+            //    hash = hash * 31 + X.GetHashCode();
+            //    hash = hash * 31 + Y.GetHashCode();
+            //    hash = hash * 31 + Z.GetHashCode();
+            //    return hash;
+            //}
+
             return HashCode.Combine(X, Y, Z);
         }
 

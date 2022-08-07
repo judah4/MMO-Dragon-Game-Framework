@@ -269,7 +269,7 @@ namespace MmoGameFramework
                     var createEntity = MessagePackSerializer.Deserialize<World.CreateEntity>(commandRequest.Payload);
 
                     var requestPayload = createEntity.Request.Value;
-                    var entityInfo = _entities.Create(requestPayload.EntityType, requestPayload.Position, requestPayload.Acls, requestPayload.Rotation, requestPayload.Components);
+                    var entityInfo = _entities.Create(requestPayload.EntityType, requestPayload.Position, requestPayload.Acls, null, requestPayload.Rotation, requestPayload.Components);
                     _entities.UpdateEntity(entityInfo);
                     createEntity.Response = new NothingInternal();
                     Send(im.SenderConnection, new MmoMessage()

@@ -12,7 +12,7 @@ namespace Mmogf.Core
         [Key(1)]
         public int EntityId { get; set; }
         [Key(2)]
-        public Dictionary<int, IEntityComponent> EntityData { get; set; }
+        public Dictionary<int, byte[]> EntityData { get; set; }
 
 
         /*
@@ -29,19 +29,27 @@ namespace Mmogf.Core
             });
          */
 
-        public static EntityWorldConfig CreateConfig(string name, int entityId, Position position, List<Acl> acls, Dictionary<int, IEntityComponent> additionalData)
+        public static EntityWorldConfig Create(string name, int entityId, Position position, List<Acl> acls, Dictionary<int, IEntityComponent> additionalData)
         {
-            if(additionalData == null)
-                additionalData = new Dictionary<int, IEntityComponent>();
 
-            additionalData[Position.ComponentId] = position;
-            additionalData[Acls.ComponentId] = new Acls() { AclList = acls };
+            var data = new Dictionary<int, byte[]>();
+
+            data[Position.ComponentId] = MessagePack.MessagePackSerializer.Serialize(position);
+            data[Acls.ComponentId] = MessagePack.MessagePackSerializer.Serialize(new Acls() { AclList = acls });
+
+            if(additionalData != null)
+            {
+                foreach(var dat in additionalData)
+                {
+                    data[dat.Key] = MessagePack.MessagePackSerializer.Serialize(dat.Value.GetType(), dat.Value);
+                }
+            }
 
             var entityData = new EntityWorldConfig()
             {
                 Name = name,
                 EntityId = entityId,
-                EntityData = additionalData,
+                EntityData = data,
             };
 
             return entityData;
