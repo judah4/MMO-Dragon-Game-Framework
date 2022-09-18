@@ -1,4 +1,6 @@
-﻿using Lidgren.Network;
+﻿using Agones;
+using Grpc.Core;
+using Lidgren.Network;
 using MessagePack;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -117,6 +119,12 @@ namespace MmoGameFramework
 
             return host.RunAsync();
 
+        }
+
+        async Task ConnectAgones()
+        {
+            var agones = new AgonesSDK();
+            bool ok = await agones.ConnectAsync();
         }
 
     }
