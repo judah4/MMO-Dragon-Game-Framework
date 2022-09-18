@@ -49,14 +49,25 @@ namespace MessagePack.Resolvers
 
         static GeneratedResolverGetFormatterHelper()
         {
-            lookup = new global::System.Collections.Generic.Dictionary<Type, int>(6)
+            lookup = new global::System.Collections.Generic.Dictionary<Type, int>(17)
             {
-                { typeof(global::Mmogf.Cannon), 0 },
-                { typeof(global::Mmogf.Cannon.FireCommand), 1 },
-                { typeof(global::Mmogf.Cannon.FireEvent), 2 },
-                { typeof(global::Mmogf.ClientAuthCheck), 3 },
-                { typeof(global::Mmogf.Health), 4 },
-                { typeof(global::Mmogf.MovementState), 5 },
+                { typeof(global::Mmogf.FireCommandRequest?), 0 },
+                { typeof(global::Mmogf.Nothing?), 1 },
+                { typeof(global::Mmogf.TakeDamageRequest?), 2 },
+                { typeof(global::Mmogf.TakeDamageResponse?), 3 },
+                { typeof(global::Mmogf.Cannon), 4 },
+                { typeof(global::Mmogf.Cannon.FireCommand), 5 },
+                { typeof(global::Mmogf.Cannon.FireEvent), 6 },
+                { typeof(global::Mmogf.ClientAuthCheck), 7 },
+                { typeof(global::Mmogf.FireCommandRequest), 8 },
+                { typeof(global::Mmogf.Health), 9 },
+                { typeof(global::Mmogf.Health.TakeDamageCommand), 10 },
+                { typeof(global::Mmogf.MovementState), 11 },
+                { typeof(global::Mmogf.Nothing), 12 },
+                { typeof(global::Mmogf.TakeDamageRequest), 13 },
+                { typeof(global::Mmogf.TakeDamageResponse), 14 },
+                { typeof(global::Mmogf.Vector3d), 15 },
+                { typeof(global::Mmogf.Vector3f), 16 },
             };
         }
 
@@ -70,12 +81,23 @@ namespace MessagePack.Resolvers
 
             switch (key)
             {
-                case 0: return new MessagePack.Formatters.Mmogf.CannonFormatter();
-                case 1: return new MessagePack.Formatters.Mmogf.Cannon_FireCommandFormatter();
-                case 2: return new MessagePack.Formatters.Mmogf.Cannon_FireEventFormatter();
-                case 3: return new MessagePack.Formatters.Mmogf.ClientAuthCheckFormatter();
-                case 4: return new MessagePack.Formatters.Mmogf.HealthFormatter();
-                case 5: return new MessagePack.Formatters.Mmogf.MovementStateFormatter();
+                case 0: return new global::MessagePack.Formatters.NullableFormatter<global::Mmogf.FireCommandRequest>();
+                case 1: return new global::MessagePack.Formatters.NullableFormatter<global::Mmogf.Nothing>();
+                case 2: return new global::MessagePack.Formatters.NullableFormatter<global::Mmogf.TakeDamageRequest>();
+                case 3: return new global::MessagePack.Formatters.NullableFormatter<global::Mmogf.TakeDamageResponse>();
+                case 4: return new MessagePack.Formatters.Mmogf.CannonFormatter();
+                case 5: return new MessagePack.Formatters.Mmogf.Cannon_FireCommandFormatter();
+                case 6: return new MessagePack.Formatters.Mmogf.Cannon_FireEventFormatter();
+                case 7: return new MessagePack.Formatters.Mmogf.ClientAuthCheckFormatter();
+                case 8: return new MessagePack.Formatters.Mmogf.FireCommandRequestFormatter();
+                case 9: return new MessagePack.Formatters.Mmogf.HealthFormatter();
+                case 10: return new MessagePack.Formatters.Mmogf.Health_TakeDamageCommandFormatter();
+                case 11: return new MessagePack.Formatters.Mmogf.MovementStateFormatter();
+                case 12: return new MessagePack.Formatters.Mmogf.NothingFormatter();
+                case 13: return new MessagePack.Formatters.Mmogf.TakeDamageRequestFormatter();
+                case 14: return new MessagePack.Formatters.Mmogf.TakeDamageResponseFormatter();
+                case 15: return new MessagePack.Formatters.Mmogf.Vector3dFormatter();
+                case 16: return new MessagePack.Formatters.Mmogf.Vector3fFormatter();
                 default: return null;
             }
         }

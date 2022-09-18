@@ -20,12 +20,12 @@ namespace Mmogf
         // Update is called once per frame
         void Update()
         {
-
+            #if UNITY_EDITOR
             //debugging
-            if (Input.GetKeyDown(KeyCode.S))
+            if (Input.GetKeyDown(KeyCode.Z))
             {
                 //create ship
-                _serverHandler.SendCommand(0, 0, new World.CreateEntity("Ship", new Position() { Y = 0, }, RandomHeading().ToRotation(), 
+                _serverHandler.SendCommand< World.CreateEntity,CreateEntityRequest,NothingInternal> (0, 0, new CreateEntityRequest("Ship", new Position() { Y = 0, }, RandomHeading().ToRotation(), 
                     new Dictionary<int, byte[]>() 
                     {
                         { Cannon.ComponentId, MessagePack.MessagePackSerializer.Serialize(new Cannon()) },
@@ -44,10 +44,10 @@ namespace Mmogf
                     });
             }
 
-            if (Input.GetKeyDown(KeyCode.D))
+            if (Input.GetKeyDown(KeyCode.X))
             {
-                //create ship
-                _serverHandler.SendCommand(0, 0, new World.CreateEntity("Shark", new Position() { Y = -5, }, RandomHeading().ToRotation(),
+                //create shark
+                _serverHandler.SendCommand<World.CreateEntity,CreateEntityRequest,NothingInternal>(0, 0, new CreateEntityRequest("Shark", new Position() { Y = -5, }, RandomHeading().ToRotation(),
                     new Dictionary<int, byte[]>()
                     {
                         { Cannon.ComponentId, MessagePack.MessagePackSerializer.Serialize(new Cannon()) },
@@ -70,14 +70,14 @@ namespace Mmogf
                     if(((EntityType)entity.Value.Data[EntityType.ComponentId]).Name == "Ship")
                     {
                         Debug.Log($"Requesting delete: {entity.Key}");
-                        _serverHandler.SendCommand(0, 0, new World.DeleteEntity(entity.Key), response => {
+                        _serverHandler.SendCommand<World.DeleteEntity, DeleteEntityRequest, NothingInternal>(0, 0, new DeleteEntityRequest(entity.Key), response => {
                             Debug.Log($"Deleted Entity! {response.CommandStatus} - {response.Message}");
                         });
                         break;
                     }
                 }
             }
-
+            #endif
         }
 
         Quaternion RandomHeading()

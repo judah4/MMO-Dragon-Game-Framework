@@ -24,7 +24,10 @@ namespace MessagePack.Formatters.Mmogf.Core
 
         public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Mmogf.Core.PlayerHeartbeatClient.RequestHeartbeat value, global::MessagePack.MessagePackSerializerOptions options)
         {
-            writer.WriteArrayHeader(0);
+            global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
+            writer.WriteArrayHeader(2);
+            formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.NothingInternal?>().Serialize(ref writer, value.Request, options);
+            formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.NothingInternal?>().Serialize(ref writer, value.Response, options);
         }
 
         public global::Mmogf.Core.PlayerHeartbeatClient.RequestHeartbeat Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
@@ -34,8 +37,29 @@ namespace MessagePack.Formatters.Mmogf.Core
                 throw new global::System.InvalidOperationException("typecode is null, struct not supported");
             }
 
-            reader.Skip();
-            return new global::Mmogf.Core.PlayerHeartbeatClient.RequestHeartbeat();
+            options.Security.DepthStep(ref reader);
+            global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
+            var length = reader.ReadArrayHeader();
+            var ____result = new global::Mmogf.Core.PlayerHeartbeatClient.RequestHeartbeat();
+
+            for (int i = 0; i < length; i++)
+            {
+                switch (i)
+                {
+                    case 0:
+                        ____result.Request = formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.NothingInternal?>().Deserialize(ref reader, options);
+                        break;
+                    case 1:
+                        ____result.Response = formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.NothingInternal?>().Deserialize(ref reader, options);
+                        break;
+                    default:
+                        reader.Skip();
+                        break;
+                }
+            }
+
+            reader.Depth--;
+            return ____result;
         }
     }
 }

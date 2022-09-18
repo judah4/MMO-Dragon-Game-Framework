@@ -17,6 +17,11 @@ namespace Mmogf
         [SerializeField]
         float _moveSpeed = 5f;
 
+        [SerializeField]
+        Rigidbody _rigidbody;
+        [SerializeField]
+        UiManager _uiManager;
+
         bool inited = false;
 
         // Start is called before the first frame update
@@ -31,6 +36,12 @@ namespace Mmogf
             }
 
             Entity.OnEntityUpdate += Entity_OnEntityUpdate;
+
+            _uiManager = Object.FindObjectOfType<UiManager>();
+            if(_uiManager != null)
+            {
+                _uiManager.AttachPlayer(this);
+            }
 
         }
 
@@ -56,11 +67,18 @@ namespace Mmogf
         {
             inputTimer -= Time.deltaTime;
 
-            var moveState = (MovementState)Entity.Data[MovementState.ComponentId];
+            var moveState = GetEntityComponent<MovementState>(MovementState.ComponentId).Value;
 
             var forward = Input.GetAxis("Vertical");
             var heading = Input.GetAxis("Horizontal");
+            var health = (Health)Entity.Data[Health.ComponentId];
+            if (health.Current <= 0)
+            {
+                forward = 0;
+                heading = 0;
+            }
             Forward = forward;
+            var position = transform.position;
 
             bool hasUpdate = false;
             if(forward != moveState.Forward)
@@ -74,18 +92,32 @@ namespace Mmogf
                 hasUpdate = true;
             }
 
-            var forwardMove = forward * _moveSpeed;
+            var position3d = position.ToVector3d(Server);
+            if (position3d != moveState.DesiredPosition)
+            {
+                moveState.DesiredPosition = position3d;
+                hasUpdate = true;
+            }
+
             var headingMove = heading * _turnSpeed;
 
             //local move
             transform.Rotate(0, headingMove * Time.deltaTime, 0, Space.Self);
-            transform.Translate(new Vector3(0, 0, forwardMove * Time.deltaTime), Space.Self);
+            //transform.Translate(new Vector3(0, 0, forwardMove * Time.deltaTime), Space.Self);
 
             if (hasUpdate && inputTimer <= 0)
             {
                 Server.UpdateEntity(Entity.EntityId, MovementState.ComponentId, moveState);
                 inputTimer = .10f;
             }
+        }
+
+        private void FixedUpdate()
+        {
+            var forwardMove = Forward * _moveSpeed;
+
+            _rigidbody.velocity = (transform.forward * forwardMove);
+
         }
 
         private void Entity_OnEntityUpdate()

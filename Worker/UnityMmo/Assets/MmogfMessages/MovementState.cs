@@ -1,4 +1,5 @@
 using MessagePack;
+using Mmogf.Core;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -18,5 +19,9 @@ namespace Mmogf
         public float Forward { get; set; }
         [Key(1)]
         public float Heading { get; set; }
+
+        [Key(2)]
+        public Mmogf.Vector3d DesiredPosition { get; set; }
+
     }
 }

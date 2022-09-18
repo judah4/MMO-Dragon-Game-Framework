@@ -8,7 +8,7 @@ namespace Mmogf.Core
         public CommonHandler Server { get; set; }
         public EntityGameObject Entity { get; set; }
 
-        protected T? GetEntityComponent<T>(int componentId) where T : struct, IEntityComponent
+        public T? GetEntityComponent<T>(int componentId) where T : struct, IEntityComponent
         {
             IEntityComponent component;
             if (Entity.Data.TryGetValue(componentId, out component))
@@ -20,7 +20,7 @@ namespace Mmogf.Core
 
         }
 
-       protected bool HasAuthority(int componentId)
+        public bool HasAuthority(int componentId)
         {
             var acls = GetEntityComponent<Acls>(Acls.ComponentId);
 

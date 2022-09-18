@@ -24,8 +24,10 @@ namespace MessagePack.Formatters.Mmogf.Core
 
         public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Mmogf.Core.World.DeleteEntity value, global::MessagePack.MessagePackSerializerOptions options)
         {
-            writer.WriteArrayHeader(1);
-            writer.Write(value.EntityId);
+            global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
+            writer.WriteArrayHeader(2);
+            formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.DeleteEntityRequest?>().Serialize(ref writer, value.Request, options);
+            formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.NothingInternal?>().Serialize(ref writer, value.Response, options);
         }
 
         public global::Mmogf.Core.World.DeleteEntity Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
@@ -36,15 +38,19 @@ namespace MessagePack.Formatters.Mmogf.Core
             }
 
             options.Security.DepthStep(ref reader);
+            global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
             var length = reader.ReadArrayHeader();
-            var __EntityId__ = default(int);
+            var ____result = new global::Mmogf.Core.World.DeleteEntity();
 
             for (int i = 0; i < length; i++)
             {
                 switch (i)
                 {
                     case 0:
-                        __EntityId__ = reader.ReadInt32();
+                        ____result.Request = formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.DeleteEntityRequest?>().Deserialize(ref reader, options);
+                        break;
+                    case 1:
+                        ____result.Response = formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.NothingInternal?>().Deserialize(ref reader, options);
                         break;
                     default:
                         reader.Skip();
@@ -52,7 +58,6 @@ namespace MessagePack.Formatters.Mmogf.Core
                 }
             }
 
-            var ____result = new global::Mmogf.Core.World.DeleteEntity(__EntityId__);
             reader.Depth--;
             return ____result;
         }

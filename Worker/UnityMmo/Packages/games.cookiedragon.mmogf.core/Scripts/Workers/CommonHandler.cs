@@ -10,9 +10,9 @@ namespace Mmogf.Core
     public class CommonHandler : MonoBehaviour
     {
         public GameObjectRepresentation GameObjectRepresentation { get; protected set; }
+        public Vector3 InterestCenter => _interestCenter;
+        public bool UpdateInterestFromPosition => _updateInterestFromPosition;
 
-        [SerializeField]
-        private GameObjectRepresentation _gameObjectRepresentation;
         protected MmoWorker Client;
         protected float ConnectDelay = 0;
 
@@ -23,6 +23,16 @@ namespace Mmogf.Core
         public string WorkerType = "Dragon-Worker";
         public string ipAddress = "localhost";
         public short port = 1337;
+
+        //local vars
+        private List<int> _entitiyClears = new List<int>();
+
+        [SerializeField]
+        private Vector3 _interestCenter = Vector3.zero;
+        [SerializeField]
+        private bool  _updateInterestFromPosition;
+
+
 
         public long ClientId
         {
@@ -60,11 +70,12 @@ namespace Mmogf.Core
 
             if (Application.isEditor == false)
             {
-                var newIp = GetArg("hostIp");
-                var newPort = GetArg("hostPort");
+                var newIp = GetArg("--hostIp");
+                var newPort = GetArg("--hostPort");
 
                 if (newIp != null)
                 {
+                    Debug.Log($"Setting IP {newIp}");
                     ipAddress = newIp;
                 }
 
@@ -73,6 +84,7 @@ namespace Mmogf.Core
                     short portTemp;
                     if (short.TryParse(newPort, out portTemp))
                     {
+                        Debug.Log($"Setting Port {portTemp}");
                         port = portTemp;
                     }
                 }
@@ -81,6 +93,7 @@ namespace Mmogf.Core
             // update even if window isn't focused, otherwise we don't receive.
             Application.runInBackground = true;
 
+            Debug.Log($"Connecting to {ipAddress}:{port}");
 
             GameObjectRepresentation = new GameObjectRepresentation(this);
 
@@ -124,14 +137,43 @@ namespace Mmogf.Core
             {
                 for(int cnt = 0; cnt < checkout.Checkouts.Count; cnt++)
                 {
-                    _gameObjectRepresentation.DeleteEntity(checkout.Checkouts[cnt]);
+                    GameObjectRepresentation.DeleteEntity(checkout.Checkouts[cnt]);
                 }
             }
+            //else
+            //{
+            //    if(GameObjectRepresentation.Entities != null)
+            //    {
+            //        _entitiyClears.Clear();
+            //        foreach (var entity in GameObjectRepresentation.Entities)
+            //        {
+            //            if (checkout.Checkouts.Contains(entity.Key))
+            //                continue;
+
+            //            _entitiyClears.Add(entity.Key);
+            //        }
+
+            //        for (int cnt = 0; cnt < _entitiyClears.Count; cnt++)
+            //        {
+            //            #if UNITY_EDITOR
+            //            Debug.Log($"Deleting {_entitiyClears[cnt]} from out of range.");
+            //            #endif
+            //            GameObjectRepresentation.DeleteEntity(_entitiyClears[cnt]);
+
+            //        }
+            //    }
+                
+            //}
         }
 
         void OnConnectHandle()
         {
-            UpdateInterestArea(transform.position);
+            var pos = Vector3.zero;
+            if(_updateInterestFromPosition)
+            {
+                pos = transform.position;
+            }
+            UpdateInterestArea(pos, true);
 
             OnConnect();
         }
@@ -152,6 +194,8 @@ namespace Mmogf.Core
 
             Client.Update();
 
+            GameObjectRepresentation.UpdateInterests();
+
             OnUpdate();
         }
 
@@ -171,21 +215,35 @@ namespace Mmogf.Core
         protected static string GetArg(string name)
         {
             var args = System.Environment.GetCommandLineArgs();
+            Debug.Log(string.Join(",", args));
             for (int i = 0; i < args.Length; i++)
             {
-                if (args[i] == name && args.Length > i + 1)
+                if(args[i] == null)
+                    continue;
+                if (args[i].StartsWith(name, System.StringComparison.InvariantCultureIgnoreCase) && args.Length > i)
                 {
-                    return args[i + 1];
+                    var splits = args[i].Split('=');
+
+                    return splits[splits.Length-1];
                 }
             }
             return null;
         }
 
-        protected void UpdateInterestArea(Vector3 position)
+        public void UpdateInterestArea(Vector3 position, bool force = false)
         {
-            //adjust position this way to not lose precision
-            var sendPos = PositionToServer(position);
-            Client.SendInterestChange(sendPos);
+            var dif = _interestCenter - position;
+
+            if(dif.sqrMagnitude > 5f * 5f || force)
+            {
+                _interestCenter = position;
+                //adjust position this way to not lose precision
+                //var sendPos = PositionToServer(position);
+                var sendPos = new Position() { X = (double)position.x, Y = (double)position.y, Z = (double)position.z, };
+                Client.SendInterestChange(sendPos);
+            }
+
+            
         }
 
         public Position PositionToServer(Vector3 position)
@@ -196,7 +254,11 @@ namespace Mmogf.Core
 
         public Vector3 PositionToClient(Position position)
         {
-            var adjustedPos = new Vector3((int)position.X, (int)position.Y, (int)position.Z) + transform.position;
+            var pos = transform.position;
+            position.X += pos.x;
+            position.Y += pos.y;
+            position.Z += pos.z;
+            var adjustedPos = new Vector3((float)position.X, (float)position.Y, (float)position.Z);
             return adjustedPos;
         }
 
@@ -218,14 +280,24 @@ namespace Mmogf.Core
             EventRequests.Add(eventRequest);
         }
 
-
-        public void SendCommand<T>(int entityId, int componentId, T fireCommand, System.Action<CommandResponse> callback = null) where T : ICommand
+        public void SendCommand<T, TRequest, TResponse>(int entityId, int componentId, TRequest request, System.Action<CommandResult<T, TRequest, TResponse>> callback = null) where T : ICommandBase<TRequest, TResponse>, new () where TRequest : struct where TResponse : struct
         {
-            Client.SendCommand(entityId, componentId, fireCommand, callback);
+            var command = new T()
+            {
+                Request = request,
+            };
+            Client.SendCommand<T, TRequest, TResponse>(entityId, componentId, command, callback);
         }
-        public void SendCommandResponse<T>(CommandRequest request, T responsePayload) where T : ICommand
+        public void SendCommandResponse<T, TRequest, TResponse>(CommandRequest request, T command, TResponse responsePayload) where T : ICommandBase<TRequest,TResponse> where TRequest : struct where TResponse : struct
         {
-            Client.SendCommandResponse(request, responsePayload);
+            command.Response = responsePayload;
+
+            Client.SendCommandResponse<T,TRequest, TResponse>(request, command);
+        }
+        public void SendCommandResponseFailure(CommandRequest request, string message)
+        {
+
+            Client.SendCommandResponseFailure(request, CommandStatus.Failure, message);
         }
         public void SendEvent<T>(int entityId, int componentId, T eventPayload) where T : IEvent
         {

@@ -24,9 +24,11 @@ namespace MessagePack.Formatters.Mmogf
 
         public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Mmogf.MovementState value, global::MessagePack.MessagePackSerializerOptions options)
         {
-            writer.WriteArrayHeader(2);
+            global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
+            writer.WriteArrayHeader(3);
             writer.Write(value.Forward);
             writer.Write(value.Heading);
+            formatterResolver.GetFormatterWithVerify<global::Mmogf.Vector3d>().Serialize(ref writer, value.DesiredPosition, options);
         }
 
         public global::Mmogf.MovementState Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
@@ -37,6 +39,7 @@ namespace MessagePack.Formatters.Mmogf
             }
 
             options.Security.DepthStep(ref reader);
+            global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
             var length = reader.ReadArrayHeader();
             var ____result = new global::Mmogf.MovementState();
 
@@ -49,6 +52,9 @@ namespace MessagePack.Formatters.Mmogf
                         break;
                     case 1:
                         ____result.Heading = reader.ReadSingle();
+                        break;
+                    case 2:
+                        ____result.DesiredPosition = formatterResolver.GetFormatterWithVerify<global::Mmogf.Vector3d>().Deserialize(ref reader, options);
                         break;
                     default:
                         reader.Skip();

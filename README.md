@@ -42,10 +42,22 @@ https://github.com/neuecc/MessagePack-CSharp#aot-code-generation-support-for-uni
 MmogfCoreResolver
 
 
-and
+### and
 
 -i
 MmogfMessages
 -o
 Scripts/Generated
+
+# Docker Build
+
+Build Server build in the `Builds/Linux` folder.  
+Run in the main folder.  
+
+
+`docker build -f Docker/Worker/Dockerfile -t ghcr.io/judah4/testgame:v0.0.8 -t ghcr.io/judah4/testgame:latest .`
+
+`docker build -f Docker/MainServer/Dockerfile -t ghcr.io/judah4/dragongf:v0.0.8 -t ghcr.io/judah4/dragongf:latest .`
+
+`docker compose -f Docker/Compose/docker-compose.yml up -d`
 

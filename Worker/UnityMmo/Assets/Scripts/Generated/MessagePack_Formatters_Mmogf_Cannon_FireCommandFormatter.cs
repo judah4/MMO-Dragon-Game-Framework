@@ -24,8 +24,10 @@ namespace MessagePack.Formatters.Mmogf
 
         public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Mmogf.Cannon.FireCommand value, global::MessagePack.MessagePackSerializerOptions options)
         {
-            writer.WriteArrayHeader(1);
-            writer.Write(value.Left);
+            global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
+            writer.WriteArrayHeader(2);
+            formatterResolver.GetFormatterWithVerify<global::Mmogf.FireCommandRequest?>().Serialize(ref writer, value.Request, options);
+            formatterResolver.GetFormatterWithVerify<global::Mmogf.Nothing?>().Serialize(ref writer, value.Response, options);
         }
 
         public global::Mmogf.Cannon.FireCommand Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
@@ -36,6 +38,7 @@ namespace MessagePack.Formatters.Mmogf
             }
 
             options.Security.DepthStep(ref reader);
+            global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
             var length = reader.ReadArrayHeader();
             var ____result = new global::Mmogf.Cannon.FireCommand();
 
@@ -44,7 +47,10 @@ namespace MessagePack.Formatters.Mmogf
                 switch (i)
                 {
                     case 0:
-                        ____result.Left = reader.ReadBoolean();
+                        ____result.Request = formatterResolver.GetFormatterWithVerify<global::Mmogf.FireCommandRequest?>().Deserialize(ref reader, options);
+                        break;
+                    case 1:
+                        ____result.Response = formatterResolver.GetFormatterWithVerify<global::Mmogf.Nothing?>().Deserialize(ref reader, options);
                         break;
                     default:
                         reader.Skip();

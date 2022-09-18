@@ -16,6 +16,8 @@ public class GameObjectRepresentation
 
     private CommonHandler _server;
 
+    List<int> _cleanEntityIds = new List<int>();
+
     public GameObjectRepresentation(CommonHandler commonHandler)
     {
         _server = commonHandler;
@@ -41,12 +43,16 @@ public class GameObjectRepresentation
             {
                 prefab = Resources.Load<GameObject>($"Prefabs/common/{entityType.Name}");
             }
+            if(prefab == null)
+                return;
 
             var gm = Object.Instantiate(prefab, adjustedPos,
                 rotation);
             gm.name = $"{entityType.Name} : {entity.EntityId} - {_server.WorkerType}";
 
             entityGm = gm.AddComponent<EntityGameObject>();
+            entityGm.Server = _server;
+            entityGm.EntityId = entity.EntityId;
 
             entityBehaviors = entityGm.GetComponents<BaseEntityBehavior>();
             for (int cnt = 0; cnt < entityBehaviors.Length; cnt++)
@@ -55,7 +61,6 @@ public class GameObjectRepresentation
                 entityBehaviors[cnt].Entity = entityGm;
             }
 
-            entityGm.EntityId = entity.EntityId;
             _entities.Add(entity.EntityId, entityGm);
         }
 
@@ -126,5 +131,30 @@ public class GameObjectRepresentation
 
         entityGm.EntityUpdated();
 
+    }
+
+    public void UpdateInterests()
+    {
+//        _cleanEntityIds.Clear();
+//        foreach (var entity in _entities)
+//        {
+//            if(entity.Value.HasAuthority(Position.ComponentId))
+//                continue;
+
+//            var dif = entity.Value.transform.position - _server.InterestCenter;
+//            if(dif.sqrMagnitude > 149f * 149f)
+//            {
+//                _cleanEntityIds.Add(entity.Key);
+//            }
+
+//        }
+
+//        for(int cnt = 0; cnt < _cleanEntityIds.Count; cnt++)
+//        {
+//#if UNITY_EDITOR
+//            Debug.Log($"Deleting {_cleanEntityIds[cnt]} from out of range.");
+//#endif
+//            DeleteEntity(_cleanEntityIds[cnt]);
+//        }
     }
 }

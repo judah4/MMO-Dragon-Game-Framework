@@ -1,3 +1,4 @@
+using MessagePack;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,6 +12,8 @@ namespace Mmogf.Core
             var hasAuth = HasAuthority(PlayerHeartbeatClient.ComponentId);
             if (!hasAuth)
                 return;
+
+            Server.UpdateInterestArea(transform.position);
 
             for (int cnt = 0; cnt < Server.CommandRequests.Count; cnt++)
             {
@@ -34,9 +37,10 @@ namespace Mmogf.Core
         void HandleHeartbeat(CommandRequest request)
         {
             Debug.Log("Got client heartbeat!");
+            var payload = MessagePackSerializer.Deserialize<PlayerHeartbeatClient.RequestHeartbeat>(request.Payload);
 
             //make empty response object
-            Server.SendCommandResponse(request, new PlayerHeartbeatClient.RequestHeartbeat());
+            Server.SendCommandResponse<PlayerHeartbeatClient.RequestHeartbeat,NothingInternal,NothingInternal>(request, payload, new NothingInternal());
         }
     }
 }

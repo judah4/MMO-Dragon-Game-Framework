@@ -47,3 +47,5 @@ MonoBehaviour:
   WorkerType: Dragon-Client
   ipAddress: 127.0.0.1
   port: 1337
+  _interestCenter: {x: 0, y: 0, z: 0}
+  _updateInterestFromPosition: 1

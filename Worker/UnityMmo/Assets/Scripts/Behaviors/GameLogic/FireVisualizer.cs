@@ -9,6 +9,9 @@ using UnityEngine;
 public class FireVisualizer : BaseEntityBehavior
 {
 
+    [SerializeField]
+    private CannonFiring _cannonFiring;
+
     void OnEnable()
     {
     }
@@ -17,15 +20,32 @@ public class FireVisualizer : BaseEntityBehavior
     {
         HandleFireEvents();
 
-        if(Input.GetKeyDown(KeyCode.Q))
+        var clientAuthCheck = GetEntityComponent<ClientAuthCheck>(ClientAuthCheck.ComponentId);
+        var hasAuth = clientAuthCheck.HasValue && clientAuthCheck.Value.WorkerId == Server.ClientId;
+
+        if (!hasAuth)
+            return;
+
+        if (Input.GetKeyDown(KeyCode.Q))
         {
-            Server.SendCommand(Entity.EntityId, Cannon.ComponentId, new Cannon.FireCommand() { Left = true }, response => {
+            Server.SendCommand<Cannon.FireCommand,FireCommandRequest,Nothing>(Entity.EntityId, Cannon.ComponentId, new FireCommandRequest() { Left = true }, result => {
+                if(result.CommandStatus != CommandStatus.Success)
+                {
+                    Debug.LogError($"{result.CommandId}: {result.CommandStatus} - {result.Message}");
+                    return;
+                }
+                //how should we check the response?
                 Debug.Log("Fired Cannon Left!");
             });
         }
         if (Input.GetKeyDown(KeyCode.E))
         {
-            Server.SendCommand(Entity.EntityId, Cannon.ComponentId, new Cannon.FireCommand() { Left = false }, response => {
+            Server.SendCommand<Cannon.FireCommand, FireCommandRequest, Nothing>(Entity.EntityId, Cannon.ComponentId,  new FireCommandRequest() { Left = false }, result => {
+                if (result.CommandStatus != CommandStatus.Success)
+                {
+                    Debug.LogError($"{result.CommandId}: {result.CommandStatus} - {result.Message}");
+                    return;
+                }
                 Debug.Log("Fired Cannon Right!");
             });
         }
@@ -37,6 +57,9 @@ public class FireVisualizer : BaseEntityBehavior
         {
             if (Server.EventRequests[cnt].ComponentId != Cannon.ComponentId)
                 continue;
+            if(Server.EventRequests[cnt].EntityId != Entity.EntityId)
+                continue;
+
             var request = Server.EventRequests[cnt];
             //we need a way to identify what command this is... Components will be able to have more commands
             //use ids!
@@ -53,6 +76,7 @@ public class FireVisualizer : BaseEntityBehavior
 
     private void HandleFireEvent(EventRequest request, Cannon.FireEvent payload)
     {
-        Debug.Log($"Fire cannon event! Left:{payload.Left}");
+
+        _cannonFiring.SpawnCannonball(payload.Left);
     }
 }

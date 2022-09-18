@@ -22,14 +22,47 @@ namespace Mmogf.Core
         public class CommandHolder
         {
             public CommandRequest Request { get; set; }
-            public Action<CommandResponse> Response { get; set; }
+
             public float TimeoutTimer { get; set; }
 
-            public CommandHolder(CommandRequest request, Action<CommandResponse> response, float timeoutTimer)
+            public CommandHolder(CommandRequest request, float timeoutTimer)
             {
                 Request = request;
-                Response = response;
                 TimeoutTimer = timeoutTimer;
+            }
+
+            public virtual void SendResponse(CommandResponse response)
+            {
+
+            }
+
+        }
+
+        public class CommandHolderTyped<TCommand, TRequest, TResponse> : CommandHolder where TCommand : ICommandBase<TRequest, TResponse> where TRequest : struct where TResponse : struct
+        {
+            public ICommandBase<TRequest,TResponse> Command { get; set; }
+            public Action<CommandResult<TCommand,TRequest, TResponse>> Response { get; set; }
+
+            public CommandHolderTyped(CommandRequest request, ICommandBase<TRequest, TResponse> command, Action<CommandResult<TCommand, TRequest, TResponse>> response, float timeoutTimer) : base(request, timeoutTimer)
+            {
+                Response = response;
+                Command = command;
+            }
+
+            public override void SendResponse(CommandResponse response)
+            {
+
+                TRequest? requestPayload = null;
+                TResponse? responsePayload = null;
+                if(response.Payload != null)
+                {
+                    var command = MessagePackSerializer.Deserialize<TCommand>(response.Payload);
+                    requestPayload = command.Request;
+                    responsePayload = command.Response;
+                }
+
+                var result = CommandResult<TCommand,TRequest,TResponse>.Create(response, requestPayload, responsePayload);
+               Response?.Invoke(result);
             }
 
         }
@@ -41,6 +74,8 @@ namespace Mmogf.Core
         private NetClient s_client;
         private DateTime _pingRequestAt;
         private Dictionary<string, CommandHolder> _commandCallbacks = new Dictionary<string, CommandHolder>();
+        List<KeyValuePair<string, CommandHolder>> _commandTimeoutUpdates = new List<KeyValuePair<string, CommandHolder>>(100);
+
 
         public bool Connected => s_client.ConnectionStatus == NetConnectionStatus.Connected;
         public NetConnectionStatus Status => s_client.ConnectionStatus;
@@ -103,25 +138,28 @@ namespace Mmogf.Core
 
         private void CommandTimeouts()
         {
-            Dictionary<string, CommandHolder> updates = new Dictionary<string, CommandHolder>(_commandCallbacks);
+            if (_commandTimeoutUpdates.Count > 0)
+                _commandTimeoutUpdates.Clear();
 
-            foreach (var commandTimeout in updates)
+            foreach (var commandTimeout in _commandCallbacks)
             {
                 var holder = commandTimeout.Value;
                 holder.TimeoutTimer -= Time.deltaTime;
 
                 if(holder.TimeoutTimer <= 0)
                 {
-                    var response = CommandResponse.Create(holder.Request, CommandStatus.Timeout, "Request timed out with no response.");
-                    holder.Response?.Invoke(response);
-                    _commandCallbacks.Remove(commandTimeout.Key);
+                    _commandTimeoutUpdates.Add(commandTimeout);
                 }
             }
 
-            //foreach(var update in updates)
-            //{
-            //    _commandCallbacks[update.Key] = update.Value;
-            //}
+            foreach (var update in _commandTimeoutUpdates)
+            {
+                var holder = update.Value;
+
+                var response = CommandResponse.Create(holder.Request, CommandStatus.Timeout, "Request timed out with no response.");
+                holder.SendResponse(response);
+                _commandCallbacks.Remove(update.Key);
+            }
 
         }
 
@@ -217,7 +255,7 @@ namespace Mmogf.Core
                                     _commandCallbacks.Remove(commandResponse.RequestId);
                                     try
                                     {
-                                        callback.Response?.Invoke(commandResponse);
+                                        callback.SendResponse(commandResponse);
                                     }
                                     catch(Exception e)
                                     {
@@ -292,9 +330,9 @@ namespace Mmogf.Core
         {
             var timespan = DateTime.UtcNow - _pingRequestAt;
             Ping = (int)timespan.TotalMilliseconds;
-            OnLog?.Invoke(LogLevel.Debug, $"Ping: {Ping} - {WorkerType}");
+            //OnLog?.Invoke(LogLevel.Debug, $"Ping: {Ping} - {WorkerType}");
         }
-        public void SendCommand<T>(int entityId, int componentId, T command, Action<CommandResponse> callback) where T : ICommand
+        public void SendCommand<T,TRequest,TResponse>(int entityId, int componentId, T command, Action<CommandResult<T, TRequest, TResponse>> callback) where T : ICommandBase<TRequest,TResponse> where TRequest : struct where TResponse : struct
         {
             var requestId = Guid.NewGuid().ToString();
 
@@ -309,7 +347,7 @@ namespace Mmogf.Core
             };
 
             //register callback
-            _commandCallbacks.Add(requestId, new CommandHolder(request, callback, 10f));
+            _commandCallbacks.Add(requestId, new CommandHolderTyped<T, TRequest, TResponse>(request, command, callback, 10f));
 
             Send(new MmoMessage()
             {
@@ -318,12 +356,24 @@ namespace Mmogf.Core
             });
         }
 
-        public void SendCommandResponse<T>(CommandRequest request, T responsePayload) where T : ICommand
+        public void SendCommandResponse<T, TRequest, TResponse>(CommandRequest request, T command) where T : ICommandBase<TRequest, TResponse> where TRequest : struct where TResponse : struct
         {
             Send(new MmoMessage()
             {
                 MessageId = ServerCodes.EntityCommandResponse,
-                Info = MessagePackSerializer.Serialize(CommandResponse.Create(request, CommandStatus.Success, "", MessagePackSerializer.Serialize(responsePayload))),
+                Info = MessagePackSerializer.Serialize(CommandResponse.Create(request, CommandStatus.Success, "", MessagePackSerializer.Serialize(command))),
+            });
+        }
+
+        public void SendCommandResponseFailure(CommandRequest request, CommandStatus status, string message)
+        {
+            if(message == null)
+                message = "Something went wrong.";
+
+            Send(new MmoMessage()
+            {
+                MessageId = ServerCodes.EntityCommandResponse,
+                Info = MessagePackSerializer.Serialize(CommandResponse.Create(request, status, message, null)),
             });
         }
 

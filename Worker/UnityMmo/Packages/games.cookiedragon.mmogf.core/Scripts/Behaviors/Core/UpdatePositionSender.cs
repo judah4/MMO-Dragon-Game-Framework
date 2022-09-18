@@ -8,7 +8,7 @@ namespace Mmogf.Core
 {
     public class UpdatePositionSender : BaseEntityBehavior
     {
-        private float updateTime = 0;
+        private float updateTime = -1;
         private float updateTick = .1f;
 
         public bool UpdateRotation = true;
@@ -19,10 +19,12 @@ namespace Mmogf.Core
 
         void Update()
         {
-            if(Time.time - updateTime < updateTick)
+            updateTime -= Time.deltaTime;
+
+            if (updateTime > 0)
                 return;
 
-            var rot = (Rotation)Entity.Data[Rotation.ComponentId];
+            var rot = GetEntityComponent<Rotation>(Rotation.ComponentId).Value;
             if(UpdateRotation) 
             { 
                 var currentRot = rot.ToQuaternion();
@@ -31,7 +33,7 @@ namespace Mmogf.Core
                     Server.UpdateEntity(Entity.EntityId, Rotation.ComponentId, transform.rotation.ToRotation());
                 }
             }
-            var pos = (Position)Entity.Data[Position.ComponentId];
+            var pos = GetEntityComponent<Position>(Position.ComponentId).Value;
 
             var currentPos = Server.PositionToClient(pos);
 
@@ -52,7 +54,7 @@ namespace Mmogf.Core
             if (Mathf.Abs((currentPos - transform.position).sqrMagnitude) > .1f)
             {
                 Server.UpdateEntity(Entity.EntityId, Position.ComponentId, new PositionUpdate(Server, transform.position).Get());
-                updateTime = Time.time;
+                updateTime = updateTick;
             }
         }
     }
