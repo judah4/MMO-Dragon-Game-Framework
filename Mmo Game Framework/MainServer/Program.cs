@@ -20,7 +20,7 @@ namespace MmoGameFramework
         private static MmoServer workerServer;
         private static EntityStore _entityStore;
 
-        static Task Main(string[] args)
+        static async Task Main(string[] args)
         {
             IHost host = Host.CreateDefaultBuilder(args)
                 .ConfigureLogging(builder =>
@@ -65,7 +65,7 @@ namespace MmoGameFramework
             if(!File.Exists(updatedPath))
             {
                 logger.LogError($"World file {updatedPath} does not exist!");
-                return Task.Delay(5000);
+                await Task.Delay(5000);
                 throw new Exception($"World file {updatedPath} does not exist!");
             }
 
@@ -106,6 +106,8 @@ namespace MmoGameFramework
             logger.LogInformation("DragonGF is ready.");
             bool loop = true;
 
+            await ConnectAgones();
+
             while (loop)
             {
                 //how do we want to quit?
@@ -117,11 +119,11 @@ namespace MmoGameFramework
             server.Stop();
             workerServer.Stop();
 
-            return host.RunAsync();
+            await host.RunAsync();
 
         }
 
-        async Task ConnectAgones()
+        static async Task ConnectAgones()
         {
             var agones = new AgonesSDK();
             bool ok = await agones.ConnectAsync();
