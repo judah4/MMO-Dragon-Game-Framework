@@ -215,14 +215,14 @@ namespace Mmogf.Core
         protected static string GetArg(string name)
         {
             var args = System.Environment.GetCommandLineArgs();
-            Debug.Log(string.Join(',', args));
+            Debug.Log(string.Join(",", args));
             for (int i = 0; i < args.Length; i++)
             {
                 if(args[i] == null)
                     continue;
                 if (args[i].StartsWith(name, System.StringComparison.InvariantCultureIgnoreCase) && args.Length > i)
                 {
-                    var splits = args[i].Split("=");
+                    var splits = args[i].Split('=');
 
                     return splits[splits.Length-1];
                 }

@@ -27,18 +27,27 @@ namespace MmoGameFramework
             _logger = logger;
         }
 
-        public EntityInfo Create(string entityType, Position position, List<Acl> acls, Rotation? rotation = null, Dictionary<int, byte[]> additionalData = null)
+        public EntityInfo Create(string entityType, Position position, List<Acl> acls, int? entityId = null, Rotation? rotation = null, Dictionary<int, byte[]> additionalData = null)
         {
-            var entityId = ++lastId;
+            if(entityId.HasValue)
+            {
+                if(lastId <= entityId.Value)
+                    lastId = entityId.Value + 1; 
+            }
+            else
+            {
+                entityId = ++lastId;
+            }
 
-            if(rotation == null)
+
+            if (rotation == null)
                 rotation = Rotation.Identity;
 
             //validate acl list for data passsed
 
             var entity = new EntityInfo()
             {
-                EntityId = entityId,
+                EntityId = entityId.Value,
                 EntityData = new Dictionary<int, byte[]>()
                 {
                     { EntityType.ComponentId, MessagePackSerializer.Serialize(new EntityType() { Name = entityType}) },
@@ -59,7 +68,7 @@ namespace MmoGameFramework
                 }
             }
 
-            _entities.Add(entityId, entity);
+            _entities.Add(entityId.Value, entity);
             return entity;
         }
 
