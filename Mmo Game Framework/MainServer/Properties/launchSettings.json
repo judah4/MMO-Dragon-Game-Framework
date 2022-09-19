@@ -3,7 +3,7 @@
     "MainServer": {
       "commandName": "Project",
       "environmentVariables": {
-        "AGONES_SDK_GRPC_HOST": "192.168.4.241"
+        //"AGONES_SDK_GRPC_HOST": "192.168.4.241"
       }
     }
   }
