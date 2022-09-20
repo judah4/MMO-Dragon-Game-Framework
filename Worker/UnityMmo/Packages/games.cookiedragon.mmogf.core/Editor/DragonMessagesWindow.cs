@@ -22,7 +22,7 @@ namespace MessagePack.Unity.Editor
         bool installingMpc;
         bool invokingMpc;
 
-        [MenuItem("DragonGF/Message Generator")]
+        [MenuItem("DragonGF/Message Pack/Message Generator", priority = 105)]
         public static void OpenWindow()
         {
             if (window != null)
@@ -34,7 +34,7 @@ namespace MessagePack.Unity.Editor
             GetWindow<DragonMessagesWindow>("DragonGF Message CodeGen").Show();
         }
 
-        [MenuItem("DragonGF/Message Generator (Auto)")]
+        [MenuItem("DragonGF/Message Pack/Message Generator (Auto)", priority = 105)]
         public static async Task DoGeneration()
         {
             var commnadLineArguments = CommandLineArgs();

@@ -14,7 +14,7 @@ namespace MessagePack.Unity.Editor
     {
 
 
-        [MenuItem("DragonGF/Run Server (Local)")]
+        [MenuItem("DragonGF/Run Server (Local)", priority = 50)]
         public static async Task DoRun()
         {
             var commnadLineArguments = CommandLineArgs();

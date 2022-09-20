@@ -8,6 +8,18 @@ namespace Mmogf.Core
         public CommonHandler Server { get; set; }
         public EntityGameObject Entity { get; set; }
 
+        public T? GetEntityComponent<T>() where T : struct, IEntityComponent
+        {
+            var comp = default(T);
+            IEntityComponent component;
+            if (Entity.Data.TryGetValue(comp.GetComponentId(), out component))
+            {
+                return (T)component;
+            }
+
+            return null;
+        }
+
         public T? GetEntityComponent<T>(int componentId) where T : struct, IEntityComponent
         {
             IEntityComponent component;
