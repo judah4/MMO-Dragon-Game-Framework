@@ -120,7 +120,7 @@ namespace Mmogf
 
         }
 
-        private void Entity_OnEntityUpdate()
+        private void Entity_OnEntityUpdate(int componentId)
         {
             if(inited)
                 return;

@@ -68,8 +68,22 @@ public class GameObjectRepresentation
         {
             entityGm.Data.Remove(pair.Key);
             var type = ComponentMappings.GetType(pair.Key);
+
+            if(type == null)
+            {
+                Debug.LogWarning($"Type mapping not found! ComponentId:{pair.Key}");
+                continue;
+            }
             
-            entityGm.Data.Add(pair.Key, (IEntityComponent)MessagePackSerializer.Deserialize(type, pair.Value));
+            try
+            {
+                entityGm.Data.Add(pair.Key, (IEntityComponent)MessagePackSerializer.Deserialize(type, pair.Value));
+            }
+            catch(System.Exception e)
+            {
+                Debug.LogError($"Error deserializing during create! Type:{type}");
+                Debug.LogException(e);
+            }
         }
 
         if(entityBehaviors != null) 
@@ -94,7 +108,8 @@ public class GameObjectRepresentation
         var data = (IEntityComponent)MessagePackSerializer.Deserialize(type, entityUpdate.Info);
         entityGm.Data.Add(entityUpdate.ComponentId, data);
 
-        entityGm.EntityUpdated();
+        entityGm.EntityUpdated(entityUpdate.ComponentId);
+
     }
 
     public void OnEntityDelete(EntityInfo entity)
@@ -129,32 +144,40 @@ public class GameObjectRepresentation
         entityGm.Data.Remove(componentId);
         entityGm.Data.Add(componentId, message);
 
-        entityGm.EntityUpdated();
+        entityGm.EntityUpdated(componentId);
 
     }
 
-    public void UpdateInterests()
+    public void Update()
     {
-//        _cleanEntityIds.Clear();
-//        foreach (var entity in _entities)
-//        {
-//            if(entity.Value.HasAuthority(Position.ComponentId))
-//                continue;
+        foreach (var entity in _entities)
+        {
+            entity.Value.Updates.Clear();
 
-//            var dif = entity.Value.transform.position - _server.InterestCenter;
-//            if(dif.sqrMagnitude > 149f * 149f)
-//            {
-//                _cleanEntityIds.Add(entity.Key);
-//            }
+        }
 
-//        }
 
-//        for(int cnt = 0; cnt < _cleanEntityIds.Count; cnt++)
-//        {
-//#if UNITY_EDITOR
-//            Debug.Log($"Deleting {_cleanEntityIds[cnt]} from out of range.");
-//#endif
-//            DeleteEntity(_cleanEntityIds[cnt]);
-//        }
+
+        //        _cleanEntityIds.Clear();
+        //        foreach (var entity in _entities)
+        //        {
+        //            if(entity.Value.HasAuthority(Position.ComponentId))
+        //                continue;
+
+        //            var dif = entity.Value.transform.position - _server.InterestCenter;
+        //            if(dif.sqrMagnitude > 149f * 149f)
+        //            {
+        //                _cleanEntityIds.Add(entity.Key);
+        //            }
+
+        //        }
+
+        //        for(int cnt = 0; cnt < _cleanEntityIds.Count; cnt++)
+        //        {
+        //#if UNITY_EDITOR
+        //            Debug.Log($"Deleting {_cleanEntityIds[cnt]} from out of range.");
+        //#endif
+        //            DeleteEntity(_cleanEntityIds[cnt]);
+        //        }
     }
 }
