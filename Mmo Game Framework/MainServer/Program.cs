@@ -2,10 +2,13 @@
 using Grpc.Core;
 using Lidgren.Network;
 using MessagePack;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Mmogf.Core;
+using Mmogf.Servers.Services;
+using Prometheus;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -22,6 +25,9 @@ namespace MmoGameFramework
 
         static async Task Main(string[] args)
         {
+            var metricServer = new KestrelMetricServer(port: 1234);
+            metricServer.Start();
+
             IHost host = Host.CreateDefaultBuilder(args)
                 .ConfigureLogging(builder =>
                 {
@@ -32,11 +38,14 @@ namespace MmoGameFramework
                         options.TimestampFormat = "hh:mm:ss ";
                     });
                 })
+                .ConfigureServices(x =>
+                {
+                    x.AddSingleton<OrchestrationService>();
+                })
                 .Build();
 
 
             var logger = host.Services.GetRequiredService<ILogger<Program>>();
-
                 Console.WriteLine(
                     @"
      _                             _____ ______ 
@@ -87,46 +96,33 @@ namespace MmoGameFramework
             logger.LogInformation($"Loaded {worldData.Entities.Count} Entities.");
 
 
+            var orchestationService = host.Services.GetRequiredService<OrchestrationService>();
+            await orchestationService.ConnectAsync();
+
             logger.LogInformation("Starting Dragon-Client connections. Port 1337");
             // create and start the server
-            server = new MmoServer(_entityStore, new NetPeerConfiguration("Dragon-Client")
+            server = new MmoServer(orchestationService, _entityStore, new NetPeerConfiguration("Dragon-Client")
             {
                 MaximumConnections = 100,
                 Port = 1337,
-            }, host.Services.GetRequiredService<ILogger<MmoServer>>());
+            }, true, host.Services.GetRequiredService<ILogger<MmoServer>>());
             server.Start();
             logger.LogInformation("Starting Dragon-Worker connections. Port 1338.");
-            workerServer = new MmoServer(_entityStore, new NetPeerConfiguration("Dragon-Worker")
+            workerServer = new MmoServer(orchestationService, _entityStore, new NetPeerConfiguration("Dragon-Worker")
             {
                 MaximumConnections = 100,
                 Port = 1338,
-            }, host.Services.GetRequiredService<ILogger<MmoServer>>());
+            }, false, host.Services.GetRequiredService<ILogger<MmoServer>>());
             workerServer.Start();
 
             logger.LogInformation("DragonGF is ready.");
-            bool loop = true;
-
-            await ConnectAgones();
-
-            while (loop)
-            {
-                //how do we want to quit?
-                var task = Task.CompletedTask;
-                task.Wait();
-               
-            }
-
-            server.Stop();
-            workerServer.Stop();
 
             await host.RunAsync();
 
-        }
-
-        static async Task ConnectAgones()
-        {
-            var agones = new AgonesSDK();
-            bool ok = await agones.ConnectAsync();
+            await orchestationService.ShutdownAsync();
+            server.Stop();
+            workerServer.Stop();
+            metricServer.Stop();
         }
 
     }
