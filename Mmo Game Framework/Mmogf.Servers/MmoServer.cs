@@ -1,27 +1,44 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using Lidgren.Network;
 using MessagePack;
 using Microsoft.Extensions.Logging;
 using Mmogf.Core;
+using Mmogf.Servers.Services;
+using Prometheus;
 
 namespace MmoGameFramework
 {
     public class MmoServer
     {
-        private NetServer s_server;
-        private EntityStore _entities;
-        NetPeerConfiguration _config;
-        ILogger _logger;
         public bool Active => s_server.Status == NetPeerStatus.Running;
         public string WorkerType => _config.AppIdentifier;
 
+        private readonly Gauge ConnectedWorkersGauge;
+
+        private NetServer s_server;
+        OrchestrationService _orchestrationService;
+        private EntityStore _entities;
+        NetPeerConfiguration _config;
+        ILogger _logger;
+
+        bool _clientWorker = false;
+
         public Dictionary<long, WorkerConnection> _connections = new Dictionary<long, WorkerConnection>();
 
-        public MmoServer(EntityStore entities, NetPeerConfiguration config, ILogger<MmoServer> logger)
+        public MmoServer(OrchestrationService orchestrationService, EntityStore entities, NetPeerConfiguration config, bool clientWorker, ILogger<MmoServer> logger)
         {
+            _orchestrationService = orchestrationService;
             _entities = entities;
+            _clientWorker = clientWorker;
+            var description = "Number of connected workers.";
+            if(_clientWorker)
+            {
+                description = "Number of connected clients.";
+            }
+            ConnectedWorkersGauge = Metrics.CreateGauge($"dragongf_{config.AppIdentifier.Replace('-', '_')}", description);
 
             // set up network
             _config = config;
@@ -34,13 +51,14 @@ namespace MmoGameFramework
             _entities.OnEntityCommand += OnEntityCommand;
             _entities.OnEntityCommandResponse += OnEntityCommandResponse;
             _entities.OnUpdateEntityPartial += OnEntityUpdatePartial;
+
         }
 
         public void Start()
         {
             s_server.Start();
 
-            var thread1 = new Thread(Loop);
+            var thread1 = new Thread(async () => await Loop());
             thread1.Start();
 
         }
@@ -51,7 +69,7 @@ namespace MmoGameFramework
             s_server.Shutdown("End");
         }
 
-        void Loop()
+        async Task Loop()
         {
             while (s_server.Status != NetPeerStatus.NotRunning)
             {
@@ -190,6 +208,13 @@ namespace MmoGameFramework
                                 break;
                         }
                         s_server.Recycle(im);
+                    }
+
+                    ConnectedWorkersGauge.Set(s_server.ConnectionsCount);
+
+                    if(s_server.ConnectionsCount > 0)
+                    {
+                        await _orchestrationService.ReadyAsync();
                     }
 
                     Thread.Sleep(0);
