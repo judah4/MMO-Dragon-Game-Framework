@@ -63,15 +63,15 @@ Run in the main folder.
 
 ## Push
 
-`docker push ghcr.io/judah4/testgame:v0.0.9`
-`docker push ghcr.io/judah4/testgame:latest`
-`docker push ghcr.io/judah4/dragongf:v0.0.9`
-`docker push ghcr.io/judah4/dragongf:latest`
+`docker push ghcr.io/judah4/testgame:v0.0.9`  
+`docker push ghcr.io/judah4/testgame:latest`  
+`docker push ghcr.io/judah4/dragongf:v0.0.9`  
+`docker push ghcr.io/judah4/dragongf:latest`  
 
-`docker push judah4/dragongf-testgame:latest`
-`docker push judah4/dragongf-testgame:v0.0.9`
-`docker push judah4/dragongf:latest`
-`docker push judah4/dragongf:v0.0.9`
+`docker push judah4/dragongf-testgame:latest`  
+`docker push judah4/dragongf-testgame:v0.0.9`  
+`docker push judah4/dragongf:latest`  
+`docker push judah4/dragongf:v0.0.9`  
 
 # Agones and Kubernetes
 
