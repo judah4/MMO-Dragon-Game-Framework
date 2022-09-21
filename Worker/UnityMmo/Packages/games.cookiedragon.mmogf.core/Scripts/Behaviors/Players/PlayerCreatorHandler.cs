@@ -12,10 +12,15 @@ namespace Mmogf.Core
 
         private void Update()
         {
+            if(!HasAuthority(PlayerCreator.ComponentId))
+                return;
+
             for (int cnt = 0; cnt < Server.CommandRequests.Count; cnt++)
             {
                 var request = Server.CommandRequests[cnt];
 
+                if (Server.CommandRequests[cnt].EntityId != Entity.EntityId)
+                    continue;
                 if (Server.CommandRequests[cnt].ComponentId != PlayerCreator.ComponentId)
                     continue;
                 //we need a way to identify what command this is... Components will be able to have more commands
