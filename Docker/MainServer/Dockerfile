@@ -20,4 +20,5 @@ RUN dotnet publish "MainServer.csproj" -a x64 -c Release -o /app
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app .
+COPY ["Worker/UnityMmo/worlds/", "worlds/"]
 ENTRYPOINT ["./MmogfMainServer"]

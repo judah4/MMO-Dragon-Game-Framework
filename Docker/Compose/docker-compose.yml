@@ -2,19 +2,51 @@ version: '3'
 
 services:
   dragon-server:
-    image: ghcr.io/judah4/dragongf:latest
+    image: judah4/dragongf:latest
     ports:
+      - "1234:1234"
       - "1337:1337/udp"
       - "1338:1338/udp"
     restart: unless-stopped
     environment:
       - value-test=asdf
+    volumes:
+      - "../../Worker/UnityMmo/worlds/default.world:/app/worlds/default.world"
+    networks:
+        dragongf-network:
+          ipv4_address: 172.16.238.10
+    deploy:
+      resources:
+        limits:
+          cpus: '6'
+          memory: 2G
+        reservations:
+          cpus: '4'
+          memory: 300M
 
   dragon-test-game:
-      image: ghcr.io/judah4/testgame:latest
-      command: --hostIp=172.31.0.1    #Make sure this is your local ip for testing. This is my wsl ip for docker
-      restart: unless-stopped
-      depends_on:
-        - dragon-server
-      environment: 
-        VIRTUAL_HOST: value-test=asdf
+    image: judah4/dragongf-testgame:latest
+    command: --hostIp=172.16.238.10  #Make sure this is your local ip for testing. This is my wsl ip for docker
+    restart: unless-stopped
+    depends_on:
+      - dragon-server
+    environment: 
+      VIRTUAL_HOST: value-test=asdf
+    networks:
+      dragongf-network:
+        ipv4_address: 172.16.238.11
+    deploy:
+      resources:
+        limits:
+          cpus: '3'
+          memory: 2G
+        reservations:
+          cpus: '1'
+          memory: 300M
+
+networks:
+  dragongf-network:
+    ipam:
+      driver: default
+      config:
+      - subnet: "172.16.238.0/24"

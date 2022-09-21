@@ -55,9 +55,24 @@ Build Server build in the `Builds/Linux` folder.
 Run in the main folder.  
 
 
-`docker build -f Docker/Worker/Dockerfile -t ghcr.io/judah4/testgame:v0.0.9 -t ghcr.io/judah4/testgame:latest .`
+`docker build -f Docker/Worker/Dockerfile -t judah4/dragongf-testgame:v0.0.9 -t judah4/dragongf-testgame:latest -t ghcr.io/judah4/testgame:v0.0.9 -t ghcr.io/judah4/testgame:latest .`
 
-`docker build -f Docker/MainServer/Dockerfile -t ghcr.io/judah4/dragongf:v0.0.9 -t ghcr.io/judah4/dragongf:latest .`
+`docker build -f Docker/MainServer/Dockerfile -t judah4/dragongf:v0.0.9 -t judah4/dragongf:latest -t ghcr.io/judah4/dragongf:v0.0.9 -t ghcr.io/judah4/dragongf:latest .`
 
 `docker compose -f Docker/Compose/docker-compose.yml up -d`
 
+## Push
+
+`docker push ghcr.io/judah4/testgame:v0.0.9`
+`docker push ghcr.io/judah4/testgame:latest`
+`docker push ghcr.io/judah4/dragongf:v0.0.9`
+`docker push ghcr.io/judah4/dragongf:latest`
+
+`docker push judah4/dragongf-testgame:latest`
+`docker push judah4/dragongf-testgame:v0.0.9`
+`docker push judah4/dragongf:latest`
+`docker push judah4/dragongf:v0.0.9`
+
+# Agones and Kubernetes
+
+`kubectl create -f Agones/dragongf-gameserver.yaml`
