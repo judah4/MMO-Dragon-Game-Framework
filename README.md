@@ -25,9 +25,9 @@ Probably should not try to use. This was all written quickly over the weekend af
 * Spread out the server workers.
 
 
-![Server and Clients setup](https://img.youtube.com/vi/wfTIpBYMjlk/0.jpg)  
+![Server and Clients setup](https://img.youtube.com/vi/f6h_A6oPgyM/0.jpg)  
 
-[Watch the video](https://youtu.be/wfTIpBYMjlk)  
+[Watch the video](https://youtu.be/f6h_A6oPgyM)  
 
 # Important Links!
 
