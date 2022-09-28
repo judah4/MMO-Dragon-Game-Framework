@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Lidgren.Network;
 using MessagePack;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Mmogf.Core;
 using Mmogf.Servers.Services;
@@ -23,22 +25,28 @@ namespace MmoGameFramework
         private EntityStore _entities;
         NetPeerConfiguration _config;
         ILogger _logger;
+        IConfiguration _configuration;
 
         bool _clientWorker = false;
+        Stopwatch _stopwatch;
+        int _tickRate;
 
         public Dictionary<long, WorkerConnection> _connections = new Dictionary<long, WorkerConnection>();
 
-        public MmoServer(OrchestrationService orchestrationService, EntityStore entities, NetPeerConfiguration config, bool clientWorker, ILogger<MmoServer> logger)
+        public MmoServer(OrchestrationService orchestrationService, EntityStore entities, NetPeerConfiguration config, bool clientWorker, ILogger<MmoServer> logger, IConfiguration configuration)
         {
             _orchestrationService = orchestrationService;
             _entities = entities;
             _clientWorker = clientWorker;
-            var description = "Number of connected workers.";
-            if(_clientWorker)
-            {
-                description = "Number of connected clients.";
-            }
+            _configuration = configuration;
+            _tickRate = _configuration.GetValue<int?>(key: "TickRate") ?? 60;
+            //var description = "Number of connected workers.";
+            //if(_clientWorker)
+            //{
+            //    description = "Number of connected clients.";
+            //}
             //ConnectedWorkersGauge = Metrics.CreateGauge($"dragongf_{config.AppIdentifier.Replace('-', '_')}", description);
+            _stopwatch = new Stopwatch();
 
             // set up network
             _config = config;
@@ -59,6 +67,7 @@ namespace MmoGameFramework
             s_server.Start();
 
             var thread1 = new Thread(async () => await Loop());
+            thread1.Priority = ThreadPriority.AboveNormal;
             thread1.Start();
 
         }
@@ -73,6 +82,7 @@ namespace MmoGameFramework
         {
             while (s_server.Status != NetPeerStatus.NotRunning)
             {
+                _stopwatch.Restart();
                 try
                 {
 
@@ -217,7 +227,18 @@ namespace MmoGameFramework
                         await _orchestrationService.ReadyAsync();
                     }
 
-                    await Task.Delay(0);
+                    var time = _stopwatch.ElapsedMilliseconds;
+
+                    var tickMilliseconds = 1000.0 / _tickRate;
+
+                    if(time < tickMilliseconds)
+                    {
+                        int delay = (int)(tickMilliseconds - time);
+                        if(delay > 0)
+                        {
+                            await Task.Delay(delay);
+                        }
+                    }
                 }
                 catch (Exception e)
                 {

@@ -46,7 +46,8 @@ namespace MmoGameFramework
 
 
             var logger = host.Services.GetRequiredService<ILogger<Program>>();
-                Console.WriteLine(
+            var configuration = host.Services.GetRequiredService<IConfiguration>();
+            Console.WriteLine(
                     @"
      _                             _____ ______ 
     | |                           |  __ \|  ___|
@@ -99,20 +100,23 @@ namespace MmoGameFramework
             var orchestationService = host.Services.GetRequiredService<OrchestrationService>();
             await orchestationService.ConnectAsync();
 
+            var tickRate = configuration.GetValue<int>(key: "TickRate");
+            logger.LogInformation($"Setting Server Tick Rate {tickRate}");
+
             logger.LogInformation("Starting Dragon-Client connections. Port 1337");
             // create and start the server
             server = new MmoServer(orchestationService, _entityStore, new NetPeerConfiguration("Dragon-Client")
             {
                 MaximumConnections = 100,
                 Port = 1337,
-            }, true, host.Services.GetRequiredService<ILogger<MmoServer>>());
+            }, true, host.Services.GetRequiredService<ILogger<MmoServer>>(), configuration);
             server.Start();
             logger.LogInformation("Starting Dragon-Worker connections. Port 1338.");
             workerServer = new MmoServer(orchestationService, _entityStore, new NetPeerConfiguration("Dragon-Worker")
             {
                 MaximumConnections = 100,
                 Port = 1338,
-            }, false, host.Services.GetRequiredService<ILogger<MmoServer>>());
+            }, false, host.Services.GetRequiredService<ILogger<MmoServer>>(), configuration);
             workerServer.Start();
 
             logger.LogInformation("DragonGF is ready.");
