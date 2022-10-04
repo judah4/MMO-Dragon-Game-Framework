@@ -79,10 +79,6 @@ Run in the main folder.
 `docker build -f Docker/MainServer/Dockerfile -t judah4/dragongf:v0.0.9 -t judah4/dragongf:latest .`
 Only required for core dev.
 
-
-## Run On Docker
-`docker compose -f Docker/Compose/docker-compose.yml up -d`
-
 ## Push
 
 `docker push judah4/dragongf:latest`  
