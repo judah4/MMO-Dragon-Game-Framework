@@ -36,7 +36,7 @@ spec:
       containers:
       - name: dragongf-game-server
         image: judah4/dragongf:v0.0.9
-        args: ["--orchestration=agones"]
+        args: ["--orchestration=agones --WorldFilePath=worlds/default.world"]
         imagePullPolicy: Always
         resources:
           requests:

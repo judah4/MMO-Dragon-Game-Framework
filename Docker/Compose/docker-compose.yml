@@ -10,8 +10,9 @@ services:
     restart: unless-stopped
     environment:
       - value-test=asdf
+      - "WorldFilePath=worlds/default.world"
     volumes:
-      - "../../Worker/UnityMmo/worlds/default.world:/app/worlds/default.world"
+      - "../../Worker/UnityMmo/worlds/default.world:/app/worlds/default.world" #change this for your own world file if you change it from default
     networks:
         dragongf-network:
           ipv4_address: 172.16.238.10

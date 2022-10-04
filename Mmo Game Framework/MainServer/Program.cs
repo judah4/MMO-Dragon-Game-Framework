@@ -66,16 +66,12 @@ namespace MmoGameFramework
 
             logger.LogInformation("Loading World Configuration.");
 
-            string worldFilePath = "worlds/default.world";
-#if DEBUG
-            //up and out of the debug bin file
-            worldFilePath = "../../../../../../Worker/UnityMmo/worlds/default.world";
-#endif
+            string worldFilePath = configuration.GetValue<string>("WorldFilePath") ?? "worlds/default.world";
             var updatedPath = Path.GetFullPath(worldFilePath);
             if(!File.Exists(updatedPath))
             {
                 logger.LogError($"World file {updatedPath} does not exist!");
-                await Task.Delay(5000);
+                await Task.Delay(1000); //delay so we can actually see the error...
                 throw new Exception($"World file {updatedPath} does not exist!");
             }
 
