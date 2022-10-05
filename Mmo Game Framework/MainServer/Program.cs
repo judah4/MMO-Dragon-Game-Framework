@@ -68,6 +68,7 @@ namespace MmoGameFramework
 
             string worldFilePath = configuration.GetValue<string>("WorldFilePath") ?? "worlds/default.world";
             var updatedPath = Path.GetFullPath(worldFilePath);
+            //Console.WriteLine($"{worldFilePath} {updatedPath}");
             if(!File.Exists(updatedPath))
             {
                 logger.LogError($"World file {updatedPath} does not exist!");
