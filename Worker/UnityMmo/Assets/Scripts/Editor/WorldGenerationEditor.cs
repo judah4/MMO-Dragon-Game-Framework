@@ -11,7 +11,7 @@ namespace Mmogf
     {
         private static readonly string WorldGenPath = Application.dataPath + "/../worlds/default.world";
 
-        [MenuItem("DragonGF/Generate World Config", false, 200)]
+        [MenuItem("DragonGF/Generate World Config", priority = 1200)]
         private static void Generate()
         {
             MmogfStartup.RegisterSerializers();

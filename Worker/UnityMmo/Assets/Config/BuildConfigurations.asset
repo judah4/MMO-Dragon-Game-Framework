@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98207775917799c47bbede0403131be6, type: 3}
+  m_Name: BuildConfigurations
+  m_EditorClassIdentifier: 
+  ClientBuildConfigurations:
+  - {fileID: 11400000, guid: 9d7849d36fd2b254798b1cc6946fd4eb, type: 2}
+  ServerBuildConfigurations:
+  - {fileID: 11400000, guid: 8d515cbd72e7c4a47af0262c5592d74a, type: 2}
+  DevClientBuildConfiguration: {fileID: 11400000, guid: d25db94fd3bc01b48b1a761d3098617d,
+    type: 2}
+  LoadTestingClientBuildConfiguration: {fileID: 0}

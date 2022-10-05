@@ -194,7 +194,7 @@ namespace Mmogf.Core
 
             Client.Update();
 
-            GameObjectRepresentation.UpdateInterests();
+            GameObjectRepresentation.Update();
 
             OnUpdate();
         }
@@ -266,6 +266,12 @@ namespace Mmogf.Core
         {
             GameObjectRepresentation.UpdateEntity(entityId, componentId, component);
             Client.SendEntityUpdate(entityId, componentId, component);
+        }
+
+        public void UpdateEntity<T>(int entityId, T component) where T : IEntityComponent
+        {
+            GameObjectRepresentation.UpdateEntity(entityId, component.GetComponentId(), component);
+            Client.SendEntityUpdate(entityId, component.GetComponentId(), component);
         }
 
         private void OnEntityCommand(CommandRequest request)

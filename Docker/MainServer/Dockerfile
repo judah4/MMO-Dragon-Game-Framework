@@ -1,6 +1,6 @@
 FROM mcr.microsoft.com/dotnet/runtime:6.0 AS base
 WORKDIR /app
-EXPOSE 80
+EXPOSE 1234
 EXPOSE 1337/udp
 EXPOSE 1338/udp
 
@@ -20,4 +20,5 @@ RUN dotnet publish "MainServer.csproj" -a x64 -c Release -o /app
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app .
+COPY ["Worker/UnityMmo/worlds/", "worlds/"]
 ENTRYPOINT ["./MmogfMainServer"]

@@ -12,7 +12,8 @@ public class EntityGameObject : MonoBehaviour
     public int EntityId;
     public Dictionary<int, IEntityComponent> Data = new Dictionary<int, IEntityComponent>();
 
-    public event Action OnEntityUpdate;
+    public event Action<int> OnEntityUpdate;
+    public List<int> Updates = new List<int>(10); //cleared in a batch on GameObjectRepresentation
 
     public CommonHandler Server { get; set; }
 
@@ -48,9 +49,10 @@ public class EntityGameObject : MonoBehaviour
         return false;
     }
 
-    public void EntityUpdated()
+    public void EntityUpdated(int componentId)
     {
-        OnEntityUpdate?.Invoke();
+        Updates.Add(componentId);
+        OnEntityUpdate?.Invoke(componentId);
 
     }
  

@@ -25,9 +25,9 @@ Probably should not try to use. This was all written quickly over the weekend af
 * Spread out the server workers.
 
 
-![Server and Clients setup](https://img.youtube.com/vi/wfTIpBYMjlk/0.jpg)  
+![Server and Clients setup](https://img.youtube.com/vi/f6h_A6oPgyM/0.jpg)  
 
-[Watch the video](https://youtu.be/wfTIpBYMjlk)  
+[Watch the video](https://youtu.be/f6h_A6oPgyM)  
 
 # Important Links!
 
@@ -49,15 +49,37 @@ MmogfMessages
 -o
 Scripts/Generated
 
+
 # Docker Build
 
 Build Server build in the `Builds/Linux` folder.  
 Run in the main folder.  
 
+## Game Build
+`docker build -f Docker/Worker/Dockerfile -t judah4/dragongf-testgame:v0.0.9 -t judah4/dragongf-testgame:latest .`
+Example build file for the test game.
 
-`docker build -f Docker/Worker/Dockerfile -t ghcr.io/judah4/testgame:v0.0.8 -t ghcr.io/judah4/testgame:latest .`
-
-`docker build -f Docker/MainServer/Dockerfile -t ghcr.io/judah4/dragongf:v0.0.8 -t ghcr.io/judah4/dragongf:latest .`
-
+## Run On Docker
 `docker compose -f Docker/Compose/docker-compose.yml up -d`
 
+## Push
+
+`docker push judah4/dragongf-testgame:latest`  
+`docker push judah4/dragongf-testgame:v0.0.9`  
+
+# Agones and Kubernetes
+
+`kubectl create -f Agones/dragongf-gameserver.yaml`
+
+# Core Build
+
+Run in the main folder.  
+
+## Main Server Build
+`docker build -f Docker/MainServer/Dockerfile -t judah4/dragongf:v0.0.9 -t judah4/dragongf:latest .`
+Only required for core dev.
+
+## Push
+
+`docker push judah4/dragongf:latest`  
+`docker push judah4/dragongf:v0.0.9`  

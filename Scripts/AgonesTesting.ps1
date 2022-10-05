@@ -1,0 +1,1 @@
+sdk-server.windows.amd64.exe --local

@@ -14,15 +14,16 @@ namespace MessagePack.Unity.Editor
     {
 
 
-        [MenuItem("DragonGF/Run Server (Local)")]
+        [MenuItem("DragonGF/Run Server (Local)", priority = 50)]
         public static async Task DoRun()
         {
-            var commnadLineArguments = CommandLineArgs();
-            UnityEngine.Debug.Log("Starting Server Locally." + commnadLineArguments);
+            var commandLineArguments = CommandLineArgs();
+            UnityEngine.Debug.Log("Starting Server Locally." + commandLineArguments);
 
             var path = Path.GetDirectoryName(Application.dataPath);
-            var programPath = Path.Combine(path, "Server/MmogfMainServer.exe");
-            var log = await InvokeProcessStartAsync(programPath, commnadLineArguments);
+            var workingPath = Path.Combine(path, "Server");
+            var programPath = Path.Combine(workingPath, "MmogfMainServer.exe");
+            var log = await InvokeProcessStartAsync(programPath, commandLineArguments, workingPath);
             UnityEngine.Debug.Log(log);
         }
 
@@ -35,46 +36,13 @@ namespace MessagePack.Unity.Editor
             return sb.ToString();
         }
 
-        const string InstallName = "messagepack.generator";
-
-        public static async Task<bool> IsInstalledMpc()
-        {
-            var list = await InvokeProcessStartAsync("dotnet", "tool list -g");
-            if (list.Contains(InstallName))
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        public static async Task<string> InstallMpc()
-        {
-            return await InvokeProcessStartAsync("dotnet", "tool install --global " + InstallName);
-        }
-
-        public static async Task<(bool found, string version)> FindDotnetAsync()
-        {
-            try
-            {
-                var version = await InvokeProcessStartAsync("dotnet", "--version");
-                return (true, version);
-            }
-            catch
-            {
-                return (false, null);
-            }
-        }
-
-        public static Task<string> InvokeProcessStartAsync(string fileName, string arguments)
+        public static Task<string> InvokeProcessStartAsync(string fileName, string arguments, string workingPath)
         {
             var psi = new ProcessStartInfo()
             {
                 FileName = fileName,
                 Arguments = arguments,
-                //WorkingDirectory = Application.dataPath,
+                WorkingDirectory = workingPath,
             };
 
             Process p;

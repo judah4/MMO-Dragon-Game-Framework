@@ -1,9 +1,14 @@
-﻿using Lidgren.Network;
+﻿using Agones;
+using Grpc.Core;
+using Lidgren.Network;
 using MessagePack;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Mmogf.Core;
+using Mmogf.Servers.Services;
+//using Prometheus;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -18,8 +23,11 @@ namespace MmoGameFramework
         private static MmoServer workerServer;
         private static EntityStore _entityStore;
 
-        static Task Main(string[] args)
+        static async Task Main(string[] args)
         {
+            //var metricServer = new KestrelMetricServer(port: 1234);
+            //metricServer.Start();
+
             IHost host = Host.CreateDefaultBuilder(args)
                 .ConfigureLogging(builder =>
                 {
@@ -30,12 +38,16 @@ namespace MmoGameFramework
                         options.TimestampFormat = "hh:mm:ss ";
                     });
                 })
+                .ConfigureServices(x =>
+                {
+                    x.AddSingleton<OrchestrationService>();
+                })
                 .Build();
 
 
             var logger = host.Services.GetRequiredService<ILogger<Program>>();
-
-                Console.WriteLine(
+            var configuration = host.Services.GetRequiredService<IConfiguration>();
+            Console.WriteLine(
                     @"
      _                             _____ ______ 
     | |                           |  __ \|  ___|
@@ -54,16 +66,13 @@ namespace MmoGameFramework
 
             logger.LogInformation("Loading World Configuration.");
 
-            string worldFilePath = "worlds/default.world";
-#if DEBUG
-            //up and out of the debug bin file
-            worldFilePath = "../../../../../../Worker/UnityMmo/worlds/default.world";
-#endif
+            string worldFilePath = configuration.GetValue<string>("WorldFilePath") ?? "worlds/default.world";
             var updatedPath = Path.GetFullPath(worldFilePath);
+            //Console.WriteLine($"{worldFilePath} {updatedPath}");
             if(!File.Exists(updatedPath))
             {
                 logger.LogError($"World file {updatedPath} does not exist!");
-                return Task.Delay(5000);
+                await Task.Delay(1000); //delay so we can actually see the error...
                 throw new Exception($"World file {updatedPath} does not exist!");
             }
 
@@ -85,38 +94,36 @@ namespace MmoGameFramework
             logger.LogInformation($"Loaded {worldData.Entities.Count} Entities.");
 
 
+            var orchestationService = host.Services.GetRequiredService<OrchestrationService>();
+            await orchestationService.ConnectAsync();
+
+            var tickRate = configuration.GetValue<int>(key: "TickRate");
+            logger.LogInformation($"Setting Server Tick Rate {tickRate}");
+
             logger.LogInformation("Starting Dragon-Client connections. Port 1337");
             // create and start the server
-            server = new MmoServer(_entityStore, new NetPeerConfiguration("Dragon-Client")
+            server = new MmoServer(orchestationService, _entityStore, new NetPeerConfiguration("Dragon-Client")
             {
                 MaximumConnections = 100,
                 Port = 1337,
-            }, host.Services.GetRequiredService<ILogger<MmoServer>>());
+            }, true, host.Services.GetRequiredService<ILogger<MmoServer>>(), configuration);
             server.Start();
             logger.LogInformation("Starting Dragon-Worker connections. Port 1338.");
-            workerServer = new MmoServer(_entityStore, new NetPeerConfiguration("Dragon-Worker")
+            workerServer = new MmoServer(orchestationService, _entityStore, new NetPeerConfiguration("Dragon-Worker")
             {
                 MaximumConnections = 100,
                 Port = 1338,
-            }, host.Services.GetRequiredService<ILogger<MmoServer>>());
+            }, false, host.Services.GetRequiredService<ILogger<MmoServer>>(), configuration);
             workerServer.Start();
 
             logger.LogInformation("DragonGF is ready.");
-            bool loop = true;
 
-            while (loop)
-            {
-                //how do we want to quit?
-                var task = Task.CompletedTask;
-                task.Wait();
-               
-            }
+            await host.RunAsync();
 
+            await orchestationService.ShutdownAsync();
             server.Stop();
             workerServer.Stop();
-
-            return host.RunAsync();
-
+            //metricServer.Stop();
         }
 
     }

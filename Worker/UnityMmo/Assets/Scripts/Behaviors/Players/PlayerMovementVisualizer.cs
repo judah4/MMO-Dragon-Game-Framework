@@ -18,7 +18,7 @@ namespace Mmogf
 
         }
 
-        private void Entity_OnEntityUpdate()
+        private void Entity_OnEntityUpdate(int componentId)
         {
             var clientAuthCheck = GetEntityComponent<ClientAuthCheck>(ClientAuthCheck.ComponentId);
             var hasAuth = clientAuthCheck.HasValue && clientAuthCheck.Value.WorkerId == Server.ClientId;
