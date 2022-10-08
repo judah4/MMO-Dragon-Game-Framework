@@ -140,11 +140,11 @@ namespace MmoGameFramework
 
                                 break;
                             case NetIncomingMessageType.Data:
-                                if(_logger.IsEnabled(LogLevel.Debug))
-                                    _logger.LogDebug(im.SenderConnection.RemoteUniqueIdentifier +" - '" + BitConverter.ToString(im.Data) + "'");
+                                //if(_logger.IsEnabled(LogLevel.Debug))
+                                //    _logger.LogDebug(im.SenderConnection.RemoteUniqueIdentifier +" - '" + BitConverter.ToString(im.Data) + "'");
                                 var simpleData = MessagePackSerializer.Deserialize<MmoMessage>(im.Data);
-                                if (_logger.IsEnabled(LogLevel.Debug))
-                                    _logger.LogDebug($"Serve Codes {simpleData.MessageId}");
+                                //if (_logger.IsEnabled(LogLevel.Debug))
+                                //    _logger.LogDebug($"Serve Codes {simpleData.MessageId}");
 
                                 switch (simpleData.MessageId)
                                 {
@@ -376,12 +376,11 @@ namespace MmoGameFramework
 
             entityInfo.Value.EntityData[entityUpdate.ComponentId] = entityUpdate.Info;
 
-            if (_logger.IsEnabled(LogLevel.Debug) && entityUpdate.ComponentId == Position.ComponentId)
-            {
-                var position = MessagePackSerializer.Deserialize<Position>(entityUpdate.Info);
-                _logger.LogDebug($"Entiy: {entityInfo.Value.EntityId} position to {position.ToString()}");
-            }
-
+            //if (_logger.IsEnabled(LogLevel.Debug) && entityUpdate.ComponentId == Position.ComponentId)
+            //{
+            //    var position = MessagePackSerializer.Deserialize<Position>(entityUpdate.Info);
+            //    _logger.LogDebug($"Entity: {entityInfo.Value.EntityId} position to {position.ToString()}");
+            //}
 
             _entities.UpdateEntityPartial(entityUpdate);
 
@@ -485,7 +484,7 @@ namespace MmoGameFramework
                 Info = MessagePackSerializer.Serialize(entityInfo),
             };
             if(_logger.IsEnabled(LogLevel.Debug))
-                _logger.LogDebug("Sending Entity Info" );
+                _logger.LogDebug($"Sending Entity Info {entityInfo.EntityId}" );
             //SendCheckedout(entityInfo.EntityId, message, NetDeliveryMethod.ReliableOrdered);
             SendArea(entityInfo.Position, message, NetDeliveryMethod.ReliableOrdered);
         }
@@ -518,8 +517,8 @@ namespace MmoGameFramework
 
                 Info = MessagePackSerializer.Serialize(entityUpdate),
             };
-            if (_logger.IsEnabled(LogLevel.Debug))
-                _logger.LogDebug("Sending Entity Update");
+            //if (_logger.IsEnabled(LogLevel.Debug))
+            //    _logger.LogDebug("Sending Entity Update");
             SendArea(entity.Value.Position, message);
         }
 
@@ -537,7 +536,7 @@ namespace MmoGameFramework
             };
 
             if (_logger.IsEnabled(LogLevel.Debug))
-                _logger.LogDebug("Sending Entity Event");
+                _logger.LogDebug($"Sending Entity Event {eventRequest.ComponentId}-{eventRequest.EventId}");
             SendArea(entity.Value.Position, message, NetDeliveryMethod.ReliableOrdered);
         }
 
@@ -574,7 +573,7 @@ namespace MmoGameFramework
             };
 
             if (_logger.IsEnabled(LogLevel.Debug))
-                _logger.LogDebug($"Sending Command Request {commandRequest.ComponentId} {commandRequest.RequestId}");
+                _logger.LogDebug($"Sending Command Request {commandRequest.RequestId} {commandRequest.ComponentId}-{commandRequest.CommandId}");
             SendToAuthority(message, workerId);
         }
 
@@ -604,8 +603,8 @@ namespace MmoGameFramework
                 Info = MessagePackSerializer.Serialize(commandResponse),
             };
             if (_logger.IsEnabled(LogLevel.Debug))
-                _logger.LogDebug($"Sending Command Response {commandResponse.ComponentId} {commandResponse.RequestId}");
-            Send(worker.Connection, message, NetDeliveryMethod.ReliableOrdered);
+                _logger.LogDebug($"Sending Command Response {commandResponse.RequestId} {commandResponse.ComponentId}-{commandResponse.CommandId}");
+            Send(worker.Connection, message, NetDeliveryMethod.ReliableUnordered);
         }
 
     }
