@@ -22,6 +22,9 @@ public class FireBehavior: BaseEntityBehavior
 
     private void Update()
     {
+        if(!Entity.HasAuthority(Cannon.ComponentId))
+            return;
+
         for (int cnt = 0; cnt < Server.CommandRequests.Count; cnt++)
         {
             if (Server.CommandRequests[cnt].ComponentId != Cannon.ComponentId)
