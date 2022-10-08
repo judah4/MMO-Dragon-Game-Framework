@@ -16,8 +16,8 @@ namespace Mmogf.Core
         protected MmoWorker Client;
         protected float ConnectDelay = 0;
 
-        public List<CommandRequest> CommandRequests = new List<CommandRequest>();
-        public List<EventRequest> EventRequests = new List<EventRequest>();
+        public List<CommandRequest> CommandRequests = new List<CommandRequest>(1000);
+        public List<EventRequest> EventRequests = new List<EventRequest>(1000);
 
 
         public string WorkerType = "Dragon-Worker";
@@ -98,6 +98,9 @@ namespace Mmogf.Core
             GameObjectRepresentation = new GameObjectRepresentation(this);
 
             var config = new NetPeerConfiguration(WorkerType);
+#if DEBUG
+            config.ConnectionTimeout = 10000000;
+#endif
 
             Client = new MmoWorker(config);
             Client.OnLog += (logLevel, message) => {

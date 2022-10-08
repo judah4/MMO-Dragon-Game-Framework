@@ -73,7 +73,7 @@ namespace Mmogf.Core
 
         private NetClient s_client;
         private DateTime _pingRequestAt;
-        private Dictionary<string, CommandHolder> _commandCallbacks = new Dictionary<string, CommandHolder>();
+        private Dictionary<string, CommandHolder> _commandCallbacks = new Dictionary<string, CommandHolder>(1000);
         List<KeyValuePair<string, CommandHolder>> _commandTimeoutUpdates = new List<KeyValuePair<string, CommandHolder>>(100);
 
 

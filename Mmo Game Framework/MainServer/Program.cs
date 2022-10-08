@@ -97,15 +97,20 @@ namespace MmoGameFramework
             var orchestationService = host.Services.GetRequiredService<OrchestrationService>();
             await orchestationService.ConnectAsync();
 
-            var tickRate = configuration.GetValue<int>(key: "TickRate");
+            var tickRate = configuration.GetValue<int>("TickRate");
+            var timeout = configuration.GetValue<int>("Timeout");
+            if(timeout == 0)
+                timeout = 25;
             logger.LogInformation($"Setting Server Tick Rate {tickRate}");
-
+            if(timeout != 25)
+            logger.LogInformation($"Setting Server Timeout To {timeout}");
             logger.LogInformation("Starting Dragon-Client connections. Port 1337");
             // create and start the server
             server = new MmoServer(orchestationService, _entityStore, new NetPeerConfiguration("Dragon-Client")
             {
                 MaximumConnections = 100,
                 Port = 1337,
+                ConnectionTimeout = timeout,
             }, true, host.Services.GetRequiredService<ILogger<MmoServer>>(), configuration);
             server.Start();
             logger.LogInformation("Starting Dragon-Worker connections. Port 1338.");
@@ -113,6 +118,7 @@ namespace MmoGameFramework
             {
                 MaximumConnections = 100,
                 Port = 1338,
+                ConnectionTimeout = timeout,
             }, false, host.Services.GetRequiredService<ILogger<MmoServer>>(), configuration);
             workerServer.Start();
 
