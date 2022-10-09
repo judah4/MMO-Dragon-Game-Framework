@@ -10,7 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Mmogf.Core;
 using Mmogf.Servers.Services;
-//using Prometheus;
+using Prometheus;
 
 namespace MmoGameFramework
 {
@@ -19,7 +19,7 @@ namespace MmoGameFramework
         public bool Active => s_server.Status == NetPeerStatus.Running;
         public string WorkerType => _config.AppIdentifier;
 
-        //private readonly Gauge ConnectedWorkersGauge;
+        private readonly Gauge ConnectedWorkersGauge;
 
         private NetServer s_server;
         OrchestrationService _orchestrationService;
@@ -42,12 +42,12 @@ namespace MmoGameFramework
             _clientWorker = clientWorker;
             _configuration = configuration;
             _tickRate = _configuration.GetValue<int?>(key: "TickRate") ?? 60;
-            //var description = "Number of connected workers.";
-            //if(_clientWorker)
-            //{
-            //    description = "Number of connected clients.";
-            //}
-            //ConnectedWorkersGauge = Metrics.CreateGauge($"dragongf_{config.AppIdentifier.Replace('-', '_')}", description);
+            var description = "Number of connected workers.";
+            if (_clientWorker)
+            {
+                description = "Number of connected clients.";
+            }
+            ConnectedWorkersGauge = Metrics.CreateGauge($"dragongf_{config.AppIdentifier.Replace('-', '_')}", description);
             _stopwatch = new Stopwatch();
 
             // set up network
@@ -222,7 +222,7 @@ namespace MmoGameFramework
                         s_server.Recycle(im);
                     }
 
-                    //ConnectedWorkersGauge.Set(s_server.ConnectionsCount);
+                    ConnectedWorkersGauge.Set(s_server.ConnectionsCount);
 
                     if(s_server.ConnectionsCount > 0)
                     {

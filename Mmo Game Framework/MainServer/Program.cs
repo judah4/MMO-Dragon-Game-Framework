@@ -8,7 +8,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Mmogf.Core;
 using Mmogf.Servers.Services;
-//using Prometheus;
+using Prometheus;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -25,8 +25,8 @@ namespace MmoGameFramework
 
         static async Task Main(string[] args)
         {
-            //var metricServer = new KestrelMetricServer(port: 1234);
-            //metricServer.Start();
+            var metricServer = new KestrelMetricServer(port: 1234);
+            metricServer.Start();
 
             IHost host = Host.CreateDefaultBuilder(args)
                 .ConfigureLogging(builder =>
@@ -135,7 +135,7 @@ namespace MmoGameFramework
             await orchestationService.ShutdownAsync();
             server.Stop();
             workerServer.Stop();
-            //metricServer.Stop();
+            metricServer.Stop();
         }
 
     }

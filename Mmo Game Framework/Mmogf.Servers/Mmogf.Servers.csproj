@@ -12,6 +12,7 @@
     <PackageReference Include="MessagePack" Version="2.4.35" />
     <PackageReference Include="MessagePack.UnityShims" Version="2.4.35" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.2" />
+    <PackageReference Include="prometheus-net.AspNetCore" Version="7.0.0-pre-000296-5b1a1c4" />
   </ItemGroup>
 	<ItemGroup>
 		<Compile Include="..\..\Worker\UnityMmo\Packages\games.cookiedragon.mmogf.core\MmogfMessages\Core\**\*.cs" LinkBase="Shared" />
