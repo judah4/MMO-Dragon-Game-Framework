@@ -11,17 +11,14 @@ namespace Mmogf.Core
     {
         public static Quaternion ToQuaternion(this Rotation rotation)
         {
-            return new Quaternion(rotation.X, rotation.Y, rotation.Z, rotation.W);
+            return Quaternion.Euler(0, rotation.Heading, 0);
         }
 
         public static Rotation ToRotation(this Quaternion rotation)
         {
             return new Rotation() 
             {
-                X = rotation.x,
-                Y = rotation.y,
-                Z = rotation.z,
-                W = rotation.w
+                Heading = rotation.eulerAngles.y,
             };
         }
     }

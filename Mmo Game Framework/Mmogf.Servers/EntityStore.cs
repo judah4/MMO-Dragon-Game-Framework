@@ -41,7 +41,7 @@ namespace MmoGameFramework
 
 
             if (rotation == null)
-                rotation = Rotation.Identity;
+                rotation = Rotation.Zero;
 
             //validate acl list for data passsed
 

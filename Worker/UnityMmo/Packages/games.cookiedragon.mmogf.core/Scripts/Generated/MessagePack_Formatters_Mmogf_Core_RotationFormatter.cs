@@ -24,11 +24,8 @@ namespace MessagePack.Formatters.Mmogf.Core
 
         public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Mmogf.Core.Rotation value, global::MessagePack.MessagePackSerializerOptions options)
         {
-            writer.WriteArrayHeader(4);
-            writer.Write(value.X);
-            writer.Write(value.Y);
-            writer.Write(value.Z);
-            writer.Write(value.W);
+            writer.WriteArrayHeader(1);
+            writer.Write(value.Heading);
         }
 
         public global::Mmogf.Core.Rotation Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
@@ -47,16 +44,7 @@ namespace MessagePack.Formatters.Mmogf.Core
                 switch (i)
                 {
                     case 0:
-                        ____result.X = reader.ReadSingle();
-                        break;
-                    case 1:
-                        ____result.Y = reader.ReadSingle();
-                        break;
-                    case 2:
-                        ____result.Z = reader.ReadSingle();
-                        break;
-                    case 3:
-                        ____result.W = reader.ReadSingle();
+                        ____result.Heading = reader.ReadSingle();
                         break;
                     default:
                         reader.Skip();

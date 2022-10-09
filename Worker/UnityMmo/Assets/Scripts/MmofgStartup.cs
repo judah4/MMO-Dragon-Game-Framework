@@ -76,7 +76,7 @@ namespace Mmogf
 
             Debug.Log($"Creating Player {clientId}");
 
-            var createEntity = new CreateEntityRequest("Player", new Position() { Y = 0, }, Rotation.Identity,
+            var createEntity = new CreateEntityRequest("Player", new Position() { Y = 0, }, Rotation.Zero,
                 new Dictionary<int, byte[]>()
                 {
                     { Cannon.ComponentId, MessagePack.MessagePackSerializer.Serialize(new Cannon()) },
