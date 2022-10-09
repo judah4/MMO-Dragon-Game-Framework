@@ -127,6 +127,8 @@ namespace Mmogf.Core
 
             InternalBehaviors();
             CommandTimeouts();
+
+            Debug.Log($"{WorkerType} {s_client.Statistics.ToString()}");
         }
 
         private void InternalBehaviors()

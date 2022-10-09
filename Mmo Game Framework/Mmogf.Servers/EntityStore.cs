@@ -18,7 +18,7 @@ namespace MmoGameFramework
         public event Action<EntityInfo> OnUpdateEntity;
         public event Action<CommandRequest> OnEntityCommand;
         public event Action<CommandResponse> OnEntityCommandResponse;
-        public event Action<EntityUpdate> OnUpdateEntityPartial;
+        public event Action<EntityUpdate, long> OnUpdateEntityPartial;
         public event Action<EventRequest> OnEntityEvent;
         public event Action<EntityInfo> OnEntityDelete;
 
@@ -100,9 +100,9 @@ namespace MmoGameFramework
             OnUpdateEntity?.Invoke(entityInfo);
         }
 
-        public void UpdateEntityPartial(EntityUpdate entityUpdate)
+        public void UpdateEntityPartial(EntityUpdate entityUpdate, long workerId)
         {
-            OnUpdateEntityPartial?.Invoke(entityUpdate);
+            OnUpdateEntityPartial?.Invoke(entityUpdate, workerId);
         }
 
         public void SendCommand(CommandRequest commandRequest)
