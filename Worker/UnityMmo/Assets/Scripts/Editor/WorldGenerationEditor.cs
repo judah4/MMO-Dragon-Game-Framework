@@ -50,6 +50,27 @@ namespace Mmogf
                 new Acl() { ComponentId = Acls.ComponentId, WorkerType = "Dragon-Worker" },
             }, new Dictionary<int, IEntityComponent>()));
 
+            var entityId = 4;
+
+            for (int x = 0; x < 10; x++)
+            {
+                for (int y = 0; y < 5; y++)
+                {
+                    worldConfig.Entities.Add(EntityWorldConfig.Create("Ship", entityId++, new Position() { X = x * 10 - 50, Z = y * 10 - 50 }, new List<Acl>()
+                    {
+                        new Acl() { ComponentId = Position.ComponentId, WorkerType = "Dragon-Worker" },
+                        new Acl() { ComponentId = Rotation.ComponentId, WorkerType = "Dragon-Worker" },
+                        new Acl() { ComponentId = Acls.ComponentId, WorkerType = "Dragon-Worker" },
+                        new Acl() { ComponentId = Cannon.ComponentId, WorkerType = "Dragon-Worker" },
+                        new Acl() { ComponentId = Health.ComponentId, WorkerType = "Dragon-Worker" },
+                    }, new Dictionary<int, IEntityComponent>()
+                    {
+                        { Rotation.ComponentId, Quaternion.Euler(0, Random.Range(-90, 90), 0).ToRotation() },
+                        { Cannon.ComponentId, new Cannon() },
+                        { Health.ComponentId, new Health() { Current = 100, Max = 100, } },
+                    }));
+                }
+            }
 
             var path = Path.GetDirectoryName(WorldGenPath);
             Directory.CreateDirectory(path);

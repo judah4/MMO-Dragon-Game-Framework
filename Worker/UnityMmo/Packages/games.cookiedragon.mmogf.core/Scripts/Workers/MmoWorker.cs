@@ -94,7 +94,7 @@ namespace Mmogf.Core
 
         public MmoWorker(NetPeerConfiguration config)
         {
-            config.AutoFlushSendQueue = false;
+            //config.AutoFlushSendQueue = false;
             s_client = new NetClient(config);
             //s_client.RegisterReceivedCallback(new SendOrPostCallback(GotMessage), _sync);
 
@@ -120,7 +120,8 @@ namespace Mmogf.Core
 
         public void Update()
         {
-            s_client.FlushSendQueue();
+            if(!s_client.Configuration.AutoFlushSendQueue)
+                s_client.FlushSendQueue();
 
             GotMessage(s_client);
 
