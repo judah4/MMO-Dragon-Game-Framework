@@ -20,10 +20,7 @@ public class FireVisualizer : BaseEntityBehavior
     {
         HandleFireEvents();
 
-        var clientAuthCheck = GetEntityComponent<ClientAuthCheck>(ClientAuthCheck.ComponentId);
-        var hasAuth = clientAuthCheck.HasValue && clientAuthCheck.Value.WorkerId == Server.ClientId;
-
-        if (!hasAuth)
+        if (!Entity.HasAuthority(ClientAuthCheck.ComponentId))
             return;
 
         if (Input.GetKeyDown(KeyCode.Q))
