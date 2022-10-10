@@ -28,8 +28,7 @@ namespace Mmogf.Core
                 var rot = GetEntityComponent<Rotation>(Rotation.ComponentId).Value;
                 if (UpdateRotation)
                 {
-                    var currentRot = rot.ToQuaternion();
-                    if (currentRot != transform.rotation)
+                    if (rot.Heading != transform.rotation.eulerAngles.y)
                     {
                         Server.UpdateEntity(Entity.EntityId, Rotation.ComponentId, transform.rotation.ToRotation());
                         updateTimeRotation = updateTick;
