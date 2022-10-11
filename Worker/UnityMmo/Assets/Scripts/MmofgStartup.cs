@@ -21,8 +21,8 @@ namespace Mmogf
                     MessagePack.Resolvers.StandardResolver.Instance
                 );
 
-            var option = MessagePackSerializerOptions.Standard.WithResolver(StaticCompositeResolver.Instance);
-
+            var option = MessagePackSerializerOptions.Standard.WithResolver(StaticCompositeResolver.Instance).WithCompression(MessagePackCompression.Lz4BlockArray);
+            //rethink compressed by default
             MessagePackSerializer.DefaultOptions = option;
             serializerRegistered = true;
         }
