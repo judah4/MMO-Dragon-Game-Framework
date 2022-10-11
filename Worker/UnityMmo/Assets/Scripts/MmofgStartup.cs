@@ -44,9 +44,13 @@ namespace Mmogf
         static void LoadEntityComponentTypesList()
         {
             Dictionary<int, System.Type> types = new Dictionary<int, System.Type>();
+            Dictionary<int, System.Type> commands = new Dictionary<int, System.Type>();
+            Dictionary<int, System.Type> events = new Dictionary<int, System.Type>();
             //map components to ids
             //yay reflection!
             var type = typeof(IEntityComponent);
+            var eventType = typeof(IEvent);
+            var commandType = typeof(ICommand);
             var assemblies = System.AppDomain.CurrentDomain.GetAssemblies();
             for (int cnt = 0; cnt < assemblies.Length; cnt++)
             {
@@ -55,16 +59,27 @@ namespace Mmogf
                 for(int i = 0; i < typesList.Length; i++)
                 {
                     var t = typesList[i];
-                    if(type.IsAssignableFrom(t) && t.IsInterface == false)
+                    if(t.IsInterface)
+                        continue;
+                    if(type.IsAssignableFrom(t))
                     {
                         var component = (IEntityComponent)System.Activator.CreateInstance(t);
-                        //Debug.Log($"{component.GetComponentId()}, {t.Name}");
                         types.Add(component.GetComponentId(), t);
+                    }
+                    if (commandType.IsAssignableFrom(t))
+                    {
+                        var command = (ICommand)System.Activator.CreateInstance(t);
+                        commands.Add(command.GetCommandId(), t);
+                    }
+                    if (eventType.IsAssignableFrom(t))
+                    {
+                        var evn = (IEvent)System.Activator.CreateInstance(t);
+                        events.Add(evn.GetEventId(), t);
                     }
                 }
             }
 
-            ComponentMappings.Init(types);
+            ComponentMappings.Init(types, commands, events);
         }
 
         static CreateEntityRequest CreatePlayer(PlayerCreator.ConnectPlayer connect, CommandRequest request)

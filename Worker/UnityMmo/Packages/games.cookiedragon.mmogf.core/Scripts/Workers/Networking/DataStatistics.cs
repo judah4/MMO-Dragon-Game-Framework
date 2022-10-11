@@ -21,6 +21,8 @@ namespace Mmogf.Core.Networking
     public class DataStatistics : IInternalBehavior
     {
 
+        public DataSpan CurrentTimeSlice => _timeSlices.Count > 1 ? _timeSlices[1] : _timeSlices[0];
+
         List<DataSpan> _timeSlices = new List<DataSpan>(1000);
 
         float _tick = 0;
