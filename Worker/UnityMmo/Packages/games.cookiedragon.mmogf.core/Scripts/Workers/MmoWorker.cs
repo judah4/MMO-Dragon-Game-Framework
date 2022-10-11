@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 using System.Threading;
 using Lidgren.Network;
 using MessagePack;
 using Mmogf.Core.Behaviors;
+using Mmogf.Core.Networking;
+using UnityEditor.PackageManager.Requests;
 using UnityEngine;
 
 namespace Mmogf.Core 
@@ -19,62 +22,21 @@ namespace Mmogf.Core
 
     public class MmoWorker
     {
-        public class CommandHolder
-        {
-            public CommandRequest Request { get; set; }
-
-            public float TimeoutTimer { get; set; }
-
-            public CommandHolder(CommandRequest request, float timeoutTimer)
-            {
-                Request = request;
-                TimeoutTimer = timeoutTimer;
-            }
-
-            public virtual void SendResponse(CommandResponse response)
-            {
-
-            }
-
-        }
-
-        public class CommandHolderTyped<TCommand, TRequest, TResponse> : CommandHolder where TCommand : ICommandBase<TRequest, TResponse> where TRequest : struct where TResponse : struct
-        {
-            public ICommandBase<TRequest,TResponse> Command { get; set; }
-            public Action<CommandResult<TCommand,TRequest, TResponse>> Response { get; set; }
-
-            public CommandHolderTyped(CommandRequest request, ICommandBase<TRequest, TResponse> command, Action<CommandResult<TCommand, TRequest, TResponse>> response, float timeoutTimer) : base(request, timeoutTimer)
-            {
-                Response = response;
-                Command = command;
-            }
-
-            public override void SendResponse(CommandResponse response)
-            {
-
-                TRequest? requestPayload = null;
-                TResponse? responsePayload = null;
-                if(response.Payload != null)
-                {
-                    var command = MessagePackSerializer.Deserialize<TCommand>(response.Payload);
-                    requestPayload = command.Request;
-                    responsePayload = command.Response;
-                }
-
-                var result = CommandResult<TCommand,TRequest,TResponse>.Create(response, requestPayload, responsePayload);
-               Response?.Invoke(result);
-            }
-
-        }
-
+        
         public long ClientId => s_client.UniqueIdentifier;
         public string WorkerType { get; private set; }
         public int Ping { get; private set; }
+        public DataStatistics ReceivedStats => _dataStatisticsReceived;
+        public DataStatistics SentStats => _dataStatisticsSent;
 
         private NetClient s_client;
         private DateTime _pingRequestAt;
         private Dictionary<string, CommandHolder> _commandCallbacks = new Dictionary<string, CommandHolder>(1000);
         List<KeyValuePair<string, CommandHolder>> _commandTimeoutUpdates = new List<KeyValuePair<string, CommandHolder>>(100);
+        CommandHolderCache _commandHolderCache;
+        DataStatistics _dataStatisticsReceived;
+        DataStatistics _dataStatisticsSent;
+        //MessagePackSerializerOptions _compressOptions = MessagePackSerializerOptions.Standard.WithCompression(MessagePackCompression.Lz4BlockArray);
 
 
         public bool Connected => s_client.ConnectionStatus == NetConnectionStatus.Connected;
@@ -96,11 +58,15 @@ namespace Mmogf.Core
         {
             //config.AutoFlushSendQueue = false;
             s_client = new NetClient(config);
+            _commandHolderCache = new CommandHolderCache();
             //s_client.RegisterReceivedCallback(new SendOrPostCallback(GotMessage), _sync);
-
+            _dataStatisticsReceived = new DataStatistics(this);
+            _dataStatisticsSent = new DataStatistics(this);
             _internalBehaviors = new List<IInternalBehavior>()
             {
                 new PingBehavior(this),
+                _dataStatisticsReceived,
+                _dataStatisticsSent,
             };
 
         }
@@ -128,7 +94,8 @@ namespace Mmogf.Core
             InternalBehaviors();
             CommandTimeouts();
 
-            Debug.Log($"{WorkerType} {s_client.Statistics.ToString()}");
+            //Debug.Log($"{WorkerType} {s_client.Statistics.ToString()}");
+
         }
 
         private void InternalBehaviors()
@@ -162,6 +129,7 @@ namespace Mmogf.Core
                 var response = CommandResponse.Create(holder.Request, CommandStatus.Timeout, "Request timed out with no response.");
                 holder.SendResponse(response);
                 _commandCallbacks.Remove(update.Key);
+                _commandHolderCache.Release(holder);
             }
 
         }
@@ -225,6 +193,7 @@ namespace Mmogf.Core
                                 //}
 
                                 OnEntityCreation?.Invoke(entityInfo);
+                                _dataStatisticsReceived.RecordMessage(entityInfo.EntityId, im.LengthBytes, DataStat.Entity);
                                 break;
                             case ServerCodes.EntityCheckout:
                                 var entityCheckout = MessagePackSerializer.Deserialize<EntityCheckout>(simpleData.Info);
@@ -234,19 +203,22 @@ namespace Mmogf.Core
                             case ServerCodes.EntityUpdate:
                                 var entityUpdate = MessagePackSerializer.Deserialize<EntityUpdate>(simpleData.Info);
                                 OnEntityUpdate?.Invoke(entityUpdate);
+                                _dataStatisticsReceived.RecordMessage(entityUpdate.ComponentId, im.LengthBytes, DataStat.Update);
                                 break;
                             case ServerCodes.EntityDelete:
                                 var entityDelete = MessagePackSerializer.Deserialize<EntityInfo>(simpleData.Info);
                                 OnEntityDelete?.Invoke(entityDelete);
+                                _dataStatisticsReceived.RecordMessage(entityDelete.EntityId, im.LengthBytes, DataStat.Entity);
                                 break;
                             case ServerCodes.EntityEvent:
                                 var eventRequest = MessagePackSerializer.Deserialize<EventRequest>(simpleData.Info);
                                 OnEntityEvent?.Invoke(eventRequest);
                                 break;
                             case ServerCodes.EntityCommandRequest:
-                            var commandRequest = MessagePackSerializer.Deserialize<CommandRequest>(simpleData.Info);
-                            OnEntityCommand?.Invoke(commandRequest);
-                            break;
+                                var commandRequest = MessagePackSerializer.Deserialize<CommandRequest>(simpleData.Info);
+                                OnEntityCommand?.Invoke(commandRequest);
+                                _dataStatisticsReceived.RecordMessage(commandRequest.CommandId, im.LengthBytes, DataStat.Command);
+                                break;
                             case ServerCodes.EntityCommandResponse:
                                 var commandResponse = MessagePackSerializer.Deserialize<CommandResponse>(simpleData.Info);
 
@@ -264,11 +236,15 @@ namespace Mmogf.Core
                                     {
                                         OnLog?.Invoke(LogLevel.Error, e.ToString());
                                     }
+                                    _commandHolderCache.Release(callback);
                                 }
+                                _dataStatisticsReceived.RecordMessage(commandResponse.CommandId, im.LengthBytes, DataStat.Command);
                                 break;
                             case ServerCodes.Ping:
-                            PingResponse();
-                            break;
+                                PingResponse();
+                                //record ping?
+                                _dataStatisticsReceived.RecordMessage(-1, im.LengthBytes, DataStat.Command);
+                                break;
                             default:
                                 break;
                         }
@@ -281,11 +257,13 @@ namespace Mmogf.Core
             }
         }
 
-        public void Send(MmoMessage message)
+        public int Send(MmoMessage message)
         {
-            NetOutgoingMessage om = s_client.CreateMessage();
-            om.Write(MessagePackSerializer.Serialize(message));
+            var bytes = MessagePackSerializer.Serialize(message);
+            NetOutgoingMessage om = s_client.CreateMessage(bytes.Length);
+            om.Write(bytes);
             s_client.SendMessage(om, NetDeliveryMethod.ReliableUnordered);
+            return bytes.Length;
         }
 
         public void SendInterestChange(Position position)
@@ -295,11 +273,12 @@ namespace Mmogf.Core
                 Position = position,
             };
 
-            Send(new MmoMessage()
+            var byteLength = Send(new MmoMessage()
             {
                 MessageId = ServerCodes.ChangeInterestArea,
                 Info = MessagePackSerializer.Serialize(changeInterest),
             });
+            _dataStatisticsSent.RecordMessage(-2, byteLength, DataStat.Command);
         }
 
         public void SendEntityUpdate<T>(int entityId, int componentId, T message) where T : IMessage
@@ -312,21 +291,23 @@ namespace Mmogf.Core
                 Info = MessagePackSerializer.Serialize(message),
             };
 
-            Send(new MmoMessage()
+            var byteLength = Send(new MmoMessage()
             {
                 MessageId = ServerCodes.EntityUpdate,
                 Info = MessagePackSerializer.Serialize(changeInterest),
             });
+            _dataStatisticsSent.RecordMessage(componentId, byteLength, DataStat.Update);
         }
 
         public void SendPing()
         {
-            Send(new MmoMessage()
+            var byteLength = Send(new MmoMessage()
             {
                 MessageId = ServerCodes.Ping,
                 Info = new byte[0],
             });
             _pingRequestAt = DateTime.UtcNow;
+            _dataStatisticsSent.RecordMessage(-1, byteLength, DataStat.Command);
         }
 
         void PingResponse()
@@ -339,6 +320,7 @@ namespace Mmogf.Core
         {
             var requestId = Guid.NewGuid().ToString();
 
+            command.Response = null; //clear data
             var request = new CommandRequest()
             {
                 RequestId = requestId,
@@ -350,22 +332,27 @@ namespace Mmogf.Core
             };
 
             //register callback
-            _commandCallbacks.Add(requestId, new CommandHolderTyped<T, TRequest, TResponse>(request, command, callback, 10f));
+            var holder = _commandHolderCache.Get(request, command, callback, 10f);
+            _commandCallbacks.Add(requestId, holder);
 
-            Send(new MmoMessage()
+            var byteLength = Send(new MmoMessage()
             {
                 MessageId = ServerCodes.EntityCommandRequest,
                 Info = MessagePackSerializer.Serialize(request),
             });
+            _dataStatisticsSent.RecordMessage(componentId, byteLength, DataStat.Command);
         }
 
         public void SendCommandResponse<T, TRequest, TResponse>(CommandRequest request, T command) where T : ICommandBase<TRequest, TResponse> where TRequest : struct where TResponse : struct
         {
-            Send(new MmoMessage()
+            command.Request = null; //clear data
+
+            var byteLength = Send(new MmoMessage()
             {
                 MessageId = ServerCodes.EntityCommandResponse,
                 Info = MessagePackSerializer.Serialize(CommandResponse.Create(request, CommandStatus.Success, "", MessagePackSerializer.Serialize(command))),
             });
+            _dataStatisticsSent.RecordMessage(request.CommandId, byteLength, DataStat.Command);
         }
 
         public void SendCommandResponseFailure(CommandRequest request, CommandStatus status, string message)
@@ -373,16 +360,17 @@ namespace Mmogf.Core
             if(message == null)
                 message = "Something went wrong.";
 
-            Send(new MmoMessage()
+            var byteLength = Send(new MmoMessage()
             {
                 MessageId = ServerCodes.EntityCommandResponse,
                 Info = MessagePackSerializer.Serialize(CommandResponse.Create(request, status, message, null)),
             });
+            _dataStatisticsSent.RecordMessage(request.CommandId, byteLength, DataStat.Command);
         }
 
         public void SendEvent<T>(int entityId, int componentId, T eventPayload) where T : IEvent
         {
-            Send(new MmoMessage()
+            var byteLength = Send(new MmoMessage()
             {
                 MessageId = ServerCodes.EntityEvent,
                 Info = MessagePackSerializer.Serialize(new EventRequest()
@@ -393,6 +381,8 @@ namespace Mmogf.Core
                     Payload = MessagePackSerializer.Serialize(eventPayload),
                 }),
             });
+            _dataStatisticsSent.RecordMessage(eventPayload.GetEventId(), byteLength, DataStat.Command);
+
         }
 
 

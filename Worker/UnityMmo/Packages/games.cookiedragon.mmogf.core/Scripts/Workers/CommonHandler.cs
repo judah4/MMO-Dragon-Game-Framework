@@ -1,4 +1,5 @@
 ﻿using Lidgren.Network;
+using Mmogf.Core.Networking;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -47,6 +48,8 @@ namespace Mmogf.Core
         {
             get { return Client?.Status ?? NetConnectionStatus.None; }
         }
+        public DataStatistics ReceivedStats => Client?.ReceivedStats;
+        public DataStatistics SentStats => Client?.SentStats;
 
         void OnEnable()
         {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using Google.Protobuf.WellKnownTypes;
 using Lidgren.Network;
 using MessagePack;
 using Microsoft.Extensions.Configuration;
@@ -35,6 +36,7 @@ namespace MmoGameFramework
 
         public MmoServer(OrchestrationService orchestrationService, EntityStore entities, NetPeerConfiguration config, bool clientWorker, ILogger<MmoServer> logger, IConfiguration configuration)
         {
+
             _orchestrationService = orchestrationService;
             _entities = entities;
             _clientWorker = clientWorker;
@@ -414,8 +416,9 @@ namespace MmoGameFramework
 
         public void Send(NetConnection connection, MmoMessage message, NetDeliveryMethod deliveryMethod = NetDeliveryMethod.Unreliable, int sequenceChannel = 0)
         {
-            NetOutgoingMessage om = s_server.CreateMessage();
-            om.Write(MessagePackSerializer.Serialize(message));
+            var bytes = MessagePackSerializer.Serialize(message);
+            NetOutgoingMessage om = s_server.CreateMessage(bytes.Length);
+            om.Write(bytes);
             s_server.SendMessage(om, connection, deliveryMethod, sequenceChannel);
         }
 

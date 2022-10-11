@@ -7,12 +7,12 @@ using UnityEngine;
 
 namespace Mmogf.Core.Behaviors
 {
-    public interface IInternalBehavior
+    internal interface IInternalBehavior
     {
         void Update();
     }
 
-    public class PingBehavior : IInternalBehavior
+    internal class PingBehavior : IInternalBehavior
     {
         public float Timer = 5f;
         MmoWorker _worker;
