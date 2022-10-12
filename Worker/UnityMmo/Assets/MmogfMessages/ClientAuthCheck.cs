@@ -9,8 +9,8 @@ namespace Mmogf
     [MessagePackObject]
     public struct ClientAuthCheck : IEntityComponent
     {
-        public const int ComponentId = 1003;
-        public int GetComponentId()
+        public const short ComponentId = 1003;
+        public short GetComponentId()
         {
             return ComponentId;
         }

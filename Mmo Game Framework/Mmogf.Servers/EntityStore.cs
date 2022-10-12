@@ -18,7 +18,7 @@ namespace MmoGameFramework
         public event Action<EntityInfo> OnUpdateEntity;
         public event Action<CommandRequest> OnEntityCommand;
         public event Action<CommandResponse> OnEntityCommandResponse;
-        public event Action<EntityUpdate> OnUpdateEntityPartial;
+        public event Action<EntityUpdate, long> OnUpdateEntityPartial;
         public event Action<EventRequest> OnEntityEvent;
         public event Action<EntityInfo> OnEntityDelete;
 
@@ -27,7 +27,7 @@ namespace MmoGameFramework
             _logger = logger;
         }
 
-        public EntityInfo Create(string entityType, Position position, List<Acl> acls, int? entityId = null, Rotation? rotation = null, Dictionary<int, byte[]> additionalData = null)
+        public EntityInfo Create(string entityType, Position position, List<Acl> acls, int? entityId = null, Rotation? rotation = null, Dictionary<short, byte[]> additionalData = null)
         {
             if(entityId.HasValue)
             {
@@ -41,14 +41,14 @@ namespace MmoGameFramework
 
 
             if (rotation == null)
-                rotation = Rotation.Identity;
+                rotation = Rotation.Zero;
 
             //validate acl list for data passsed
 
             var entity = new EntityInfo()
             {
                 EntityId = entityId.Value,
-                EntityData = new Dictionary<int, byte[]>()
+                EntityData = new Dictionary<short, byte[]>()
                 {
                     { EntityType.ComponentId, MessagePackSerializer.Serialize(new EntityType() { Name = entityType}) },
                     { Position.ComponentId, MessagePackSerializer.Serialize(position) },
@@ -100,9 +100,9 @@ namespace MmoGameFramework
             OnUpdateEntity?.Invoke(entityInfo);
         }
 
-        public void UpdateEntityPartial(EntityUpdate entityUpdate)
+        public void UpdateEntityPartial(EntityUpdate entityUpdate, long workerId)
         {
-            OnUpdateEntityPartial?.Invoke(entityUpdate);
+            OnUpdateEntityPartial?.Invoke(entityUpdate, workerId);
         }
 
         public void SendCommand(CommandRequest commandRequest)

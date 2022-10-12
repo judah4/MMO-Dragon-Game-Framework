@@ -68,10 +68,10 @@ namespace MessagePack.Formatters.Mmogf.Core
                         ____result.EntityId = reader.ReadInt32();
                         break;
                     case 5:
-                        ____result.ComponentId = reader.ReadInt32();
+                        ____result.ComponentId = reader.ReadInt16();
                         break;
                     case 6:
-                        ____result.CommandId = reader.ReadInt32();
+                        ____result.CommandId = reader.ReadInt16();
                         break;
                     case 7:
                         ____result.Payload = reader.ReadBytes()?.ToArray();

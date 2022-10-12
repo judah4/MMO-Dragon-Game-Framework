@@ -23,6 +23,10 @@ public class FireVisualizer : BaseEntityBehavior
         if (!Entity.HasAuthority(ClientAuthCheck.ComponentId))
             return;
 
+        var health = GetEntityComponent<Health>();
+        if(health.HasValue && health.Value.Current < 1)
+            return;
+
         if (Input.GetKeyDown(KeyCode.Q))
         {
             Server.SendCommand<Cannon.FireCommand,FireCommandRequest,Nothing>(Entity.EntityId, Cannon.ComponentId, new FireCommandRequest() { Left = true }, result => {

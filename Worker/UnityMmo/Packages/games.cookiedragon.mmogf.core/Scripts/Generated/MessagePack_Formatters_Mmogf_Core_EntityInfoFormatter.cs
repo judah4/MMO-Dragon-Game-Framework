@@ -27,7 +27,7 @@ namespace MessagePack.Formatters.Mmogf.Core
             global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
             writer.WriteArrayHeader(2);
             writer.Write(value.EntityId);
-            formatterResolver.GetFormatterWithVerify<global::System.Collections.Generic.Dictionary<int, byte[]>>().Serialize(ref writer, value.EntityData, options);
+            formatterResolver.GetFormatterWithVerify<global::System.Collections.Generic.Dictionary<short, byte[]>>().Serialize(ref writer, value.EntityData, options);
         }
 
         public global::Mmogf.Core.EntityInfo Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
@@ -50,7 +50,7 @@ namespace MessagePack.Formatters.Mmogf.Core
                         ____result.EntityId = reader.ReadInt32();
                         break;
                     case 1:
-                        ____result.EntityData = formatterResolver.GetFormatterWithVerify<global::System.Collections.Generic.Dictionary<int, byte[]>>().Deserialize(ref reader, options);
+                        ____result.EntityData = formatterResolver.GetFormatterWithVerify<global::System.Collections.Generic.Dictionary<short, byte[]>>().Deserialize(ref reader, options);
                         break;
                     default:
                         reader.Skip();

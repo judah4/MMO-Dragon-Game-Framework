@@ -1,4 +1,5 @@
 ﻿using Lidgren.Network;
+using Mmogf.Core.Networking;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -47,6 +48,8 @@ namespace Mmogf.Core
         {
             get { return Client?.Status ?? NetConnectionStatus.None; }
         }
+        public DataStatistics ReceivedStats => Client?.ReceivedStats;
+        public DataStatistics SentStats => Client?.SentStats;
 
         void OnEnable()
         {
@@ -242,7 +245,7 @@ namespace Mmogf.Core
                 _interestCenter = position;
                 //adjust position this way to not lose precision
                 //var sendPos = PositionToServer(position);
-                var sendPos = new Position() { X = (double)position.x, Y = (double)position.y, Z = (double)position.z, };
+                var sendPos = new Position() { X = (double)position.x, Y = position.y, Z = (double)position.z, };
                 Client.SendInterestChange(sendPos);
             }
 
@@ -251,7 +254,7 @@ namespace Mmogf.Core
 
         public Position PositionToServer(Vector3 position)
         {
-            var sendPos = new Position() { X = (double)position.x - transform.position.x, Y = (double)position.y - transform.position.y, Z = (double)position.z - transform.position.z, };
+            var sendPos = new Position() { X = (double)position.x - transform.position.x, Y = position.y - transform.position.y, Z = (double)position.z - transform.position.z, };
             return sendPos;
         }
 
@@ -265,7 +268,7 @@ namespace Mmogf.Core
             return adjustedPos;
         }
 
-        public void UpdateEntity<T>(int entityId, int componentId, T component) where T : IEntityComponent
+        public void UpdateEntity<T>(int entityId, short componentId, T component) where T : IEntityComponent
         {
             GameObjectRepresentation.UpdateEntity(entityId, componentId, component);
             Client.SendEntityUpdate(entityId, componentId, component);
@@ -289,7 +292,7 @@ namespace Mmogf.Core
             EventRequests.Add(eventRequest);
         }
 
-        public void SendCommand<T, TRequest, TResponse>(int entityId, int componentId, TRequest request, System.Action<CommandResult<T, TRequest, TResponse>> callback = null) where T : ICommandBase<TRequest, TResponse>, new () where TRequest : struct where TResponse : struct
+        public void SendCommand<T, TRequest, TResponse>(int entityId, short componentId, TRequest request, System.Action<CommandResult<T, TRequest, TResponse>> callback = null) where T : ICommandBase<TRequest, TResponse>, new () where TRequest : struct where TResponse : struct
         {
             var command = new T()
             {
@@ -308,7 +311,7 @@ namespace Mmogf.Core
 
             Client.SendCommandResponseFailure(request, CommandStatus.Failure, message);
         }
-        public void SendEvent<T>(int entityId, int componentId, T eventPayload) where T : IEvent
+        public void SendEvent<T>(int entityId, short componentId, T eventPayload) where T : IEvent
         {
             Client.SendEvent(entityId, componentId, eventPayload);
         }

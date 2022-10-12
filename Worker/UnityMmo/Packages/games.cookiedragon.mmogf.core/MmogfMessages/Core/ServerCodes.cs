@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Mmogf.Core
 {
-    public enum ServerCodes
+    public enum ServerCodes : byte
     {
         None,
         ClientConnect,

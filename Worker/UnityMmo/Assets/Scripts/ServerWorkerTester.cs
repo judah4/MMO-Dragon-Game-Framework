@@ -26,7 +26,7 @@ namespace Mmogf
             {
                 //create ship
                 _serverHandler.SendCommand< World.CreateEntity,CreateEntityRequest,NothingInternal> (0, 0, new CreateEntityRequest("Ship", new Position() { Y = 0, }, RandomHeading().ToRotation(), 
-                    new Dictionary<int, byte[]>() 
+                    new Dictionary<short, byte[]>() 
                     {
                         { Cannon.ComponentId, MessagePack.MessagePackSerializer.Serialize(new Cannon()) },
                         { Health.ComponentId, MessagePack.MessagePackSerializer.Serialize(new Health() { Current = 100, Max = 100, }) },
@@ -48,7 +48,7 @@ namespace Mmogf
             {
                 //create shark
                 _serverHandler.SendCommand<World.CreateEntity,CreateEntityRequest,NothingInternal>(0, 0, new CreateEntityRequest("Shark", new Position() { Y = -5, }, RandomHeading().ToRotation(),
-                    new Dictionary<int, byte[]>()
+                    new Dictionary<short, byte[]>()
                     {
                         { Cannon.ComponentId, MessagePack.MessagePackSerializer.Serialize(new Cannon()) },
                     },

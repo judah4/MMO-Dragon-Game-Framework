@@ -9,8 +9,8 @@ namespace Mmogf
     [MessagePackObject]
     public struct MovementState : IEntityComponent
     {
-        public const int ComponentId = 1004;
-        public int GetComponentId()
+        public const short ComponentId = 1004;
+        public short GetComponentId()
         {
             return ComponentId;
         }

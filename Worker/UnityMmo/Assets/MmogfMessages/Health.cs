@@ -26,8 +26,8 @@ namespace Mmogf
     [MessagePackObject]
     public struct Health : IEntityComponent
     {
-        public const int ComponentId = 1002;
-        public int GetComponentId()
+        public const short ComponentId = 1002;
+        public short GetComponentId()
         {
             return ComponentId;
         }
@@ -42,8 +42,8 @@ namespace Mmogf
         [MessagePackObject]
         public struct TakeDamageCommand : ICommandBase<TakeDamageRequest, TakeDamageResponse>
         {
-            public const int CommandId = 10002;
-            public int GetCommandId() => CommandId;
+            public const short CommandId = 10002;
+            public short GetCommandId() => CommandId;
 
             [Key(0)]
             public TakeDamageRequest? Request { get; set; }

@@ -67,7 +67,7 @@ public class GameObjectRepresentation
         foreach (var pair in entity.EntityData)
         {
             entityGm.Data.Remove(pair.Key);
-            var type = ComponentMappings.GetType(pair.Key);
+            var type = ComponentMappings.GetComponentType(pair.Key);
 
             if(type == null)
             {
@@ -103,7 +103,7 @@ public class GameObjectRepresentation
             return;
 
         entityGm.Data.Remove(entityUpdate.ComponentId);
-        var type = ComponentMappings.GetType(entityUpdate.ComponentId);
+        var type = ComponentMappings.GetComponentType(entityUpdate.ComponentId);
 
         var data = (IEntityComponent)MessagePackSerializer.Deserialize(type, entityUpdate.Info);
         entityGm.Data.Add(entityUpdate.ComponentId, data);

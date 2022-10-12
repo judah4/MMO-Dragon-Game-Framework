@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using Google.Protobuf.WellKnownTypes;
 using Lidgren.Network;
 using MessagePack;
 using Microsoft.Extensions.Configuration;
@@ -35,6 +36,7 @@ namespace MmoGameFramework
 
         public MmoServer(OrchestrationService orchestrationService, EntityStore entities, NetPeerConfiguration config, bool clientWorker, ILogger<MmoServer> logger, IConfiguration configuration)
         {
+
             _orchestrationService = orchestrationService;
             _entities = entities;
             _clientWorker = clientWorker;
@@ -382,7 +384,7 @@ namespace MmoGameFramework
             //    _logger.LogDebug($"Entity: {entityInfo.Value.EntityId} position to {position.ToString()}");
             //}
 
-            _entities.UpdateEntityPartial(entityUpdate);
+            _entities.UpdateEntityPartial(entityUpdate, worker.Connection.RemoteUniqueIdentifier);
 
         }
 
@@ -414,8 +416,9 @@ namespace MmoGameFramework
 
         public void Send(NetConnection connection, MmoMessage message, NetDeliveryMethod deliveryMethod = NetDeliveryMethod.Unreliable, int sequenceChannel = 0)
         {
-            NetOutgoingMessage om = s_server.CreateMessage();
-            om.Write(MessagePackSerializer.Serialize(message));
+            var bytes = MessagePackSerializer.Serialize(message);
+            NetOutgoingMessage om = s_server.CreateMessage(bytes.Length);
+            om.Write(bytes);
             s_server.SendMessage(om, connection, deliveryMethod, sequenceChannel);
         }
 
@@ -438,11 +441,14 @@ namespace MmoGameFramework
             s_server.SendMessage(om, connections, deliveryMethod, sequenceChannel);
         }
 
-        public void SendArea(Position position, MmoMessage message, NetDeliveryMethod deliveryMethod = NetDeliveryMethod.Unreliable, int sequenceChannel = 0)
+        public void SendArea(Position position, MmoMessage message, long workerExcludeId, NetDeliveryMethod deliveryMethod = NetDeliveryMethod.Unreliable, int sequenceChannel = 0)
         {
-            var connections = new List<NetConnection>();
+            var connections = new List<NetConnection>(100);
             foreach (var workerConnection in _connections)
             {
+                if(workerConnection.Key == workerExcludeId)
+                    continue;
+
                 if (Position.WithinArea(position, workerConnection.Value.InterestPosition,
                     workerConnection.Value.InterestRange))
                 {
@@ -486,7 +492,7 @@ namespace MmoGameFramework
             if(_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"Sending Entity Info {entityInfo.EntityId}" );
             //SendCheckedout(entityInfo.EntityId, message, NetDeliveryMethod.ReliableOrdered);
-            SendArea(entityInfo.Position, message, NetDeliveryMethod.ReliableUnordered);
+            SendArea(entityInfo.Position, message, 0, NetDeliveryMethod.ReliableUnordered);
         }
 
         private void OnEntityDelete(EntityInfo entityInfo)
@@ -501,10 +507,10 @@ namespace MmoGameFramework
 
             _logger.LogInformation($"Deleting Entity {entityInfo.EntityId}");
             //SendCheckedout(entityInfo.EntityId, message, NetDeliveryMethod.ReliableOrdered);
-            SendArea(entityInfo.Position, message, NetDeliveryMethod.ReliableUnordered);
+            SendArea(entityInfo.Position, message, 0, NetDeliveryMethod.ReliableUnordered);
         }
 
-        private void OnEntityUpdatePartial(EntityUpdate entityUpdate)
+        private void OnEntityUpdatePartial(EntityUpdate entityUpdate, long workerId)
         {
 
             var entity = _entities.GetEntity(entityUpdate.EntityId);
@@ -519,7 +525,7 @@ namespace MmoGameFramework
             };
             //if (_logger.IsEnabled(LogLevel.Debug))
             //    _logger.LogDebug("Sending Entity Update");
-            SendArea(entity.Value.Position, message, NetDeliveryMethod.Unreliable);
+            SendArea(entity.Value.Position, message, workerId, NetDeliveryMethod.Unreliable);
         }
 
         private void OnEntityEvent(EventRequest eventRequest)
@@ -537,7 +543,7 @@ namespace MmoGameFramework
 
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"Sending Entity Event {eventRequest.ComponentId}-{eventRequest.EventId}");
-            SendArea(entity.Value.Position, message, NetDeliveryMethod.ReliableUnordered);
+            SendArea(entity.Value.Position, message, 0, NetDeliveryMethod.ReliableUnordered);
         }
 
         private void OnEntityCommand(CommandRequest commandRequest)

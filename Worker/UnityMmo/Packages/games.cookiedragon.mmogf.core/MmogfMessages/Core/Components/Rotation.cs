@@ -6,21 +6,15 @@ namespace Mmogf.Core
     public struct Rotation : IEntityComponent
     {
 
-        public static Rotation Identity => new Rotation()
+        public static Rotation Zero => new Rotation()
         {
-            W = 1,
+            Heading = 0,
         };
 
-        public static int ComponentId = 3;
-        public int GetComponentId() => ComponentId;
+        public static short ComponentId = 3;
+        public short GetComponentId() => ComponentId;
 
         [Key(0)]
-        public float X { get; set; }
-        [Key(1)]
-        public float Y { get; set; }
-        [Key(2)]
-        public float Z { get; set; }
-        [Key(3)]
-        public float W { get; set; }
+        public short Heading { get; set; }
     }
 }
