@@ -2,7 +2,7 @@
 
 using Mmogf.Core;
 using Mmogf.Core.Networking;
-using Mmogf.Unity.Editor;
+using Mmogf.Core.Editor;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

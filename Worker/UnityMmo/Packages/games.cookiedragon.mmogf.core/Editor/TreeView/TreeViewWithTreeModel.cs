@@ -1,11 +1,14 @@
+#if UNITY_EDITOR
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 
 
-namespace UnityEditor.TreeViewExamples
+namespace Mmogf.Core.Editor
 {
 
 	internal class TreeViewItem<T> : TreeViewItem where T : TreeElement
@@ -239,3 +242,5 @@ namespace UnityEditor.TreeViewExamples
 	}
 
 }
+
+#endif

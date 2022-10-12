@@ -1,11 +1,12 @@
+#if UNITY_EDITOR
+
 using Mmogf.Core.Networking;
 using System;
 using System.Collections.Generic;
-using UnityEditor.TreeViewExamples;
 using UnityEngine;
 
 
-namespace Mmogf.Unity.Editor
+namespace Mmogf.Core.Editor
 {
 
 	[Serializable]
@@ -21,4 +22,4 @@ namespace Mmogf.Unity.Editor
 
 }
 
-
+#endif

@@ -1,14 +1,14 @@
-using Mmogf.Unity.Editor;
+#if UNITY_EDITOR
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
-using UnityEditor.TreeViewExamples;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-namespace Mmogf.Unity.Editor
+namespace Mmogf.Core.Editor
 {
 	internal class CommandTreeView : TreeViewWithTreeModel<CommandDataElement>
 	{
@@ -413,3 +413,5 @@ namespace Mmogf.Unity.Editor
     }
 
 }
+
+#endif

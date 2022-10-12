@@ -1,9 +1,11 @@
+#if UNITY_EDITOR
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 
-namespace UnityEditor.TreeViewExamples
+namespace Mmogf.Core.Editor
 {
 
 	// TreeElementUtility and TreeElement are useful helper classes for backend tree data structures.
@@ -172,3 +174,5 @@ namespace UnityEditor.TreeViewExamples
 
 
 }
+
+#endif
