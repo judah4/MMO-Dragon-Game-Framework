@@ -245,7 +245,7 @@ namespace Mmogf.Core
                 _interestCenter = position;
                 //adjust position this way to not lose precision
                 //var sendPos = PositionToServer(position);
-                var sendPos = new Position() { X = (double)position.x, Y = (double)position.y, Z = (double)position.z, };
+                var sendPos = new Position() { X = (double)position.x, Y = position.y, Z = (double)position.z, };
                 Client.SendInterestChange(sendPos);
             }
 
@@ -254,7 +254,7 @@ namespace Mmogf.Core
 
         public Position PositionToServer(Vector3 position)
         {
-            var sendPos = new Position() { X = (double)position.x - transform.position.x, Y = (double)position.y - transform.position.y, Z = (double)position.z - transform.position.z, };
+            var sendPos = new Position() { X = (double)position.x - transform.position.x, Y = position.y - transform.position.y, Z = (double)position.z - transform.position.z, };
             return sendPos;
         }
 

@@ -49,7 +49,7 @@ namespace MessagePack.Formatters.Mmogf.Core
                         ____result.X = reader.ReadDouble();
                         break;
                     case 1:
-                        ____result.Y = reader.ReadDouble();
+                        ____result.Y = reader.ReadSingle();
                         break;
                     case 2:
                         ____result.Z = reader.ReadDouble();

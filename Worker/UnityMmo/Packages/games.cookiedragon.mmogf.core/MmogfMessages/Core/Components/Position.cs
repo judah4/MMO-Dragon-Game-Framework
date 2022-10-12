@@ -12,7 +12,7 @@ namespace Mmogf.Core
         [Key(0)]
         public double X { get; set; }
         [Key(1)]
-        public double Y { get; set; }
+        public float Y { get; set; }
         [Key(2)]
         public double Z { get; set; }
 

@@ -258,12 +258,12 @@ namespace Mmogf.Core
             }
         }
 
-        public int Send(MmoMessage message)
+        public int Send(MmoMessage message, NetDeliveryMethod deliveryMethod = NetDeliveryMethod.ReliableUnordered, int sequence = 0)
         {
             var bytes = MessagePackSerializer.Serialize(message);
             NetOutgoingMessage om = s_client.CreateMessage(bytes.Length);
             om.Write(bytes);
-            s_client.SendMessage(om, NetDeliveryMethod.ReliableUnordered);
+            s_client.SendMessage(om, deliveryMethod, sequence);
             return bytes.Length;
         }
 
@@ -285,18 +285,34 @@ namespace Mmogf.Core
         public void SendEntityUpdate<T>(int entityId, short componentId, T message) where T : IMessage
         {
 
-            var changeInterest = new EntityUpdate()
+            var entityUpdate = new EntityUpdate()
             {
                 EntityId = entityId,
                 ComponentId = componentId,
                 Info = MessagePackSerializer.Serialize(message),
             };
 
+            var deliveryMethod = NetDeliveryMethod.ReliableUnordered;
+            var sequence = 0;
+
+            if(componentId == Position.ComponentId)
+            {
+                //special
+                deliveryMethod = NetDeliveryMethod.UnreliableSequenced;
+                sequence = 1;
+            }
+            if (componentId == Rotation.ComponentId)
+            {
+                //special
+                deliveryMethod = NetDeliveryMethod.UnreliableSequenced;
+                sequence = 2;
+            }
+
             var byteLength = Send(new MmoMessage()
             {
                 MessageId = ServerCodes.EntityUpdate,
-                Info = MessagePackSerializer.Serialize(changeInterest),
-            });
+                Info = MessagePackSerializer.Serialize(entityUpdate),
+            }, deliveryMethod, sequence);
             _dataStatisticsSent.RecordMessage(componentId, byteLength, DataStat.Update);
         }
 
