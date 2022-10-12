@@ -268,7 +268,7 @@ namespace Mmogf.Core
             return adjustedPos;
         }
 
-        public void UpdateEntity<T>(int entityId, int componentId, T component) where T : IEntityComponent
+        public void UpdateEntity<T>(int entityId, short componentId, T component) where T : IEntityComponent
         {
             GameObjectRepresentation.UpdateEntity(entityId, componentId, component);
             Client.SendEntityUpdate(entityId, componentId, component);
@@ -292,7 +292,7 @@ namespace Mmogf.Core
             EventRequests.Add(eventRequest);
         }
 
-        public void SendCommand<T, TRequest, TResponse>(int entityId, int componentId, TRequest request, System.Action<CommandResult<T, TRequest, TResponse>> callback = null) where T : ICommandBase<TRequest, TResponse>, new () where TRequest : struct where TResponse : struct
+        public void SendCommand<T, TRequest, TResponse>(int entityId, short componentId, TRequest request, System.Action<CommandResult<T, TRequest, TResponse>> callback = null) where T : ICommandBase<TRequest, TResponse>, new () where TRequest : struct where TResponse : struct
         {
             var command = new T()
             {
@@ -311,7 +311,7 @@ namespace Mmogf.Core
 
             Client.SendCommandResponseFailure(request, CommandStatus.Failure, message);
         }
-        public void SendEvent<T>(int entityId, int componentId, T eventPayload) where T : IEvent
+        public void SendEvent<T>(int entityId, short componentId, T eventPayload) where T : IEvent
         {
             Client.SendEvent(entityId, componentId, eventPayload);
         }

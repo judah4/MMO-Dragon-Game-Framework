@@ -24,7 +24,7 @@ namespace Mmogf
 
             if (Entity.Data.ContainsKey(Health.ComponentId))
             {
-                var health = (Health)Entity.Data[Health.ComponentId];
+                var health = GetEntityComponent<Health>().Value;
                 _alive = health.Current > 0;
             }
 
@@ -36,7 +36,7 @@ namespace Mmogf
             if(_fireTimer >= 0)
                 return;
 
-            _fireTimer = Random.Range(1f, 2f);
+            _fireTimer = Random.Range(2f, 3f);
 
             Server.SendCommand<Cannon.FireCommand, FireCommandRequest, Nothing>(Entity.EntityId, Cannon.ComponentId, new FireCommandRequest() { Left = left }, result => {
                 if (result.CommandStatus != CommandStatus.Success)

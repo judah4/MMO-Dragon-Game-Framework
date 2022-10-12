@@ -44,7 +44,7 @@ namespace MessagePack.Formatters.Mmogf.Core
                 switch (i)
                 {
                     case 0:
-                        ____result.Heading = reader.ReadSingle();
+                        ____result.Heading = reader.ReadInt16();
                         break;
                     default:
                         reader.Skip();

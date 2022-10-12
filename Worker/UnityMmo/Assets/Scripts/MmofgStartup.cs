@@ -21,7 +21,9 @@ namespace Mmogf
                     MessagePack.Resolvers.StandardResolver.Instance
                 );
 
-            var option = MessagePackSerializerOptions.Standard.WithResolver(StaticCompositeResolver.Instance).WithCompression(MessagePackCompression.Lz4BlockArray);
+            var option = MessagePackSerializerOptions.Standard.WithResolver(StaticCompositeResolver.Instance)
+                //.WithCompression(MessagePackCompression.Lz4BlockArray)
+                ;
             //rethink compressed by default
             MessagePackSerializer.DefaultOptions = option;
             serializerRegistered = true;
@@ -92,7 +94,7 @@ namespace Mmogf
             Debug.Log($"Creating Player {clientId}");
 
             var createEntity = new CreateEntityRequest("Player", new Position() { Y = 0, }, Rotation.Zero,
-                new Dictionary<int, byte[]>()
+                new Dictionary<short, byte[]>()
                 {
                     { Cannon.ComponentId, MessagePack.MessagePackSerializer.Serialize(new Cannon()) },
                     { Health.ComponentId, MessagePack.MessagePackSerializer.Serialize(new Health() { Current = 100, Max = 100, }) },

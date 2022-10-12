@@ -213,6 +213,7 @@ namespace Mmogf.Core
                             case ServerCodes.EntityEvent:
                                 var eventRequest = MessagePackSerializer.Deserialize<EventRequest>(simpleData.Info);
                                 OnEntityEvent?.Invoke(eventRequest);
+                                _dataStatisticsReceived.RecordMessage(eventRequest.EventId, im.LengthBytes, DataStat.Event);
                                 break;
                             case ServerCodes.EntityCommandRequest:
                                 var commandRequest = MessagePackSerializer.Deserialize<CommandRequest>(simpleData.Info);
@@ -243,7 +244,7 @@ namespace Mmogf.Core
                             case ServerCodes.Ping:
                                 PingResponse();
                                 //record ping?
-                                _dataStatisticsReceived.RecordMessage(-1, im.LengthBytes, DataStat.Command);
+                                _dataStatisticsReceived.RecordMessage(World.PingCommand.CommandId, im.LengthBytes, DataStat.Command);
                                 break;
                             default:
                                 break;
@@ -278,10 +279,10 @@ namespace Mmogf.Core
                 MessageId = ServerCodes.ChangeInterestArea,
                 Info = MessagePackSerializer.Serialize(changeInterest),
             });
-            _dataStatisticsSent.RecordMessage(-2, byteLength, DataStat.Command);
+            _dataStatisticsSent.RecordMessage(World.ChangeInterestAreaCommand.CommandId, byteLength, DataStat.Command);
         }
 
-        public void SendEntityUpdate<T>(int entityId, int componentId, T message) where T : IMessage
+        public void SendEntityUpdate<T>(int entityId, short componentId, T message) where T : IMessage
         {
 
             var changeInterest = new EntityUpdate()
@@ -307,16 +308,15 @@ namespace Mmogf.Core
                 Info = new byte[0],
             });
             _pingRequestAt = DateTime.UtcNow;
-            _dataStatisticsSent.RecordMessage(-1, byteLength, DataStat.Command);
+            _dataStatisticsSent.RecordMessage(World.PingCommand.CommandId, byteLength, DataStat.Command);
         }
 
         void PingResponse()
         {
             var timespan = DateTime.UtcNow - _pingRequestAt;
             Ping = (int)timespan.TotalMilliseconds;
-            //OnLog?.Invoke(LogLevel.Debug, $"Ping: {Ping} - {WorkerType}");
         }
-        public void SendCommand<T,TRequest,TResponse>(int entityId, int componentId, T command, Action<CommandResult<T, TRequest, TResponse>> callback) where T : ICommandBase<TRequest,TResponse> where TRequest : struct where TResponse : struct
+        public void SendCommand<T,TRequest,TResponse>(int entityId, short componentId, T command, Action<CommandResult<T, TRequest, TResponse>> callback) where T : ICommandBase<TRequest,TResponse> where TRequest : struct where TResponse : struct
         {
             var requestId = Guid.NewGuid().ToString();
 
@@ -340,7 +340,7 @@ namespace Mmogf.Core
                 MessageId = ServerCodes.EntityCommandRequest,
                 Info = MessagePackSerializer.Serialize(request),
             });
-            _dataStatisticsSent.RecordMessage(componentId, byteLength, DataStat.Command);
+            _dataStatisticsSent.RecordMessage(command.GetCommandId(), byteLength, DataStat.Command);
         }
 
         public void SendCommandResponse<T, TRequest, TResponse>(CommandRequest request, T command) where T : ICommandBase<TRequest, TResponse> where TRequest : struct where TResponse : struct
@@ -368,7 +368,7 @@ namespace Mmogf.Core
             _dataStatisticsSent.RecordMessage(request.CommandId, byteLength, DataStat.Command);
         }
 
-        public void SendEvent<T>(int entityId, int componentId, T eventPayload) where T : IEvent
+        public void SendEvent<T>(int entityId, short componentId, T eventPayload) where T : IEvent
         {
             var byteLength = Send(new MmoMessage()
             {
@@ -381,7 +381,7 @@ namespace Mmogf.Core
                     Payload = MessagePackSerializer.Serialize(eventPayload),
                 }),
             });
-            _dataStatisticsSent.RecordMessage(eventPayload.GetEventId(), byteLength, DataStat.Command);
+            _dataStatisticsSent.RecordMessage(eventPayload.GetEventId(), byteLength, DataStat.Event);
 
         }
 

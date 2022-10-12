@@ -19,19 +19,18 @@ namespace MessagePack.Formatters.Mmogf.Core
     using global::System.Buffers;
     using global::MessagePack;
 
-    public sealed class EntityWorldConfigFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Mmogf.Core.EntityWorldConfig>
+    public sealed class World_PingCommandFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Mmogf.Core.World.PingCommand>
     {
 
-        public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Mmogf.Core.EntityWorldConfig value, global::MessagePack.MessagePackSerializerOptions options)
+        public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Mmogf.Core.World.PingCommand value, global::MessagePack.MessagePackSerializerOptions options)
         {
             global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
-            writer.WriteArrayHeader(3);
-            formatterResolver.GetFormatterWithVerify<string>().Serialize(ref writer, value.Name, options);
-            writer.Write(value.EntityId);
-            formatterResolver.GetFormatterWithVerify<global::System.Collections.Generic.Dictionary<short, byte[]>>().Serialize(ref writer, value.EntityData, options);
+            writer.WriteArrayHeader(2);
+            formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.NothingInternal?>().Serialize(ref writer, value.Request, options);
+            formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.NothingInternal?>().Serialize(ref writer, value.Response, options);
         }
 
-        public global::Mmogf.Core.EntityWorldConfig Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
+        public global::Mmogf.Core.World.PingCommand Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
         {
             if (reader.TryReadNil())
             {
@@ -41,20 +40,17 @@ namespace MessagePack.Formatters.Mmogf.Core
             options.Security.DepthStep(ref reader);
             global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
             var length = reader.ReadArrayHeader();
-            var ____result = new global::Mmogf.Core.EntityWorldConfig();
+            var ____result = new global::Mmogf.Core.World.PingCommand();
 
             for (int i = 0; i < length; i++)
             {
                 switch (i)
                 {
                     case 0:
-                        ____result.Name = formatterResolver.GetFormatterWithVerify<string>().Deserialize(ref reader, options);
+                        ____result.Request = formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.NothingInternal?>().Deserialize(ref reader, options);
                         break;
                     case 1:
-                        ____result.EntityId = reader.ReadInt32();
-                        break;
-                    case 2:
-                        ____result.EntityData = formatterResolver.GetFormatterWithVerify<global::System.Collections.Generic.Dictionary<short, byte[]>>().Deserialize(ref reader, options);
+                        ____result.Response = formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.NothingInternal?>().Deserialize(ref reader, options);
                         break;
                     default:
                         reader.Skip();

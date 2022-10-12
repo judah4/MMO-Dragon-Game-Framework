@@ -27,7 +27,7 @@ namespace MmoGameFramework
             _logger = logger;
         }
 
-        public EntityInfo Create(string entityType, Position position, List<Acl> acls, int? entityId = null, Rotation? rotation = null, Dictionary<int, byte[]> additionalData = null)
+        public EntityInfo Create(string entityType, Position position, List<Acl> acls, int? entityId = null, Rotation? rotation = null, Dictionary<short, byte[]> additionalData = null)
         {
             if(entityId.HasValue)
             {
@@ -48,7 +48,7 @@ namespace MmoGameFramework
             var entity = new EntityInfo()
             {
                 EntityId = entityId.Value,
-                EntityData = new Dictionary<int, byte[]>()
+                EntityData = new Dictionary<short, byte[]>()
                 {
                     { EntityType.ComponentId, MessagePackSerializer.Serialize(new EntityType() { Name = entityType}) },
                     { Position.ComponentId, MessagePackSerializer.Serialize(position) },

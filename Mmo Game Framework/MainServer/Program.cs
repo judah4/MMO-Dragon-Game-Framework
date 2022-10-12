@@ -64,8 +64,8 @@ namespace MmoGameFramework
             logger.LogInformation("Attaching Entity Storage.");
             _entityStore = new EntityStore(host.Services.GetRequiredService<ILogger<EntityStore>>());
 
-            var lz4Options = MessagePackSerializerOptions.Standard.WithCompression(MessagePackCompression.Lz4BlockArray);
-            MessagePackSerializer.DefaultOptions = lz4Options;
+            //var lz4Options = MessagePackSerializerOptions.Standard.WithCompression(MessagePackCompression.Lz4BlockArray);
+            //MessagePackSerializer.DefaultOptions = lz4Options;
             //rethink compressed by default
 
             logger.LogInformation("Loading World Configuration.");

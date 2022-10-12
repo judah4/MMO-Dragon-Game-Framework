@@ -20,8 +20,8 @@ namespace Mmogf
     [MessagePackObject]
     public struct Cannon : IEntityComponent
     {
-        public const int ComponentId = 1001;
-        public int GetComponentId()
+        public const short ComponentId = 1001;
+        public short GetComponentId()
         {
             return ComponentId;
         }
@@ -34,8 +34,8 @@ namespace Mmogf
         [MessagePackObject]
         public struct FireEvent : IEvent
         {
-            public const int EventId = 20001;
-            public int GetEventId() => EventId;
+            public const short EventId = 20001;
+            public short GetEventId() => EventId;
 
             [Key(0)]
             public bool Left { get; set; }
@@ -48,8 +48,8 @@ namespace Mmogf
         [MessagePackObject]
         public struct FireCommand : ICommandBase<FireCommandRequest, Nothing>
         {
-            public const int CommandId = 10001;
-            public int GetCommandId() => CommandId;
+            public const short CommandId = 10001;
+            public short GetCommandId() => CommandId;
 
             [Key(0)]
             public FireCommandRequest? Request { get; set; }

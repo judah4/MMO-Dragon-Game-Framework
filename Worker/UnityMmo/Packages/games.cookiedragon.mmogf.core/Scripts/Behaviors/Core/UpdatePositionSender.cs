@@ -10,7 +10,7 @@ namespace Mmogf.Core
     {
         private float updateTime = -1;
         private float updateTimeRotation = -1;
-        private float updateTick = .1f;
+        private float updateTick = .12f;
 
         public bool UpdateRotation = true;
 
@@ -28,9 +28,10 @@ namespace Mmogf.Core
                 var rot = GetEntityComponent<Rotation>(Rotation.ComponentId).Value;
                 if (UpdateRotation)
                 {
-                    if (rot.Heading != transform.rotation.eulerAngles.y)
+                    var currHeading = transform.rotation.ToRotation();
+                    if (rot.Heading != currHeading.Heading)
                     {
-                        Server.UpdateEntity(Entity.EntityId, Rotation.ComponentId, transform.rotation.ToRotation());
+                        Server.UpdateEntity(Entity.EntityId, Rotation.ComponentId, currHeading);
                         updateTimeRotation = updateTick;
                     }
                 }

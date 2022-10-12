@@ -15,7 +15,7 @@ namespace Mmogf.Core
     public struct Acl : IMessage
     {
         [Key(0)]
-        public int ComponentId { get; set; }
+        public short ComponentId { get; set; }
 
         [Key(1)]
         public string WorkerType { get; set; }

@@ -11,10 +11,10 @@ namespace Mmogf.Core
             Heading = 0,
         };
 
-        public static int ComponentId = 3;
-        public int GetComponentId() => ComponentId;
+        public static short ComponentId = 3;
+        public short GetComponentId() => ComponentId;
 
         [Key(0)]
-        public float Heading { get; set; }
+        public short Heading { get; set; }
     }
 }

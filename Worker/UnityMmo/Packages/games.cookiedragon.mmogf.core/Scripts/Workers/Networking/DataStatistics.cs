@@ -15,6 +15,7 @@ namespace Mmogf.Core.Networking
         Event,
         Update,
         Entity,
+        Summary
     }
 
 

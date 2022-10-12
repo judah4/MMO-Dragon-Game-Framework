@@ -1,6 +1,7 @@
 ﻿#if UNITY_EDITOR
 
 using Mmogf.Core;
+using Mmogf.Core.Networking;
 using Mmogf.Unity.Editor;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
+using UnityEditor.MemoryProfiler;
 using UnityEditor.TreeViewExamples;
 using UnityEngine;
 
@@ -19,6 +21,8 @@ namespace MessagePack.Unity.Editor
         static DragonNetworkStatsWindow window;
 
         [NonSerialized] bool processInitialized;
+        [NonSerialized] CommonHandler _selectedConnection;
+        [NonSerialized] DataStat _selectedStat;
 
         CommonHandler[] _connections;
 
@@ -143,32 +147,68 @@ namespace MessagePack.Unity.Editor
 
             };
 
-            if(_connections != null)
+            if(_selectedConnection != null && _selectedConnection.ReceivedStats != null)
             {
-                foreach (var connection in _connections)
+                
+                var stats = _selectedConnection.ReceivedStats;
+                if(!received)
+                    stats = _selectedConnection.SentStats;
+
+                switch(_selectedStat)
                 {
-                    if (connection == null || connection.ReceivedStats == null)
-                        continue;
+                    case DataStat.Command:
+                        foreach (var stat in stats.CurrentTimeSlice.Commands)
+                        {
+                            var command = ComponentMappings.GetCommandType(stat.Key);
+                            var el = new CommandDataElement(command?.Name ?? "", 0, stat.Key, stat.Value);
+                            list.Add(el);
+                        }
+                        break;
+                    case DataStat.Event:
+                        foreach (var stat in stats.CurrentTimeSlice.Events)
+                        {
+                            var command = ComponentMappings.GetEventType(stat.Key);
+                            var el = new CommandDataElement(command?.Name ?? "", 0, stat.Key, stat.Value);
+                            list.Add(el);
+                        }
+                        break;
+                    case DataStat.Update:
+                        foreach (var update in stats.CurrentTimeSlice.Updates)
+                        {
+                            var component = ComponentMappings.GetComponentType(update.Key);
+                            var el = new CommandDataElement(component?.Name ?? "", 0, update.Key, update.Value);
+                            list.Add(el);
+                        }
+                        break;
+                    case DataStat.Entity:
+                        var entitySum = stats.CurrentTimeSlice.Sum(stats.CurrentTimeSlice.Entities);
 
-                    var stats = connection.ReceivedStats;
-                    if(!received)
-                        stats = connection.SentStats;
+                        var entitySumEl = new CommandDataElement("Entities", 0, 0, entitySum);
+                        list.Add(entitySumEl);
 
-                    foreach(var stat in stats.CurrentTimeSlice.Commands)
-                    {
-                        var command = ComponentMappings.GetCommandType(stat.Key);
-                        var el = new CommandDataElement(command?.Name ?? "" , 0, stat.Key, stat.Value);
-                        list.Add(el);
-                    }
+                        break;
+                    case DataStat.Summary:
+                        var updatesSummary = stats.CurrentTimeSlice.Sum(stats.CurrentTimeSlice.Updates);
+                        var uptSumEl = new CommandDataElement("Updates", 0, 0, updatesSummary);
+                        list.Add(uptSumEl);
+                        var commandsSummary = stats.CurrentTimeSlice.Sum(stats.CurrentTimeSlice.Commands);
+                        var comSumEl = new CommandDataElement("Commands", 0, 0, commandsSummary);
+                        list.Add(comSumEl);
+                        var eventsSummary = stats.CurrentTimeSlice.Sum(stats.CurrentTimeSlice.Events);
+                        var evnySumEl = new CommandDataElement("Events", 0, 0, eventsSummary);
+                        list.Add(evnySumEl);                        
+                        var entitySummary = stats.CurrentTimeSlice.Sum(stats.CurrentTimeSlice.Entities);
+                        var entSumEl = new CommandDataElement("Entities", 0, 0, entitySummary);
+                        list.Add(entSumEl);
 
-                    foreach (var update in stats.CurrentTimeSlice.Updates)
-                    {
-                        var component = ComponentMappings.GetComponentType(update.Key);
-                        var el = new CommandDataElement(component?.Name ?? "", 0, update.Key, update.Value);
-                        list.Add(el);
-                    }
+                        var totalSummary = stats.CurrentTimeSlice.Sum(new[] { updatesSummary, commandsSummary, eventsSummary, entitySummary, });
+                        var totalSumEl = new CommandDataElement("Totals", 0, 0, totalSummary);
+                        list.Add(totalSumEl);
 
+                        break;
                 }
+
+                
             }
 
             return list;
@@ -185,8 +225,51 @@ namespace MessagePack.Unity.Editor
                 return;
             }
 
-            //aa
+            EditorGUI.LabelField(new Rect(10, 5, 120, 20), "Received");
+            if(EditorGUI.DropdownButton(new Rect(125, 5, 250, 20), new GUIContent($"Connection: {(_selectedConnection != null ? _selectedConnection.WorkerType : "------")}"), FocusType.Keyboard))
+            {
+                // create the menu and add items to it
+                GenericMenu menu = new GenericMenu();
+                if (_connections != null)
+                {
+                    foreach (var connection in _connections)
+                    {
+                        if (connection == null)
+                            continue;
+                        AddMenuItemForConnection(menu, connection.WorkerType, connection);
+                    }
+
+                    if (menu.GetItemCount() == 0)
+                    {
+                        AddMenuItemForConnection(menu, "-----", null);
+                    }
+
+                }
+
+                // display the menu
+                menu.ShowAsContext();
+            }
+            if (EditorGUI.DropdownButton(new Rect(380, 5, 150, 20), new GUIContent($"Type: {_selectedStat}"), FocusType.Keyboard))
+            {
+                // create the menu and add items to it
+                GenericMenu menu = new GenericMenu();
+
+                var enumValues = Enum.GetValues(typeof(DataStat));
+
+                foreach(var val in enumValues)
+                {
+                    var dataStat = (DataStat)val;
+                    AddMenuItemForData(menu, dataStat.ToString(), dataStat);
+                }
+
+                // display the menu
+                menu.ShowAsContext();
+            }
             _treeReceivedView.OnGUI(_treeViewRect);
+
+            EditorGUI.LabelField(new Rect(10, _treeViewRect.height + _treeViewRect.y + 5, position.width - 20, 20), "Sent");
+
+
             _treeSentView.OnGUI(_sentViewRect);
 
         }
@@ -204,6 +287,36 @@ namespace MessagePack.Unity.Editor
 
             // This will only get called 10 times per second.
             Repaint();
+        }
+
+        void AddMenuItemForConnection(GenericMenu menu, string menuPath, CommonHandler connection)
+        {
+            // the menu item is marked as selected if it matches the current value of m_Color
+            menu.AddItem(new GUIContent(menuPath), _selectedConnection == connection, OnConnectionSelected, connection);
+        }
+
+        // a method to simplify adding menu items
+        void AddMenuItemForData(GenericMenu menu, string menuPath, DataStat dataStat)
+        {
+            // the menu item is marked as selected if it matches the current value of m_Color
+            menu.AddItem(new GUIContent(menuPath), _selectedStat == dataStat, OnDataStatSelected, dataStat);
+        }
+
+        // the GenericMenu.MenuFunction2 event handler for when a menu item is selected
+        void OnDataStatSelected(object dataStat)
+        {
+            _selectedStat = (DataStat)dataStat;
+        }
+
+        void OnConnectionSelected(object connection)
+        {
+            if(connection == null)
+            {
+                _selectedConnection = null;
+                return;
+            }
+
+            _selectedConnection = (CommonHandler)connection;
         }
 
     }

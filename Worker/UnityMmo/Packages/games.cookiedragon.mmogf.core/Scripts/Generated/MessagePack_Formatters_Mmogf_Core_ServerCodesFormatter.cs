@@ -21,12 +21,12 @@ namespace MessagePack.Formatters.Mmogf.Core
     {
         public void Serialize(ref MessagePackWriter writer, global::Mmogf.Core.ServerCodes value, global::MessagePack.MessagePackSerializerOptions options)
         {
-            writer.Write((Int32)value);
+            writer.Write((Byte)value);
         }
 
         public global::Mmogf.Core.ServerCodes Deserialize(ref MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
         {
-            return (global::Mmogf.Core.ServerCodes)reader.ReadInt32();
+            return (global::Mmogf.Core.ServerCodes)reader.ReadByte();
         }
     }
 }

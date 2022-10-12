@@ -56,7 +56,7 @@ namespace Mmogf.Core.Networking
         }
 
 
-        DataBucket Sum(Dictionary<int, DataBucket> buckets)
+        public DataBucket Sum(Dictionary<int, DataBucket> buckets)
         {
             var sum = new DataBucket();
             foreach (var pair in buckets)
@@ -67,5 +67,18 @@ namespace Mmogf.Core.Networking
 
             return sum;
         }
+
+        public DataBucket Sum(IList<DataBucket> buckets)
+        {
+            var sum = new DataBucket();
+            foreach (var pair in buckets)
+            {
+                sum.Messages += pair.Messages;
+                sum.Bytes += pair.Bytes;
+            }
+
+            return sum;
+        }
+
     }
 }
