@@ -6,7 +6,7 @@ namespace Mmogf.Core
     public struct PlayerHeartbeatServer : IEntityComponent
     {
 
-        public static short ComponentId = 5;
+        public const short ComponentId = 5;
         public short GetComponentId() => ComponentId;
 
         /// <summary>

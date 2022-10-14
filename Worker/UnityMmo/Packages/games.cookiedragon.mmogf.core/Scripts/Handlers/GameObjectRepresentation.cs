@@ -28,7 +28,7 @@ public class GameObjectRepresentation
         EntityGameObject entityGm;
 
         var entityType = MessagePackSerializer.Deserialize<EntityType>(entity.EntityData[EntityType.ComponentId]);
-        var position = MessagePackSerializer.Deserialize<Position>(entity.EntityData[Position.ComponentId]);
+        var position = MessagePackSerializer.Deserialize<FixedVector3>(entity.EntityData[FixedVector3.ComponentId]).ToPosition();
         var rot = MessagePackSerializer.Deserialize<Rotation>(entity.EntityData[Rotation.ComponentId]);
         var adjustedPos = _server.PositionToClient(position);
         var rotation = rot.ToQuaternion();

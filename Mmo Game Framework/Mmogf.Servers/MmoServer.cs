@@ -155,7 +155,7 @@ namespace MmoGameFramework
                                         WorkerConnection worker;
                                         if (_connections.TryGetValue(im.SenderConnection.RemoteUniqueIdentifier, out worker))
                                         {
-                                            worker.InterestPosition = interestArea.Position;
+                                            worker.InterestPosition = interestArea.Position.ToPosition();
 
                                             var entities = _entities.GetInArea(worker.InterestPosition,
                                                 worker.InterestRange);
@@ -172,7 +172,7 @@ namespace MmoGameFramework
                                                 Send(im.SenderConnection, new MmoMessage()
                                                 {
                                                     MessageId = ServerCodes.EntityInfo,
-                                                    Info = MessagePackSerializer.Serialize(entityInfo),
+                                                    Info = MessagePackSerializer.Serialize(entityInfo.ToEntityInfo()),
                                                 }, NetDeliveryMethod.ReliableUnordered);
                                             }
 
@@ -317,7 +317,7 @@ namespace MmoGameFramework
                     var createEntity = MessagePackSerializer.Deserialize<World.CreateEntity>(commandRequest.Payload);
 
                     var requestPayload = createEntity.Request.Value;
-                    var entityInfo = _entities.Create(requestPayload.EntityType, requestPayload.Position, requestPayload.Acls, null, requestPayload.Rotation, requestPayload.Components);
+                    var entityInfo = _entities.Create(requestPayload.EntityType, requestPayload.Position.ToPosition(), requestPayload.Rotation, requestPayload.Acls, null, requestPayload.Components);
                     _entities.UpdateEntity(entityInfo);
                     createEntity.Response = new NothingInternal();
                     Send(im.SenderConnection, new MmoMessage()
@@ -358,9 +358,9 @@ namespace MmoGameFramework
         void HandleEntityUpdate(NetIncomingMessage im, MmoMessage simpleData)
         {
             var entityUpdate = MessagePackSerializer.Deserialize<EntityUpdate>(simpleData.Info);
-            var entityInfo = _entities.GetEntity(entityUpdate.EntityId);
+            var entity = _entities.GetEntity(entityUpdate.EntityId);
 
-            if (entityInfo == null)
+            if (entity == null)
                 return;
 
             WorkerConnection worker;
@@ -369,22 +369,21 @@ namespace MmoGameFramework
                 //disconnected??
                 return;
             }
-            var acls = entityInfo.Value.Acls;
+            var acls = entity.Value.Acls;
             if(!acls.CanWrite(entityUpdate.ComponentId, worker.ConnectionType))
             {
                 //log
                 return;
             }
 
-            entityInfo.Value.EntityData[entityUpdate.ComponentId] = entityUpdate.Info;
-
+            entity.Value.UpdateComponent(entityUpdate.ComponentId, entityUpdate.Info);
             //if (_logger.IsEnabled(LogLevel.Debug) && entityUpdate.ComponentId == Position.ComponentId)
             //{
             //    var position = MessagePackSerializer.Deserialize<Position>(entityUpdate.Info);
             //    _logger.LogDebug($"Entity: {entityInfo.Value.EntityId} position to {position.ToString()}");
             //}
 
-            _entities.UpdateEntityPartial(entityUpdate, worker.Connection.RemoteUniqueIdentifier);
+            _entities.UpdateEntityPartial(entity.Value, entityUpdate, worker.Connection.RemoteUniqueIdentifier);
 
         }
 
@@ -481,13 +480,13 @@ namespace MmoGameFramework
             }
         }
 
-        private void OnEntityUpdate(EntityInfo entityInfo)
+        private void OnEntityUpdate(Entity entityInfo)
         {
             var message = new MmoMessage()
             {
                 MessageId = ServerCodes.EntityInfo,
 
-                Info = MessagePackSerializer.Serialize(entityInfo),
+                Info = MessagePackSerializer.Serialize(entityInfo.ToEntityInfo()),
             };
             if(_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"Sending Entity Info {entityInfo.EntityId}" );
@@ -495,7 +494,7 @@ namespace MmoGameFramework
             SendArea(entityInfo.Position, message, 0, NetDeliveryMethod.ReliableUnordered);
         }
 
-        private void OnEntityDelete(EntityInfo entityInfo)
+        private void OnEntityDelete(Entity entityInfo)
         {
             //find who has checked out
             var message = new MmoMessage()

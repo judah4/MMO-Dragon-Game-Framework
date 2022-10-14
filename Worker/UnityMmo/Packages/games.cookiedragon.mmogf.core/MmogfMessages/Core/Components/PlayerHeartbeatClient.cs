@@ -11,7 +11,7 @@ namespace Mmogf.Core
     public struct PlayerHeartbeatClient : IEntityComponent
     {
 
-        public static short ComponentId = 6;
+        public const short ComponentId = 6;
         public short GetComponentId() => ComponentId;
 
         [MessagePackObject]

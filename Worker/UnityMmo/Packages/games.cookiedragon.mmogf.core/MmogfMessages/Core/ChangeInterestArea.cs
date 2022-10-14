@@ -6,7 +6,7 @@ namespace Mmogf.Core
     public struct ChangeInterestArea : IMessage
     {
         [Key(0)]
-        public Position Position { get; set; }
+        public FixedVector3 Position { get; set; }
 
     }
 }

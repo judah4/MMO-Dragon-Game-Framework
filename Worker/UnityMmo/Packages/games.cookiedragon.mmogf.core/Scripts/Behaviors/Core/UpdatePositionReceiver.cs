@@ -25,8 +25,8 @@ namespace Mmogf.Core
             if(LocalControl)
                 return;
 
-            var position = (Position)Entity.Data[Position.ComponentId];
-            var rotation = (Rotation)Entity.Data[Rotation.ComponentId];
+            var position = GetEntityComponent<FixedVector3>().Value.ToPosition();
+            var rotation = GetEntityComponent<Rotation>().Value;
             var localPos = Server.PositionToClient(position);
 
             var updatedRot = rotation.ToQuaternion();

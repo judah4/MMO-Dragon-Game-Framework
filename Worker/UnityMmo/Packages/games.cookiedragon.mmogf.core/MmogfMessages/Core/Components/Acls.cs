@@ -8,7 +8,7 @@ namespace Mmogf.Core
     [MessagePackObject]
     public partial struct Acls : IEntityComponent
     {
-        public static short ComponentId = 4;
+        public const short ComponentId = 4;
         public short GetComponentId() { return ComponentId; }
 
         [Key(0)]

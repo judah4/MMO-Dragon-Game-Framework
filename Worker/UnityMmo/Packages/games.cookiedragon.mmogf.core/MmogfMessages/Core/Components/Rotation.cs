@@ -11,7 +11,7 @@ namespace Mmogf.Core
             Heading = 0,
         };
 
-        public static short ComponentId = 3;
+        public const short ComponentId = 3;
         public short GetComponentId() => ComponentId;
 
         [Key(0)]

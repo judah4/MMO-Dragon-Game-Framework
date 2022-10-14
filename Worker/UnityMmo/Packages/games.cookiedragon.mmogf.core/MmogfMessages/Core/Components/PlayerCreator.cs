@@ -16,7 +16,7 @@ namespace Mmogf.Core
     public struct PlayerCreator : IEntityComponent
     {
 
-        public static short ComponentId = 7;
+        public const short ComponentId = 7;
         public short GetComponentId() => ComponentId;
 
         [MessagePackObject]

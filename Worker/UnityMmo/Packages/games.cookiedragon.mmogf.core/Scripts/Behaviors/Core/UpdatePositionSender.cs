@@ -40,7 +40,7 @@ namespace Mmogf.Core
             if (updateTime > 0)
                 return;
 
-            var pos = GetEntityComponent<Position>(Position.ComponentId).Value;
+            var pos = GetEntityComponent<FixedVector3>(FixedVector3.ComponentId).Value.ToPosition();
 
             var currentPos = Server.PositionToClient(pos);
 
@@ -60,7 +60,7 @@ namespace Mmogf.Core
 
             if (Mathf.Abs((currentPos - transform.position).sqrMagnitude) > .1f)
             {
-                Server.UpdateEntity(Entity.EntityId, Position.ComponentId, new PositionUpdate(Server, transform.position).Get());
+                Server.UpdateEntity(Entity.EntityId, FixedVector3.ComponentId, new PositionUpdate(Server, transform.position).Get().ToFixedVector3());
                 updateTime = updateTick;
             }
         }

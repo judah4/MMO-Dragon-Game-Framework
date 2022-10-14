@@ -93,7 +93,7 @@ namespace Mmogf
 
             Debug.Log($"Creating Player {clientId}");
 
-            var createEntity = new CreateEntityRequest("Player", new Position() { Y = 0, }, Rotation.Zero,
+            var createEntity = new CreateEntityRequest("Player", new Position() { Y = 0, }.ToFixedVector3(), Rotation.Zero,
                 new Dictionary<short, byte[]>()
                 {
                     { Cannon.ComponentId, MessagePack.MessagePackSerializer.Serialize(new Cannon()) },
@@ -105,7 +105,7 @@ namespace Mmogf
                 },
                 new List<Acl>()
                 {
-                    new Acl() { ComponentId = Position.ComponentId, WorkerType = "Dragon-Worker" },
+                    new Acl() { ComponentId = FixedVector3.ComponentId, WorkerType = "Dragon-Worker" },
                     new Acl() { ComponentId = Rotation.ComponentId, WorkerType = "Dragon-Worker" },
                     new Acl() { ComponentId = Acls.ComponentId, WorkerType = "Dragon-Worker" },
                     new Acl() { ComponentId = Cannon.ComponentId, WorkerType = "Dragon-Worker" },

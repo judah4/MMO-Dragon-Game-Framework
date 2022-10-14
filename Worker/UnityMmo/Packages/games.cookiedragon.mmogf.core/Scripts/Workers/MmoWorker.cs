@@ -270,7 +270,7 @@ namespace Mmogf.Core
         {
             var changeInterest = new ChangeInterestArea()
             {
-                Position = position,
+                Position = position.ToFixedVector3(),
             };
 
             var byteLength = Send(new MmoMessage()
@@ -294,7 +294,7 @@ namespace Mmogf.Core
             var deliveryMethod = NetDeliveryMethod.ReliableUnordered;
             var sequence = 0;
 
-            if(componentId == Position.ComponentId)
+            if(componentId == FixedVector3.ComponentId)
             {
                 //special
                 deliveryMethod = NetDeliveryMethod.UnreliableSequenced;

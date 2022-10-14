@@ -77,15 +77,15 @@ namespace MessagePack.Resolvers
                 { typeof(global::Mmogf.Core.EntityWorldConfig), 23 },
                 { typeof(global::Mmogf.Core.EventData), 24 },
                 { typeof(global::Mmogf.Core.EventRequest), 25 },
-                { typeof(global::Mmogf.Core.GameData), 26 },
-                { typeof(global::Mmogf.Core.MmoMessage), 27 },
-                { typeof(global::Mmogf.Core.NothingInternal), 28 },
-                { typeof(global::Mmogf.Core.PlayerCreator), 29 },
-                { typeof(global::Mmogf.Core.PlayerCreator.ConnectPlayer), 30 },
-                { typeof(global::Mmogf.Core.PlayerHeartbeatClient), 31 },
-                { typeof(global::Mmogf.Core.PlayerHeartbeatClient.RequestHeartbeat), 32 },
-                { typeof(global::Mmogf.Core.PlayerHeartbeatServer), 33 },
-                { typeof(global::Mmogf.Core.Position), 34 },
+                { typeof(global::Mmogf.Core.FixedVector3), 26 },
+                { typeof(global::Mmogf.Core.GameData), 27 },
+                { typeof(global::Mmogf.Core.MmoMessage), 28 },
+                { typeof(global::Mmogf.Core.NothingInternal), 29 },
+                { typeof(global::Mmogf.Core.PlayerCreator), 30 },
+                { typeof(global::Mmogf.Core.PlayerCreator.ConnectPlayer), 31 },
+                { typeof(global::Mmogf.Core.PlayerHeartbeatClient), 32 },
+                { typeof(global::Mmogf.Core.PlayerHeartbeatClient.RequestHeartbeat), 33 },
+                { typeof(global::Mmogf.Core.PlayerHeartbeatServer), 34 },
                 { typeof(global::Mmogf.Core.Rotation), 35 },
                 { typeof(global::Mmogf.Core.ServerConnect), 36 },
                 { typeof(global::Mmogf.Core.World.ChangeInterestAreaCommand), 37 },
@@ -132,15 +132,15 @@ namespace MessagePack.Resolvers
                 case 23: return new MessagePack.Formatters.Mmogf.Core.EntityWorldConfigFormatter();
                 case 24: return new MessagePack.Formatters.Mmogf.Core.EventDataFormatter();
                 case 25: return new MessagePack.Formatters.Mmogf.Core.EventRequestFormatter();
-                case 26: return new MessagePack.Formatters.Mmogf.Core.GameDataFormatter();
-                case 27: return new MessagePack.Formatters.Mmogf.Core.MmoMessageFormatter();
-                case 28: return new MessagePack.Formatters.Mmogf.Core.NothingInternalFormatter();
-                case 29: return new MessagePack.Formatters.Mmogf.Core.PlayerCreatorFormatter();
-                case 30: return new MessagePack.Formatters.Mmogf.Core.PlayerCreator_ConnectPlayerFormatter();
-                case 31: return new MessagePack.Formatters.Mmogf.Core.PlayerHeartbeatClientFormatter();
-                case 32: return new MessagePack.Formatters.Mmogf.Core.PlayerHeartbeatClient_RequestHeartbeatFormatter();
-                case 33: return new MessagePack.Formatters.Mmogf.Core.PlayerHeartbeatServerFormatter();
-                case 34: return new MessagePack.Formatters.Mmogf.Core.PositionFormatter();
+                case 26: return new MessagePack.Formatters.Mmogf.Core.FixedVector3Formatter();
+                case 27: return new MessagePack.Formatters.Mmogf.Core.GameDataFormatter();
+                case 28: return new MessagePack.Formatters.Mmogf.Core.MmoMessageFormatter();
+                case 29: return new MessagePack.Formatters.Mmogf.Core.NothingInternalFormatter();
+                case 30: return new MessagePack.Formatters.Mmogf.Core.PlayerCreatorFormatter();
+                case 31: return new MessagePack.Formatters.Mmogf.Core.PlayerCreator_ConnectPlayerFormatter();
+                case 32: return new MessagePack.Formatters.Mmogf.Core.PlayerHeartbeatClientFormatter();
+                case 33: return new MessagePack.Formatters.Mmogf.Core.PlayerHeartbeatClient_RequestHeartbeatFormatter();
+                case 34: return new MessagePack.Formatters.Mmogf.Core.PlayerHeartbeatServerFormatter();
                 case 35: return new MessagePack.Formatters.Mmogf.Core.RotationFormatter();
                 case 36: return new MessagePack.Formatters.Mmogf.Core.ServerConnectFormatter();
                 case 37: return new MessagePack.Formatters.Mmogf.Core.World_ChangeInterestAreaCommandFormatter();

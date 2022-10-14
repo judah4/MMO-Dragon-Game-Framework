@@ -19,10 +19,10 @@ namespace MessagePack.Formatters.Mmogf.Core
     using global::System.Buffers;
     using global::MessagePack;
 
-    public sealed class PositionFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Mmogf.Core.Position>
+    public sealed class FixedVector3Formatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Mmogf.Core.FixedVector3>
     {
 
-        public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Mmogf.Core.Position value, global::MessagePack.MessagePackSerializerOptions options)
+        public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Mmogf.Core.FixedVector3 value, global::MessagePack.MessagePackSerializerOptions options)
         {
             writer.WriteArrayHeader(3);
             writer.Write(value.X);
@@ -30,7 +30,7 @@ namespace MessagePack.Formatters.Mmogf.Core
             writer.Write(value.Z);
         }
 
-        public global::Mmogf.Core.Position Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
+        public global::Mmogf.Core.FixedVector3 Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
         {
             if (reader.TryReadNil())
             {
@@ -39,20 +39,20 @@ namespace MessagePack.Formatters.Mmogf.Core
 
             options.Security.DepthStep(ref reader);
             var length = reader.ReadArrayHeader();
-            var ____result = new global::Mmogf.Core.Position();
+            var ____result = new global::Mmogf.Core.FixedVector3();
 
             for (int i = 0; i < length; i++)
             {
                 switch (i)
                 {
                     case 0:
-                        ____result.X = reader.ReadDouble();
+                        ____result.X = reader.ReadInt32();
                         break;
                     case 1:
-                        ____result.Y = reader.ReadSingle();
+                        ____result.Y = reader.ReadInt32();
                         break;
                     case 2:
-                        ____result.Z = reader.ReadDouble();
+                        ____result.Z = reader.ReadInt32();
                         break;
                     default:
                         reader.Skip();

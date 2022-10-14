@@ -85,18 +85,20 @@ namespace MmoGameFramework
 
             foreach(var entity in worldData.Entities)
             {
-                Rotation? rotation = null;
+                Rotation rotation = Rotation.Zero;
                 byte[] rotationBytes;
                 if(entity.EntityData.TryGetValue(Rotation.ComponentId, out rotationBytes))
                 {
                     rotation = MessagePackSerializer.Deserialize<Rotation>(rotationBytes);
                 }
 
-                _entityStore.Create(entity.Name, MessagePackSerializer.Deserialize<Position>(entity.EntityData[Position.ComponentId]), MessagePackSerializer.Deserialize<Acls>(entity.EntityData[Acls.ComponentId]).AclList, entity.EntityId, rotation, entity.EntityData);
+                _entityStore.Create(entity.Name, MessagePackSerializer.Deserialize<FixedVector3>(entity.EntityData[FixedVector3.ComponentId]).ToPosition(),
+                    rotation, 
+                    MessagePackSerializer.Deserialize<Acls>(entity.EntityData[Acls.ComponentId]).AclList, 
+                    entity.EntityId, entity.EntityData);
 
             }
             logger.LogInformation($"Loaded {worldData.Entities.Count} Entities.");
-
 
             var orchestationService = host.Services.GetRequiredService<OrchestrationService>();
             await orchestationService.ConnectAsync();

@@ -9,7 +9,7 @@ namespace Mmogf.Core
         [Key(0)]
         public string EntityType { get; set; }
         [Key(1)]
-        public Position Position { get; set; }
+        public FixedVector3 Position { get; set; }
         [Key(2)]
         public Rotation Rotation { get; set; }
         [Key(3)]
@@ -18,7 +18,7 @@ namespace Mmogf.Core
         [Key(4)]
         public List<Acl> Acls { get; set; }
 
-        public CreateEntityRequest(string entityType, Position position, Rotation rotation, Dictionary<short, byte[]> components, List<Acl> acls)
+        public CreateEntityRequest(string entityType, FixedVector3 position, Rotation rotation, Dictionary<short, byte[]> components, List<Acl> acls)
         {
             EntityType = entityType;
             Position = position;
