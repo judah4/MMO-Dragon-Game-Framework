@@ -1,6 +1,7 @@
 using MessagePack;
 using Microsoft.Extensions.Logging;
 using Mmogf.Core;
+using Mmogf.Servers.Worlds;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -14,6 +15,7 @@ namespace MmoGameFramework
         private int lastId = 0;
 
         private ConcurrentDictionary<int, Entity> _entities = new ConcurrentDictionary<int, Entity>();
+        private ConcurrentDictionary<(int x, int z), WorldCell> _cells = new ConcurrentDictionary<(int x, int z), WorldCell>();
 
         ILogger _logger;
 
