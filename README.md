@@ -9,7 +9,7 @@ Slowly and surely improving but probably not ready for a big game yet. Under hea
 
 ## Tech
 * C# Core
-* Lidgren Networking
+* [Lidgren Networking](https://github.com/lidgren/lidgren-network-gen3)
 * MessagePack for Serialization
 
 ## Features
