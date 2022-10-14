@@ -27,13 +27,11 @@ namespace Mmogf
         // Start is called before the first frame update
         void OnEnable()
         {
-            var clientAuthCheck = GetEntityComponent<ClientAuthCheck>(ClientAuthCheck.ComponentId);
-            var hasAuth = clientAuthCheck.HasValue && clientAuthCheck.Value.WorkerId == Server.ClientId;
-            Debug.Log($"Player auth: {hasAuth} - AuthId:{clientAuthCheck.Value.WorkerId} ServerId:{Server.ClientId} - Type:{Server.WorkerType}");
-            if(hasAuth)
-            {
-                Init();
-            }
+            if(!Entity.HasAuthority(ClientAuthCheck.ComponentId))
+                return;
+
+            Init();
+            
 
             Entity.OnEntityUpdate += Entity_OnEntityUpdate;
 
@@ -48,13 +46,21 @@ namespace Mmogf
         // Update is called once per frame
         void Update()
         {
-            var clientAuthCheck = GetEntityComponent<ClientAuthCheck>(ClientAuthCheck.ComponentId);
-            var hasAuth = clientAuthCheck.HasValue && clientAuthCheck.Value.WorkerId == Server.ClientId;
-
-            if(!hasAuth)
+            if (!Entity.HasAuthority(ClientAuthCheck.ComponentId))
                 return;
 
             HandleMovement();
+        }
+
+        private void FixedUpdate()
+        {
+            if (!Entity.HasAuthority(ClientAuthCheck.ComponentId))
+                return;
+
+            var forwardMove = Forward * _moveSpeed;
+
+            _rigidbody.velocity = (transform.forward * forwardMove);
+
         }
 
         void Init()
@@ -110,14 +116,6 @@ namespace Mmogf
                 Server.UpdateEntity(Entity.EntityId, MovementState.ComponentId, moveState);
                 inputTimer = .10f;
             }
-        }
-
-        private void FixedUpdate()
-        {
-            var forwardMove = Forward * _moveSpeed;
-
-            _rigidbody.velocity = (transform.forward * forwardMove);
-
         }
 
         private void Entity_OnEntityUpdate(int componentId)

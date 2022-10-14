@@ -19,18 +19,18 @@ namespace MessagePack.Formatters.Mmogf.Core
     using global::System.Buffers;
     using global::MessagePack;
 
-    public sealed class PositionFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Mmogf.Core.Position>
+    public sealed class World_ChangeInterestAreaCommandFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Mmogf.Core.World.ChangeInterestAreaCommand>
     {
 
-        public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Mmogf.Core.Position value, global::MessagePack.MessagePackSerializerOptions options)
+        public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Mmogf.Core.World.ChangeInterestAreaCommand value, global::MessagePack.MessagePackSerializerOptions options)
         {
-            writer.WriteArrayHeader(3);
-            writer.Write(value.X);
-            writer.Write(value.Y);
-            writer.Write(value.Z);
+            global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
+            writer.WriteArrayHeader(2);
+            formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.NothingInternal?>().Serialize(ref writer, value.Request, options);
+            formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.NothingInternal?>().Serialize(ref writer, value.Response, options);
         }
 
-        public global::Mmogf.Core.Position Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
+        public global::Mmogf.Core.World.ChangeInterestAreaCommand Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
         {
             if (reader.TryReadNil())
             {
@@ -38,21 +38,19 @@ namespace MessagePack.Formatters.Mmogf.Core
             }
 
             options.Security.DepthStep(ref reader);
+            global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
             var length = reader.ReadArrayHeader();
-            var ____result = new global::Mmogf.Core.Position();
+            var ____result = new global::Mmogf.Core.World.ChangeInterestAreaCommand();
 
             for (int i = 0; i < length; i++)
             {
                 switch (i)
                 {
                     case 0:
-                        ____result.X = reader.ReadDouble();
+                        ____result.Request = formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.NothingInternal?>().Deserialize(ref reader, options);
                         break;
                     case 1:
-                        ____result.Y = reader.ReadDouble();
-                        break;
-                    case 2:
-                        ____result.Z = reader.ReadDouble();
+                        ____result.Response = formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.NothingInternal?>().Deserialize(ref reader, options);
                         break;
                     default:
                         reader.Skip();

@@ -25,15 +25,15 @@ namespace Mmogf
             if (Input.GetKeyDown(KeyCode.Z))
             {
                 //create ship
-                _serverHandler.SendCommand< World.CreateEntity,CreateEntityRequest,NothingInternal> (0, 0, new CreateEntityRequest("Ship", new Position() { Y = 0, }, RandomHeading().ToRotation(), 
-                    new Dictionary<int, byte[]>() 
+                _serverHandler.SendCommand< World.CreateEntity,CreateEntityRequest,NothingInternal> (0, 0, new CreateEntityRequest("Ship", new Position() { Y = 0, }.ToFixedVector3(), RandomHeading().ToRotation(), 
+                    new Dictionary<short, byte[]>() 
                     {
                         { Cannon.ComponentId, MessagePack.MessagePackSerializer.Serialize(new Cannon()) },
                         { Health.ComponentId, MessagePack.MessagePackSerializer.Serialize(new Health() { Current = 100, Max = 100, }) },
                     }, 
                     new List<Acl>() 
                     {
-                        new Acl() { ComponentId = Position.ComponentId, WorkerType = "Dragon-Worker" },
+                        new Acl() { ComponentId = FixedVector3.ComponentId, WorkerType = "Dragon-Worker" },
                         new Acl() { ComponentId = Rotation.ComponentId, WorkerType = "Dragon-Worker" },
                         new Acl() { ComponentId = Acls.ComponentId, WorkerType = "Dragon-Worker" },
                         new Acl() { ComponentId = Cannon.ComponentId, WorkerType = "Dragon-Worker" },
@@ -47,14 +47,14 @@ namespace Mmogf
             if (Input.GetKeyDown(KeyCode.X))
             {
                 //create shark
-                _serverHandler.SendCommand<World.CreateEntity,CreateEntityRequest,NothingInternal>(0, 0, new CreateEntityRequest("Shark", new Position() { Y = -5, }, RandomHeading().ToRotation(),
-                    new Dictionary<int, byte[]>()
+                _serverHandler.SendCommand<World.CreateEntity,CreateEntityRequest,NothingInternal>(0, 0, new CreateEntityRequest("Shark", new Position() { Y = -5, }.ToFixedVector3(), RandomHeading().ToRotation(),
+                    new Dictionary<short, byte[]>()
                     {
                         { Cannon.ComponentId, MessagePack.MessagePackSerializer.Serialize(new Cannon()) },
                     },
                     new List<Acl>()
                     {
-                        new Acl() { ComponentId = Position.ComponentId, WorkerType = "Dragon-Worker" },
+                        new Acl() { ComponentId = FixedVector3.ComponentId, WorkerType = "Dragon-Worker" },
                         new Acl() { ComponentId = Rotation.ComponentId, WorkerType = "Dragon-Worker" },
                         new Acl() { ComponentId = Acls.ComponentId, WorkerType = "Dragon-Worker" },
                     }),

@@ -9,7 +9,7 @@ namespace Mmogf.Core
         [Key(1)]
         public int EntityId { get; set; }
         [Key(2)]
-        public int ComponentId { get; set; }
+        public short ComponentId { get; set; }
         [Key(3)]
         public byte[] Payload { get; set; }
     }

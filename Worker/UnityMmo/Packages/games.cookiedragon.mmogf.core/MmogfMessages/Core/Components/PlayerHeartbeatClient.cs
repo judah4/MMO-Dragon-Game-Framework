@@ -11,14 +11,14 @@ namespace Mmogf.Core
     public struct PlayerHeartbeatClient : IEntityComponent
     {
 
-        public static int ComponentId = 6;
-        public int GetComponentId() => ComponentId;
+        public const short ComponentId = 6;
+        public short GetComponentId() => ComponentId;
 
         [MessagePackObject]
         public struct RequestHeartbeat : ICommandBase<NothingInternal, NothingInternal>
         {
-            public const int CommandId = 102;
-            public int GetCommandId() => CommandId;
+            public const short CommandId = 102;
+            public short GetCommandId() => CommandId;
 
 
             [Key(0)]

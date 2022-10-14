@@ -6,14 +6,14 @@ namespace Mmogf.Core
     public struct PlayerHeartbeatServer : IEntityComponent
     {
 
-        public static int ComponentId = 5;
-        public int GetComponentId() => ComponentId;
+        public const short ComponentId = 5;
+        public short GetComponentId() => ComponentId;
 
         /// <summary>
         /// Once this has 3 missed we delete the player
         /// </summary>
         [Key(0)]
-        public int MissedHeartbeats { get; set; }
+        public short MissedHeartbeats { get; set; }
 
     }
 }

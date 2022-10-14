@@ -9,7 +9,8 @@ namespace Mmogf.Core
     public class UpdatePositionSender : BaseEntityBehavior
     {
         private float updateTime = -1;
-        private float updateTick = .1f;
+        private float updateTimeRotation = -1;
+        private float updateTick = .12f;
 
         public bool UpdateRotation = true;
 
@@ -20,20 +21,26 @@ namespace Mmogf.Core
         void Update()
         {
             updateTime -= Time.deltaTime;
+            updateTimeRotation -= Time.deltaTime;
+
+            if(updateTimeRotation <= 0)
+            {
+                var rot = GetEntityComponent<Rotation>(Rotation.ComponentId).Value;
+                if (UpdateRotation)
+                {
+                    var currHeading = transform.rotation.ToRotation();
+                    if (rot.Heading != currHeading.Heading)
+                    {
+                        Server.UpdateEntity(Entity.EntityId, Rotation.ComponentId, currHeading);
+                        updateTimeRotation = updateTick;
+                    }
+                }
+            }
 
             if (updateTime > 0)
                 return;
 
-            var rot = GetEntityComponent<Rotation>(Rotation.ComponentId).Value;
-            if(UpdateRotation) 
-            { 
-                var currentRot = rot.ToQuaternion();
-                if(currentRot != transform.rotation)
-                {
-                    Server.UpdateEntity(Entity.EntityId, Rotation.ComponentId, transform.rotation.ToRotation());
-                }
-            }
-            var pos = GetEntityComponent<Position>(Position.ComponentId).Value;
+            var pos = GetEntityComponent<FixedVector3>(FixedVector3.ComponentId).Value.ToPosition();
 
             var currentPos = Server.PositionToClient(pos);
 
@@ -53,7 +60,7 @@ namespace Mmogf.Core
 
             if (Mathf.Abs((currentPos - transform.position).sqrMagnitude) > .1f)
             {
-                Server.UpdateEntity(Entity.EntityId, Position.ComponentId, new PositionUpdate(Server, transform.position).Get());
+                Server.UpdateEntity(Entity.EntityId, FixedVector3.ComponentId, new PositionUpdate(Server, transform.position).Get().ToFixedVector3());
                 updateTime = updateTick;
             }
         }

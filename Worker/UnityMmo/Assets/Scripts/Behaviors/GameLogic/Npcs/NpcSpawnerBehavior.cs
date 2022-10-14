@@ -16,7 +16,7 @@ namespace Mmogf
         // Update is called once per frame
         void Update()
         {
-            if(!HasAuthority(Position.ComponentId))
+            if(!HasAuthority(FixedVector3.ComponentId))
                 return;
 
             _timer -= Time.deltaTime;
@@ -54,15 +54,15 @@ namespace Mmogf
             var pos = Server.PositionToServer(position);
 
             //create ship
-            Server.SendCommand<World.CreateEntity, CreateEntityRequest, NothingInternal>(0, 0, new CreateEntityRequest("Ship", pos, RandomHeading().ToRotation(),
-                new Dictionary<int, byte[]>()
+            Server.SendCommand<World.CreateEntity, CreateEntityRequest, NothingInternal>(0, 0, new CreateEntityRequest("Ship", pos.ToFixedVector3(), RandomHeading().ToRotation(),
+                new Dictionary<short, byte[]>()
                 {
                     { Cannon.ComponentId, MessagePack.MessagePackSerializer.Serialize(new Cannon()) },
                     { Health.ComponentId, MessagePack.MessagePackSerializer.Serialize(new Health() { Current = 100, Max = 100, }) },
                 },
                 new List<Acl>()
                 {
-                    new Acl() { ComponentId = Position.ComponentId, WorkerType = "Dragon-Worker" },
+                    new Acl() { ComponentId = FixedVector3.ComponentId, WorkerType = "Dragon-Worker" },
                     new Acl() { ComponentId = Rotation.ComponentId, WorkerType = "Dragon-Worker" },
                     new Acl() { ComponentId = Acls.ComponentId, WorkerType = "Dragon-Worker" },
                     new Acl() { ComponentId = Cannon.ComponentId, WorkerType = "Dragon-Worker" },
@@ -79,14 +79,14 @@ namespace Mmogf
             position.y = -5;
             var pos = Server.PositionToServer(position);
             //create shark
-            Server.SendCommand<World.CreateEntity, CreateEntityRequest, NothingInternal>(0, 0, new CreateEntityRequest("Shark", pos, RandomHeading().ToRotation(),
-                new Dictionary<int, byte[]>()
+            Server.SendCommand<World.CreateEntity, CreateEntityRequest, NothingInternal>(0, 0, new CreateEntityRequest("Shark", pos.ToFixedVector3(), RandomHeading().ToRotation(),
+                new Dictionary<short, byte[]>()
                 {
                     { Cannon.ComponentId, MessagePack.MessagePackSerializer.Serialize(new Cannon()) },
                 },
                 new List<Acl>()
                 {
-                    new Acl() { ComponentId = Position.ComponentId, WorkerType = "Dragon-Worker" },
+                    new Acl() { ComponentId = FixedVector3.ComponentId, WorkerType = "Dragon-Worker" },
                     new Acl() { ComponentId = Rotation.ComponentId, WorkerType = "Dragon-Worker" },
                     new Acl() { ComponentId = Acls.ComponentId, WorkerType = "Dragon-Worker" },
                 }),

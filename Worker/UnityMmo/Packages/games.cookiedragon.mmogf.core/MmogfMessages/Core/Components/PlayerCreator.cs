@@ -16,14 +16,14 @@ namespace Mmogf.Core
     public struct PlayerCreator : IEntityComponent
     {
 
-        public static int ComponentId = 7;
-        public int GetComponentId() => ComponentId;
+        public const short ComponentId = 7;
+        public short GetComponentId() => ComponentId;
 
         [MessagePackObject]
         public struct ConnectPlayer : ICommandBase<ConnectPlayerRequest, NothingInternal>
         {
-            public const int CommandId = 103;
-            public int GetCommandId() => CommandId;
+            public const short CommandId = 103;
+            public short GetCommandId() => CommandId;
 
             [Key(0)]
             public ConnectPlayerRequest? Request { get; set; }

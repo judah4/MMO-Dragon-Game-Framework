@@ -17,7 +17,7 @@ namespace Mmogf.Core
     /// </summary>
     public interface ICommand : IMessage
     {
-        int GetCommandId();
+        short GetCommandId();
     }
 
     /// <summary>
@@ -25,11 +25,11 @@ namespace Mmogf.Core
     /// </summary>
     public interface IEvent : IMessage
     {
-        int GetEventId();
+        short GetEventId();
     }
 
     public interface IEntityComponent : IMessage
     {
-        int GetComponentId();
+        short GetComponentId();
     }
 }

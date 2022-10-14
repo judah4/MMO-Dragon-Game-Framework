@@ -21,8 +21,10 @@ namespace Mmogf
                     MessagePack.Resolvers.StandardResolver.Instance
                 );
 
-            var option = MessagePackSerializerOptions.Standard.WithResolver(StaticCompositeResolver.Instance);
-
+            var option = MessagePackSerializerOptions.Standard.WithResolver(StaticCompositeResolver.Instance)
+                //.WithCompression(MessagePackCompression.Lz4BlockArray)
+                ;
+            //rethink compressed by default
             MessagePackSerializer.DefaultOptions = option;
             serializerRegistered = true;
         }
@@ -44,9 +46,13 @@ namespace Mmogf
         static void LoadEntityComponentTypesList()
         {
             Dictionary<int, System.Type> types = new Dictionary<int, System.Type>();
+            Dictionary<int, System.Type> commands = new Dictionary<int, System.Type>();
+            Dictionary<int, System.Type> events = new Dictionary<int, System.Type>();
             //map components to ids
             //yay reflection!
             var type = typeof(IEntityComponent);
+            var eventType = typeof(IEvent);
+            var commandType = typeof(ICommand);
             var assemblies = System.AppDomain.CurrentDomain.GetAssemblies();
             for (int cnt = 0; cnt < assemblies.Length; cnt++)
             {
@@ -55,16 +61,27 @@ namespace Mmogf
                 for(int i = 0; i < typesList.Length; i++)
                 {
                     var t = typesList[i];
-                    if(type.IsAssignableFrom(t) && t.IsInterface == false)
+                    if(t.IsInterface)
+                        continue;
+                    if(type.IsAssignableFrom(t))
                     {
                         var component = (IEntityComponent)System.Activator.CreateInstance(t);
-                        //Debug.Log($"{component.GetComponentId()}, {t.Name}");
                         types.Add(component.GetComponentId(), t);
+                    }
+                    if (commandType.IsAssignableFrom(t))
+                    {
+                        var command = (ICommand)System.Activator.CreateInstance(t);
+                        commands.Add(command.GetCommandId(), t);
+                    }
+                    if (eventType.IsAssignableFrom(t))
+                    {
+                        var evn = (IEvent)System.Activator.CreateInstance(t);
+                        events.Add(evn.GetEventId(), t);
                     }
                 }
             }
 
-            ComponentMappings.Init(types);
+            ComponentMappings.Init(types, commands, events);
         }
 
         static CreateEntityRequest CreatePlayer(PlayerCreator.ConnectPlayer connect, CommandRequest request)
@@ -76,8 +93,8 @@ namespace Mmogf
 
             Debug.Log($"Creating Player {clientId}");
 
-            var createEntity = new CreateEntityRequest("Player", new Position() { Y = 0, }, Rotation.Identity,
-                new Dictionary<int, byte[]>()
+            var createEntity = new CreateEntityRequest("Player", new Position() { Y = 0, }.ToFixedVector3(), Rotation.Zero,
+                new Dictionary<short, byte[]>()
                 {
                     { Cannon.ComponentId, MessagePack.MessagePackSerializer.Serialize(new Cannon()) },
                     { Health.ComponentId, MessagePack.MessagePackSerializer.Serialize(new Health() { Current = 100, Max = 100, }) },
@@ -88,7 +105,7 @@ namespace Mmogf
                 },
                 new List<Acl>()
                 {
-                    new Acl() { ComponentId = Position.ComponentId, WorkerType = "Dragon-Worker" },
+                    new Acl() { ComponentId = FixedVector3.ComponentId, WorkerType = "Dragon-Worker" },
                     new Acl() { ComponentId = Rotation.ComponentId, WorkerType = "Dragon-Worker" },
                     new Acl() { ComponentId = Acls.ComponentId, WorkerType = "Dragon-Worker" },
                     new Acl() { ComponentId = Cannon.ComponentId, WorkerType = "Dragon-Worker" },

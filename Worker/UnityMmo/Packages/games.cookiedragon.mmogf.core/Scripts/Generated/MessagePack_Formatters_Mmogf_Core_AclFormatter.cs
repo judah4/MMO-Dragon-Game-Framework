@@ -48,7 +48,7 @@ namespace MessagePack.Formatters.Mmogf.Core
                 switch (i)
                 {
                     case 0:
-                        ____result.ComponentId = reader.ReadInt32();
+                        ____result.ComponentId = reader.ReadInt16();
                         break;
                     case 1:
                         ____result.WorkerType = formatterResolver.GetFormatterWithVerify<string>().Deserialize(ref reader, options);

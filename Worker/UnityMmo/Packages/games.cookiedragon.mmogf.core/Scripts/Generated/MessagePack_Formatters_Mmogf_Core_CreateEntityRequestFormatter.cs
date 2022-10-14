@@ -27,9 +27,9 @@ namespace MessagePack.Formatters.Mmogf.Core
             global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
             writer.WriteArrayHeader(5);
             formatterResolver.GetFormatterWithVerify<string>().Serialize(ref writer, value.EntityType, options);
-            formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.Position>().Serialize(ref writer, value.Position, options);
+            formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.FixedVector3>().Serialize(ref writer, value.Position, options);
             formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.Rotation>().Serialize(ref writer, value.Rotation, options);
-            formatterResolver.GetFormatterWithVerify<global::System.Collections.Generic.Dictionary<int, byte[]>>().Serialize(ref writer, value.Components, options);
+            formatterResolver.GetFormatterWithVerify<global::System.Collections.Generic.Dictionary<short, byte[]>>().Serialize(ref writer, value.Components, options);
             formatterResolver.GetFormatterWithVerify<global::System.Collections.Generic.List<global::Mmogf.Core.Acl>>().Serialize(ref writer, value.Acls, options);
         }
 
@@ -44,9 +44,9 @@ namespace MessagePack.Formatters.Mmogf.Core
             global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
             var length = reader.ReadArrayHeader();
             var __EntityType__ = default(string);
-            var __Position__ = default(global::Mmogf.Core.Position);
+            var __Position__ = default(global::Mmogf.Core.FixedVector3);
             var __Rotation__ = default(global::Mmogf.Core.Rotation);
-            var __Components__ = default(global::System.Collections.Generic.Dictionary<int, byte[]>);
+            var __Components__ = default(global::System.Collections.Generic.Dictionary<short, byte[]>);
             var __Acls__ = default(global::System.Collections.Generic.List<global::Mmogf.Core.Acl>);
 
             for (int i = 0; i < length; i++)
@@ -57,13 +57,13 @@ namespace MessagePack.Formatters.Mmogf.Core
                         __EntityType__ = formatterResolver.GetFormatterWithVerify<string>().Deserialize(ref reader, options);
                         break;
                     case 1:
-                        __Position__ = formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.Position>().Deserialize(ref reader, options);
+                        __Position__ = formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.FixedVector3>().Deserialize(ref reader, options);
                         break;
                     case 2:
                         __Rotation__ = formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.Rotation>().Deserialize(ref reader, options);
                         break;
                     case 3:
-                        __Components__ = formatterResolver.GetFormatterWithVerify<global::System.Collections.Generic.Dictionary<int, byte[]>>().Deserialize(ref reader, options);
+                        __Components__ = formatterResolver.GetFormatterWithVerify<global::System.Collections.Generic.Dictionary<short, byte[]>>().Deserialize(ref reader, options);
                         break;
                     case 4:
                         __Acls__ = formatterResolver.GetFormatterWithVerify<global::System.Collections.Generic.List<global::Mmogf.Core.Acl>>().Deserialize(ref reader, options);

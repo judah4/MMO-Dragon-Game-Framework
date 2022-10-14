@@ -160,67 +160,6 @@ namespace MessagePack.Unity.Editor
 
     }
 
-    internal class MpcArgument
-    {
-        public string Input;
-        public string Output;
-        public string ConditionalSymbol;
-        public string ResolverName;
-        public string Namespace;
-        public bool UseMapMode;
-        public string MultipleIfDirectiveOutputSymbols;
-
-        static string Key => "MessagePackCodeGen." + Application.productName;
-
-        public static MpcArgument Restore()
-        {
-            if (EditorPrefs.HasKey(Key))
-            {
-                var json = EditorPrefs.GetString(Key);
-                return JsonUtility.FromJson<MpcArgument>(json);
-            }
-            else
-            {
-                return new MpcArgument();
-            }
-        }
-
-        public void Save()
-        {
-            var json = JsonUtility.ToJson(this);
-            EditorPrefs.SetString(Key, json);
-        }
-
-        public override string ToString()
-        {
-            var sb = new StringBuilder();
-            sb.Append("-i "); sb.Append(Input);
-            sb.Append(" -o "); sb.Append(Output);
-            if (!string.IsNullOrWhiteSpace(ConditionalSymbol))
-            {
-                sb.Append(" -c "); sb.Append(ConditionalSymbol);
-            }
-            if (!string.IsNullOrWhiteSpace(ResolverName))
-            {
-                sb.Append(" -r "); sb.Append(ResolverName);
-            }
-            if (UseMapMode)
-            {
-                sb.Append(" -m");
-            }
-            if (!string.IsNullOrWhiteSpace(Namespace))
-            {
-                sb.Append(" -n "); sb.Append(Namespace);
-            }
-            if (!string.IsNullOrWhiteSpace(MultipleIfDirectiveOutputSymbols))
-            {
-                sb.Append(" -ms "); sb.Append(MultipleIfDirectiveOutputSymbols);
-            }
-
-            return sb.ToString();
-        }
-    }
-
     internal static class ProcessHelper
     {
         const string InstallName = "messagepack.generator";

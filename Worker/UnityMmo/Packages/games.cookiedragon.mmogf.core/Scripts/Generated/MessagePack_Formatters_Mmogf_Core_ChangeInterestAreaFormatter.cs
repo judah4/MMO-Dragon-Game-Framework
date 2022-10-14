@@ -26,7 +26,7 @@ namespace MessagePack.Formatters.Mmogf.Core
         {
             global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
             writer.WriteArrayHeader(1);
-            formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.Position>().Serialize(ref writer, value.Position, options);
+            formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.FixedVector3>().Serialize(ref writer, value.Position, options);
         }
 
         public global::Mmogf.Core.ChangeInterestArea Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
@@ -46,7 +46,7 @@ namespace MessagePack.Formatters.Mmogf.Core
                 switch (i)
                 {
                     case 0:
-                        ____result.Position = formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.Position>().Deserialize(ref reader, options);
+                        ____result.Position = formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.FixedVector3>().Deserialize(ref reader, options);
                         break;
                     default:
                         reader.Skip();

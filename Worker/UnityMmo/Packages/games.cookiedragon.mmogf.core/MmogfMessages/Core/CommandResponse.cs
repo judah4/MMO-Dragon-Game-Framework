@@ -30,9 +30,9 @@ namespace Mmogf.Core
         [Key(4)]
         public int EntityId { get; set; }
         [Key(5)]
-        public int ComponentId { get; set; }
+        public short ComponentId { get; set; }
         [Key(6)]
-        public int CommandId { get; set; }
+        public short CommandId { get; set; }
         [Key(7)]
         public byte[] Payload { get; set; }
 

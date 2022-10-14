@@ -7,8 +7,8 @@ namespace Mmogf.Core
     [MessagePackObject]
     public struct EntityType : IEntityComponent
     {
-        public static int ComponentId = 1;
-        public int GetComponentId() => ComponentId;
+        public const short ComponentId = 1;
+        public short GetComponentId() => ComponentId;
 
         [Key(0)]
         public string Name { get; set; }

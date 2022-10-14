@@ -2,8 +2,10 @@ using MessagePack;
 using Microsoft.Extensions.Logging;
 using Mmogf.Core;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
+using static Grpc.Core.Metadata;
 
 namespace MmoGameFramework
 {
@@ -11,23 +13,23 @@ namespace MmoGameFramework
     {
         private int lastId = 0;
 
-        private Dictionary<int, EntityInfo> _entities = new Dictionary<int, EntityInfo>();
+        private ConcurrentDictionary<int, Entity> _entities = new ConcurrentDictionary<int, Entity>();
 
         ILogger _logger;
 
-        public event Action<EntityInfo> OnUpdateEntity;
+        public event Action<Entity> OnUpdateEntity;
         public event Action<CommandRequest> OnEntityCommand;
         public event Action<CommandResponse> OnEntityCommandResponse;
-        public event Action<EntityUpdate> OnUpdateEntityPartial;
+        public event Action<EntityUpdate, long> OnUpdateEntityPartial;
         public event Action<EventRequest> OnEntityEvent;
-        public event Action<EntityInfo> OnEntityDelete;
+        public event Action<Entity> OnEntityDelete;
 
         public EntityStore(ILogger<EntityStore> logger)
         {
             _logger = logger;
         }
 
-        public EntityInfo Create(string entityType, Position position, List<Acl> acls, int? entityId = null, Rotation? rotation = null, Dictionary<int, byte[]> additionalData = null)
+        public Entity Create(string entityType, Position position, Rotation rotation, List<Acl> acls, int? entityId = null, Dictionary<short, byte[]> additionalData = null)
         {
             if(entityId.HasValue)
             {
@@ -39,42 +41,34 @@ namespace MmoGameFramework
                 entityId = ++lastId;
             }
 
-
-            if (rotation == null)
-                rotation = Rotation.Identity;
-
-            //validate acl list for data passsed
-
-            var entity = new EntityInfo()
+            //todo: Validate acl list for data passsed
+            var data = new Dictionary<short, byte[]>()
             {
-                EntityId = entityId.Value,
-                EntityData = new Dictionary<int, byte[]>()
-                {
-                    { EntityType.ComponentId, MessagePackSerializer.Serialize(new EntityType() { Name = entityType}) },
-                    { Position.ComponentId, MessagePackSerializer.Serialize(position) },
-                    { Rotation.ComponentId, MessagePackSerializer.Serialize(rotation) },
-                    { Acls.ComponentId, MessagePackSerializer.Serialize(new Acls() { AclList = acls }) },
-                }
+                { EntityType.ComponentId, MessagePackSerializer.Serialize(new EntityType() { Name = entityType}) },
+                { FixedVector3.ComponentId, MessagePackSerializer.Serialize(position.ToFixedVector3()) },
+                { Rotation.ComponentId, MessagePackSerializer.Serialize(rotation) },
+                { Acls.ComponentId, MessagePackSerializer.Serialize(new Acls() { AclList = acls }) },
             };
-
-            if(additionalData != null)
+            if (additionalData != null)
             {
-                foreach(var additional in additionalData)
+                foreach (var additional in additionalData)
                 {
-                    if(entity.EntityData.ContainsKey(additional.Key))
+                    if (data.ContainsKey(additional.Key))
                         continue;
 
-                    entity.EntityData.Add(additional.Key, additional.Value);
+                    data.Add(additional.Key, additional.Value);
                 }
             }
 
-            _entities.Add(entityId.Value, entity);
+            var entity = new Entity(entityId.Value, data);
+
+            _entities.TryAdd(entityId.Value, entity);
             return entity;
         }
 
-        public List<EntityInfo> GetInArea(Position position, float radius)
+        public List<Entity> GetInArea(Position position, float radius)
         {
-            var entities = new List<EntityInfo>();
+            var entities = new List<Entity>();
             foreach (var entityInfo in _entities)
             {
                 if (Position.WithinArea(entityInfo.Value.Position, position, radius))
@@ -86,23 +80,25 @@ namespace MmoGameFramework
             return entities;
         }
 
-        public EntityInfo? GetEntity(int entityId)
+        public Entity? GetEntity(int entityId)
         {
-            EntityInfo entityInfo;
+            Entity entityInfo;
             if(!_entities.TryGetValue(entityId, out entityInfo))
                 return null;
 
             return entityInfo;        
         }
 
-        public void UpdateEntity(EntityInfo entityInfo)
+        public void UpdateEntity(Entity entity)
         {
-            OnUpdateEntity?.Invoke(entityInfo);
+            _entities[entity.EntityId] = entity;
+            OnUpdateEntity?.Invoke(entity);
         }
 
-        public void UpdateEntityPartial(EntityUpdate entityUpdate)
+        public void UpdateEntityPartial(Entity entity, EntityUpdate entityUpdate, long workerId)
         {
-            OnUpdateEntityPartial?.Invoke(entityUpdate);
+            _entities[entity.EntityId] = entity;
+            OnUpdateEntityPartial?.Invoke(entityUpdate, workerId);
         }
 
         public void SendCommand(CommandRequest commandRequest)
@@ -122,13 +118,11 @@ namespace MmoGameFramework
 
         public void Delete(int entityId)
         {
-            var entity = GetEntity(entityId);
-            if(entity == null)
+            Entity entity;
+            if(!_entities.Remove(entityId, out entity))
                 return;
 
-            _entities.Remove(entityId);
-
-            OnEntityDelete?.Invoke(entity.Value);
+            OnEntityDelete?.Invoke(entity);
         }
     }
 }

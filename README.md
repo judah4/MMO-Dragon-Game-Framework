@@ -1,11 +1,11 @@
 
 # MMO Dragon Game Framework
 
-Proof of concept for SpatialOS style entities and load balancing with distributed server workers. 
+Proof of concept networking entities and load balancing with distributed server workers. 
 
 ### Warning  
 
-Probably should not try to use. This was all written quickly over the weekend after the whole issue with Unity and Improbable.  Might not even cover 1% of what a full mmo networking framework can do like SpatialOS.
+Slowly and surely improving but probably not ready for a big game yet. Under heavy development.
 
 ## Tech
 * C# Core
@@ -20,9 +20,8 @@ Probably should not try to use. This was all written quickly over the weekend af
 * Example Unity3d client and server.  
 
 ## Future Work
-* Add rotations.  
-* Permissions for who can control what.
-* Spread out the server workers.
+* Better area entity checkouts.
+* Multiple server workers for distributed processing.
 
 
 ![Server and Clients setup](https://img.youtube.com/vi/f6h_A6oPgyM/0.jpg)  
@@ -56,7 +55,7 @@ Build Server build in the `Builds/Linux` folder.
 Run in the main folder.  
 
 ## Game Build
-`docker build -f Docker/Worker/Dockerfile -t judah4/dragongf-testgame:v0.0.9 -t judah4/dragongf-testgame:latest .`
+`docker build -f Docker/Worker/Dockerfile -t judah4/dragongf-testgame:v0.1.0 -t judah4/dragongf-testgame:latest .`
 Example build file for the test game.
 
 ## Run On Docker
@@ -65,7 +64,7 @@ Example build file for the test game.
 ## Push
 
 `docker push judah4/dragongf-testgame:latest`  
-`docker push judah4/dragongf-testgame:v0.0.9`  
+`docker push judah4/dragongf-testgame:v0.1.0`  
 
 # Agones and Kubernetes
 
@@ -76,10 +75,10 @@ Example build file for the test game.
 Run in the main folder.  
 
 ## Main Server Build
-`docker build -f Docker/MainServer/Dockerfile -t judah4/dragongf:v0.0.9 -t judah4/dragongf:latest .`
+`docker build -f Docker/MainServer/Dockerfile -t judah4/dragongf:v0.1.0 -t judah4/dragongf:latest .`
 Only required for core dev.
 
 ## Push
 
 `docker push judah4/dragongf:latest`  
-`docker push judah4/dragongf:v0.0.9`  
+`docker push judah4/dragongf:v0.1.0`  
