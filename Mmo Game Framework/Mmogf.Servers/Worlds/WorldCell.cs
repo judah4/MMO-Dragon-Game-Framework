@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace Mmogf.Servers.Worlds
 {
+    /// <summary>
+    /// Cells are from bottom left coordinates
+    /// </summary>
     public class WorldCell
     {
         public int EntityCount => _entities.Count;
@@ -34,11 +37,15 @@ namespace Mmogf.Servers.Worlds
 
         public bool WithinArea(Position point)
         {
-            var minX = Position.X - CellSize/2f;
+            var minX = Position.X - CellSize / 2f;
             var maxX = Position.X + CellSize / 2f;
+            var minY = Position.Y - CellSize / 2f;
+            var maxY = Position.Y + CellSize / 2f;
             var minZ = Position.Z - CellSize / 2f;
             var maxZ = Position.Z + CellSize / 2f;
             if (point.X > maxX || point.X < minX)
+                return false;
+            if (point.Y > maxY || point.Y < minY)
                 return false;
             if (point.Z > maxZ || point.Z < minZ)
                 return false;
