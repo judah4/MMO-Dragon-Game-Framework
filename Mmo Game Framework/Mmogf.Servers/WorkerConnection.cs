@@ -14,6 +14,20 @@ namespace MmoGameFramework
 
         public HashSet<int> EntitiesInRange { get; set; }
 
+        //figure out how to specify interest layers...
+        /*
+         World Layer
+            Time, Weather, Synced Ocean Waves, etc
+            Unlimited Bounds
+        Normal Layer
+            Players, Npcs, stuff
+            100 meters or so
+        Extended Range Layer
+            Low update things like party markers, Town information
+            1000 meters or so
+
+         */
+
         public WorkerConnection(string connectionType, Lidgren.Network.NetConnection senderConnection, Position interestPosition)
         {
             ConnectionType = connectionType;
