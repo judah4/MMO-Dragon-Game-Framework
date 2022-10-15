@@ -23,6 +23,11 @@ Slowly and surely improving but probably not ready for a big game yet. Under hea
 * Better area entity checkouts.
 * Multiple server workers for distributed processing.
 
+# Getting Started
+
+1. Open the Unity Project at `Workers/UnityMmo`.
+2. Open the scene `Scenes/SampleScene.unity`.
+3. Run the sever from the tool bar `Dragon GF/Run Server (Local)`.
 
 ![Server and Clients setup](https://img.youtube.com/vi/f6h_A6oPgyM/0.jpg)  
 
