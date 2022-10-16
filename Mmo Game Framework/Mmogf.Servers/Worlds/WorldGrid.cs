@@ -15,6 +15,8 @@ namespace Mmogf.Servers.Worlds
         private ConcurrentDictionary<(int x, int y, int z), WorldCell> _cells = new ConcurrentDictionary<(int x, int y, int z), WorldCell>();
         private ConcurrentDictionary<int, WorldCell> _entityCells = new ConcurrentDictionary<int, WorldCell>();
 
+        public Action<int, ConcurrentDictionary<long, string>> OnEntityAdd;
+        public Action<int, ConcurrentDictionary<long, string>> OnEntityRemove;
 
         public ConcurrentDictionary<(int x, int y, int z), WorldCell> Cells => _cells;
         public int CellSize { get; private set; }
@@ -57,6 +59,8 @@ namespace Mmogf.Servers.Worlds
             {
                 cell = new WorldCell(new Position(cellX * CellSize, cellY * CellSize, cellZ * CellSize), CellSize);
                 _cells.TryAdd((cellX, cellY, cellZ), cell);
+                cell.OnEntityAdd += ProcessOnEntityAdd;
+                cell.OnEntityRemove += ProcessOnEntityRemove;
             }
             return cell;
         }
@@ -122,6 +126,15 @@ namespace Mmogf.Servers.Worlds
                 }
             }
 
+        }
+
+        void ProcessOnEntityAdd(int entityId, ConcurrentDictionary<long, string> workers)
+        {
+            OnEntityAdd?.Invoke(entityId, workers);
+        }
+        void ProcessOnEntityRemove(int entityId, ConcurrentDictionary<long, string> workers)
+        {
+            OnEntityRemove?.Invoke(entityId, workers);
         }
 
 

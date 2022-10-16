@@ -37,8 +37,8 @@ namespace Mmogf.Servers.Worlds
         private ConcurrentDictionary<int,int> _entities = new ConcurrentDictionary<int,int>();
         private ConcurrentDictionary<long, string> _workerSubscriptions = new ConcurrentDictionary<long, string>();
 
-        public Action<int> OnEntityAdd;
-        public Action<int> OnEntityRemove;
+        public Action<int, ConcurrentDictionary<long, string>> OnEntityAdd;
+        public Action<int, ConcurrentDictionary<long, string>> OnEntityRemove;
 
         public WorldCell(Position position, int cellSize)
         {
@@ -51,7 +51,7 @@ namespace Mmogf.Servers.Worlds
             if(!_entities.ContainsKey(entity.EntityId))
             {
                 if(_entities.TryAdd(entity.EntityId, entity.EntityId))
-                    OnEntityAdd?.Invoke(entity.EntityId);
+                    OnEntityAdd?.Invoke(entity.EntityId, _workerSubscriptions);
             }
                 
         }
@@ -60,7 +60,7 @@ namespace Mmogf.Servers.Worlds
         {
             if(_entities.Remove(entity.EntityId, out int value))
             {
-                OnEntityRemove?.Invoke(entity.EntityId);
+                OnEntityRemove?.Invoke(entity.EntityId, _workerSubscriptions);
             }
         }
 
