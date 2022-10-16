@@ -1,5 +1,3 @@
-using MessagePack;
-using Mmogf.Core;
 using System;
 
 namespace Mmogf.Core
