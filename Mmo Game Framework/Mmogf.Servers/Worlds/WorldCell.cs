@@ -11,7 +11,7 @@ namespace Mmogf.Servers.Worlds
     /// <summary>
     /// Cells are from bottom left coordinates
     /// </summary>
-    public class WorldCell
+    public sealed class WorldCell
     {
 
         /*

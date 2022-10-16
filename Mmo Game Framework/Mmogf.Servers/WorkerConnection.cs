@@ -6,7 +6,7 @@ using Mmogf.Servers.Worlds;
 
 namespace MmoGameFramework
 {
-    public class WorkerConnection
+    public sealed class WorkerConnection
     {
         public long WorkerId => Connection.RemoteUniqueIdentifier;
         public string ConnectionType { get; set; }

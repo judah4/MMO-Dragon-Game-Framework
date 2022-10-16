@@ -14,7 +14,7 @@ using Mmogf.Servers.Services;
 
 namespace MmoGameFramework
 {
-    public class MmoServer
+    public sealed class MmoServer
     {
         public bool Active => s_server.Status == NetPeerStatus.Running;
         public string WorkerType => _config.AppIdentifier;

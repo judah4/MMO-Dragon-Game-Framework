@@ -10,12 +10,12 @@ using static Grpc.Core.Metadata;
 
 namespace MmoGameFramework
 {
-    public class EntityStore
+    public sealed class EntityStore
     {
         private int lastId = 0;
 
         private ConcurrentDictionary<int, Entity> _entities = new ConcurrentDictionary<int, Entity>();
-        private List<WorldGrid> GridLayers = new List<WorldGrid>();
+        private List<WorldGrid> GridLayers = new List<WorldGrid>(2);
 
         ILogger _logger;
 
