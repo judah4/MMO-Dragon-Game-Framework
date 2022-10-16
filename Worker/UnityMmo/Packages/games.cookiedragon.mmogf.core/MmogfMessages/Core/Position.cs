@@ -1,5 +1,3 @@
-using MessagePack;
-using Mmogf.Core;
 using System;
 
 namespace Mmogf.Core
@@ -52,10 +50,10 @@ namespace Mmogf.Core
                 return false;
             }
 
-            return obj is FixedVector3 other && Equals(other);
+            return obj is Position other && Equals(other);
         }
 
-        public bool Equals(FixedVector3 other)
+        public bool Equals(Position other)
         {
             return X == other.X && Y == other.Y && Z == other.Z;
         }
