@@ -23,7 +23,7 @@ namespace Mmogf.Servers.Tests.Worlds
         {
             var entity = new Entity(1, new Dictionary<short, byte[]>()
             {
-                { EntityType.ComponentId, MessagePack.MessagePackSerializer.Serialize(new EntityType() { Name ="Npc" }) },
+                { EntityType.ComponentId, MessagePack.MessagePackSerializer.Serialize(new EntityType() { Name = "Npc" }) },
                 { FixedVector3.ComponentId, MessagePack.MessagePackSerializer.Serialize<FixedVector3>(postion.ToFixedVector3()) },
                 { Rotation.ComponentId, MessagePack.MessagePackSerializer.Serialize(Rotation.Zero) },
                 { Acls.ComponentId, MessagePack.MessagePackSerializer.Serialize(new Acls() { AclList = new List<Acl>(), }) },

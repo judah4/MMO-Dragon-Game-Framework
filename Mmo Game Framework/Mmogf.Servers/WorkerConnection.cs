@@ -14,8 +14,6 @@ namespace MmoGameFramework
         public float InterestRange { get; set; }
         public Lidgren.Network.NetConnection Connection { get; set; }
 
-        public HashSet<int> EntitiesInRange { get; set; }
-
         public List<WorldCell> CellSubscriptions { get; set; }
 
         //figure out how to specify interest layers...
@@ -38,8 +36,22 @@ namespace MmoGameFramework
             InterestPosition = interestPosition;
             InterestRange = 100;
             Connection = senderConnection;
-            EntitiesInRange = new HashSet<int>();
             CellSubscriptions = new List<WorldCell>();
+        }
+
+        public List<int> GetSubscribedEntityIds()
+        {
+            List<int> entities = new List<int>(100);
+            foreach (var cell in CellSubscriptions)
+            {
+                foreach (var ent in cell.Entities)
+                {
+                    if(!entities.Contains(ent.Key))
+                        entities.Add(ent.Key);
+                }
+            }
+
+            return entities;
         }
 
     }

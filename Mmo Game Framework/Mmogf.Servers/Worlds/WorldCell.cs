@@ -29,8 +29,9 @@ namespace Mmogf.Servers.Worlds
         */
 
         public int EntityCount => _entities.Count;
-        public int WorkerSubscriptions => _workerSubscriptions.Count;
-
+        public ConcurrentDictionary<int, int> Entities => _entities;
+        public int WorkerSubscriptionCount => _workerSubscriptions.Count;
+        public ConcurrentDictionary<long, string> WorkerSubscriptions => _workerSubscriptions;
         public Position Position { get; private set; }
         public int CellSize { get; private set; }
         private ConcurrentDictionary<int,int> _entities = new ConcurrentDictionary<int,int>();
