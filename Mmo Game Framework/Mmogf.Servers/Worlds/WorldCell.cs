@@ -29,10 +29,16 @@ namespace Mmogf.Servers.Worlds
         */
 
         public int EntityCount => _entities.Count;
+        public int WorkerSubscriptions => _workerSubscriptions.Count;
 
         public Position Position { get; private set; }
         public int CellSize { get; private set; }
         private ConcurrentDictionary<int,int> _entities = new ConcurrentDictionary<int,int>();
+        private ConcurrentDictionary<long, string> _workerSubscriptions = new ConcurrentDictionary<long, string>();
+
+        public Action<int> OnEntityAdd;
+        public Action<int> OnEntityRemove;
+
         public WorldCell(Position position, int cellSize)
         {
             this.Position = position;
@@ -42,12 +48,39 @@ namespace Mmogf.Servers.Worlds
         public void AddEntity(Entity entity)
         {
             if(!_entities.ContainsKey(entity.EntityId))
-                _entities.TryAdd(entity.EntityId, entity.EntityId);
+            {
+                if(_entities.TryAdd(entity.EntityId, entity.EntityId))
+                    OnEntityAdd?.Invoke(entity.EntityId);
+            }
+                
         }
 
         public void RemoveEntity(Entity entity)
         {
-            _entities.Remove(entity.EntityId, out int value);
+            if(_entities.Remove(entity.EntityId, out int value))
+            {
+                OnEntityRemove?.Invoke(entity.EntityId);
+            }
+        }
+
+        public void AddWorkerSub(WorkerConnection worker)
+        {
+            if (!_workerSubscriptions.ContainsKey(worker.WorkerId))
+            {
+                if (_workerSubscriptions.TryAdd(worker.WorkerId, worker.ConnectionType))
+                {
+                    worker.CellSubscriptions.Add(this);
+                }
+            }
+        }
+
+        public void RemoveWorkerSub(WorkerConnection worker)
+        {
+            if(_workerSubscriptions.Remove(worker.WorkerId, out string value))
+            {
+                worker.CellSubscriptions.Remove(this);
+
+            }
         }
 
         public bool WithinArea(Position point)

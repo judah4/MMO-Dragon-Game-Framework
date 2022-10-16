@@ -1,8 +1,10 @@
-﻿using MmoGameFramework;
+﻿using Grpc.Core;
+using MmoGameFramework;
 using Mmogf.Core;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,6 +14,7 @@ namespace Mmogf.Servers.Worlds
     {
         private ConcurrentDictionary<(int x, int y, int z), WorldCell> _cells = new ConcurrentDictionary<(int x, int y, int z), WorldCell>();
         private ConcurrentDictionary<int, WorldCell> _entityCells = new ConcurrentDictionary<int, WorldCell>();
+
 
         public ConcurrentDictionary<(int x, int y, int z), WorldCell> Cells => _cells;
         public int CellSize { get; private set; }
@@ -60,23 +63,24 @@ namespace Mmogf.Servers.Worlds
 
         public List<WorldCell> GetCellsInArea(Position position, float interestArea)
         {
+            var radius = interestArea / 2.0f;
             var list = new List<WorldCell>(10);
 
             var cellHalf = CellSize / 2.0;
             //shift offset by half a cell
-            var maxBoundX = position.X + interestArea + cellHalf;
-            var minBoundX = position.X - interestArea + cellHalf;
-            var maxBoundY = position.Y + interestArea + cellHalf;
-            var minBoundY = position.Y - interestArea + cellHalf;
-            var maxBoundZ = position.Z + interestArea + cellHalf;
-            var minBoundZ = position.Z - interestArea + cellHalf;
+            var maxBoundX = position.X + radius + cellHalf;
+            var minBoundX = position.X - radius - cellHalf;
+            var maxBoundY = position.Y + radius + cellHalf;
+            var minBoundY = position.Y - radius - cellHalf;
+            var maxBoundZ = position.Z + radius + cellHalf;
+            var minBoundZ = position.Z - radius - cellHalf;
 
-            var maxCellX = (int)(maxBoundX / CellSize);
-            var minCellX = (int)(minBoundX / CellSize);
-            var maxCellY = (int)(maxBoundY / CellSize);
-            var minCellY = (int)(minBoundY / CellSize);
-            var maxCellZ = (int)(maxBoundZ / CellSize);
-            var minCellZ = (int)(minBoundZ / CellSize);
+            var maxCellX = (int)Math.Floor(maxBoundX / CellSize);
+            var minCellX = (int)Math.Ceiling(minBoundX / CellSize);
+            var maxCellY = (int)Math.Floor(maxBoundY / CellSize);
+            var minCellY = (int)Math.Ceiling(minBoundY / CellSize);
+            var maxCellZ = (int)Math.Floor(maxBoundZ / CellSize);
+            var minCellZ = (int)Math.Ceiling(minBoundZ / CellSize);
 
             for(int cntX = minCellX; cntX <= maxCellX; cntX++)
             {
@@ -85,15 +89,39 @@ namespace Mmogf.Servers.Worlds
                     for (int cntY = minCellY; cntY <= maxCellY; cntY++)
                     { 
                         WorldCell cell;
-                        if(_cells.TryGetValue((cntX,cntY,cntZ), out cell))
+                        if(!_cells.TryGetValue((cntX,cntY,cntZ), out cell))
                         {
-                            list.Add(cell);
+                            cell = new WorldCell(new Position(cntX * CellSize, cntY * CellSize, cntZ * CellSize), CellSize);
+                            if(!_cells.TryAdd((cntX, cntY, cntZ), cell))
+                                _cells.TryGetValue((cntX, cntY, cntZ), out cell); //validate this for better concurrency
                         }
+                        list.Add(cell);
+
                     }
                 }
             }
-
             return list;
+        }
+
+        public void UpdateWorkerInterestArea(WorkerConnection worker)
+        {
+            var cells = GetCellsInArea(worker.InterestPosition, worker.InterestRange);
+
+            foreach(var cell in cells)
+            {
+                cell.AddWorkerSub(worker);
+            }
+
+            for(int i = worker.CellSubscriptions.Count - 1; i >= 0; i--)
+            {
+                var cell = worker.CellSubscriptions[i];
+                if (!cells.Contains(cell))
+                {
+                    cell.RemoveWorkerSub(worker);
+                    worker.CellSubscriptions.RemoveAt(i);
+                }
+            }
+
         }
 
 

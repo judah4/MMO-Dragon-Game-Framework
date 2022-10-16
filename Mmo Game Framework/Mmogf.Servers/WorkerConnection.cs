@@ -2,17 +2,21 @@
 using System.Collections.Generic;
 using System.Text;
 using Mmogf.Core;
+using Mmogf.Servers.Worlds;
 
 namespace MmoGameFramework
 {
     public class WorkerConnection
     {
+        public long WorkerId => Connection.RemoteUniqueIdentifier;
         public string ConnectionType { get; set; }
         public Position InterestPosition { get; set; }
         public float InterestRange { get; set; }
         public Lidgren.Network.NetConnection Connection { get; set; }
 
         public HashSet<int> EntitiesInRange { get; set; }
+
+        public List<WorldCell> CellSubscriptions { get; set; }
 
         //figure out how to specify interest layers...
         /*
@@ -32,9 +36,10 @@ namespace MmoGameFramework
         {
             ConnectionType = connectionType;
             InterestPosition = interestPosition;
-            InterestRange = 500;
+            InterestRange = 100;
             Connection = senderConnection;
             EntitiesInRange = new HashSet<int>();
+            CellSubscriptions = new List<WorldCell>();
         }
 
     }

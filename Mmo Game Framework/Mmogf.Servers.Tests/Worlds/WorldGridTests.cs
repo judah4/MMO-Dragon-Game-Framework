@@ -2,6 +2,7 @@ using Grpc.Core;
 using MmoGameFramework;
 using Mmogf.Core;
 using Mmogf.Servers.Worlds;
+using System.Runtime.CompilerServices;
 using static Grpc.Core.Metadata;
 
 namespace Mmogf.Servers.Tests.Worlds
@@ -99,8 +100,28 @@ namespace Mmogf.Servers.Tests.Worlds
         {
             var cellSize = 50;
             var grid = GetWorldGrid(cellSize, true);
-            var cells = grid.GetCellsInArea(new Position(10, 1, 10), 100);
-            Assert.AreEqual(1, cells.Count);
+            var interestRange = 100f;
+            var cells = grid.GetCellsInArea(new Position(10, 1, 10), interestRange);
+            //max edge is  (-90, -99, -90) to (110, 101, 110) which is (-100, -100, -100) to (100, 100, 100);
+
+            int xLower = -50;
+            int yLower = -50;
+            int zLower = -50;
+
+            int cellCnt = 0;
+            for (int cntX = xLower; cntX <= 50; cntX+=cellSize)
+            {
+                for (int cntZ = zLower; cntZ <= 50; cntZ += cellSize)
+                {
+                    for (int cntY = yLower; cntY <= 50; cntY += cellSize)
+                    {
+                        Assert.IsTrue(cells.Count > cellCnt);
+                        Assert.AreEqual(new Position(cntX, cntY, cntZ), cells[cellCnt].Position);
+                        cellCnt++;
+                    }
+                }
+            }
+            Assert.AreEqual(cellCnt, cells.Count);
         }
 
         [TestMethod]
@@ -112,7 +133,26 @@ namespace Mmogf.Servers.Tests.Worlds
             grid.AddEntity(GetEntity(new Position(5, 5, 5)));
             grid.AddEntity(GetEntity(new Position(85, 5, 74)));
             var cells = grid.GetCellsInArea(new Position(10, 1, 10), 100);
-            Assert.AreEqual(2, cells.Count);
+
+            int xLower = -50;
+            int yLower = -50;
+            int zLower = -50;
+
+            int cellCnt = 0;
+            for (int cntX = xLower; cntX <= 50; cntX += cellSize)
+            {
+                for (int cntZ = zLower; cntZ <= 50; cntZ += cellSize)
+                {
+                    for (int cntY = yLower; cntY <= 50; cntY += cellSize)
+                    {
+                        Assert.IsTrue(cells.Count > cellCnt);
+                        Assert.AreEqual(new Position(cntX, cntY, cntZ), cells[cellCnt].Position);
+                        cellCnt++;
+                    }
+                }
+            }
+            Assert.AreEqual(cellCnt, cells.Count);
+
         }
 
         [TestMethod]
@@ -124,7 +164,55 @@ namespace Mmogf.Servers.Tests.Worlds
             grid.AddEntity(GetEntity(new Position(5, 5, 5)));
             grid.AddEntity(GetEntity(new Position(126, 5, 100))); //(150, 0, 100)
             var cells = grid.GetCellsInArea(new Position(10, 1, 10), 100);
-            Assert.AreEqual(1, cells.Count);
+
+            int xLower = -50;
+            int yLower = -50;
+            int zLower = -50;
+
+            int cellCnt = 0;
+            for (int cntX = xLower; cntX <= 50; cntX += cellSize)
+            {
+                for (int cntZ = zLower; cntZ <= 50; cntZ += cellSize)
+                {
+                    for (int cntY = yLower; cntY <= 50; cntY += cellSize)
+                    {
+                        Assert.IsTrue(cells.Count > cellCnt);
+                        Assert.AreEqual(new Position(cntX, cntY, cntZ), cells[cellCnt].Position);
+                        cellCnt++;
+                    }
+                }
+            }
+            Assert.AreEqual(cellCnt, cells.Count);
+        }
+
+        [TestMethod]
+        public void GetCellsInArea_Test4()
+        {
+            var cellSize = 50;
+            var grid = GetWorldGrid(cellSize, false);
+            grid.AddEntity(GetEntity(new Position(156, 5, 160))); //(150, 0, 150)
+            var cells = grid.GetCellsInArea(new Position(220, 1, 220), 100); //(200, 0, 200)
+            //lower range, 220 - 50 = 170. 150?
+
+            int xLower = 150;
+            int yLower = -50;
+            int zLower = 150;
+
+            int cellCnt = 0;
+            for (int cntX = xLower; cntX <= 250; cntX += cellSize)
+            {
+                for (int cntZ = zLower; cntZ <= 250; cntZ += cellSize)
+                {
+                    for (int cntY = yLower; cntY <= 50; cntY += cellSize)
+                    {
+                        Assert.IsTrue(cells.Count > cellCnt);
+                        Assert.AreEqual(new Position(cntX, cntY, cntZ), cells[cellCnt].Position);
+                        cellCnt++;
+                    }
+                }
+            }
+
+            Assert.AreEqual(cellCnt, cells.Count);
         }
 
 
