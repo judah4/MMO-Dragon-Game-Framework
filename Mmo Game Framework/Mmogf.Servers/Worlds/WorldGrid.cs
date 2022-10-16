@@ -52,7 +52,7 @@ namespace Mmogf.Servers.Worlds
             WorldCell cell;
             if (!_cells.TryGetValue((cellX, cellY, cellZ), out cell))
             {
-                cell = new WorldCell(new Position(cellX * cellHalf, cellY * cellHalf, cellZ * cellHalf), CellSize);
+                cell = new WorldCell(new Position(cellX * CellSize, cellY * CellSize, cellZ * CellSize), CellSize);
                 _cells.TryAdd((cellX, cellY, cellZ), cell);
             }
             return cell;
@@ -78,11 +78,11 @@ namespace Mmogf.Servers.Worlds
             var maxCellZ = (int)(maxBoundZ / CellSize);
             var minCellZ = (int)(minBoundZ / CellSize);
 
-            for(int cntX = minCellX; cntX < maxCellX; cntX++)
+            for(int cntX = minCellX; cntX <= maxCellX; cntX++)
             {
-                for (int cntZ = minCellZ; cntZ < maxCellZ; cntZ++)
+                for (int cntZ = minCellZ; cntZ <= maxCellZ; cntZ++)
                 {
-                    for (int cntY = minCellY; cntY < maxCellY; cntY++)
+                    for (int cntY = minCellY; cntY <= maxCellY; cntY++)
                     { 
                         WorldCell cell;
                         if(_cells.TryGetValue((cntX,cntY,cntZ), out cell))
