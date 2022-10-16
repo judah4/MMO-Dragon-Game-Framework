@@ -8,11 +8,12 @@ using System.Threading.Tasks;
 
 namespace Mmogf.Servers.Worlds
 {
-    public class WorldGrid
+    public sealed class WorldGrid
     {
         private ConcurrentDictionary<(int x, int y, int z), WorldCell> _cells = new ConcurrentDictionary<(int x, int y, int z), WorldCell>();
         private ConcurrentDictionary<int, WorldCell> _entityCells = new ConcurrentDictionary<int, WorldCell>();
 
+        public ConcurrentDictionary<(int x, int y, int z), WorldCell> Cells => _cells;
         public int CellSize { get; private set; }
 
         public WorldGrid(int cellSize)
@@ -20,36 +21,38 @@ namespace Mmogf.Servers.Worlds
             CellSize = cellSize;
         }
 
-        public void AddEntity(Entity entity)
+        public WorldCell AddEntity(Entity entity)
         {
             var pos = entity.Position;
             var cell = GetCell(pos);
             cell.AddEntity(entity);
             _entityCells.TryAdd(entity.EntityId, cell);
+            return cell;
         }
 
-        public void RemoveEntity(Entity entity)
+        public WorldCell RemoveEntity(Entity entity)
         {
             var id = entity.EntityId;
             WorldCell cell;
             if (!_entityCells.TryGetValue(id, out cell))
-                return;
+                return null;
             cell.RemoveEntity(entity);
             _entityCells.TryRemove(id, out cell);
+            return cell;
         }
 
-        WorldCell GetCell(Position position)
+        public WorldCell GetCell(Position position)
         {
             var cellHalf = CellSize / 2.0;
 
-            var cellX = (int)(position.X / CellSize + cellHalf);
-            var cellY = (int)(position.Y / CellSize + cellHalf);
-            var cellZ = (int)(position.Z / CellSize + cellHalf);
+            var cellX = (int)((position.X + cellHalf) / CellSize);
+            var cellY = (int)((position.Y + cellHalf) / CellSize);
+            var cellZ = (int)((position.Z + cellHalf) / CellSize);
             //add mutex
             WorldCell cell;
             if (!_cells.TryGetValue((cellX, cellY, cellZ), out cell))
             {
-                cell = new WorldCell(new Position(cellX, cellY, cellZ), CellSize);
+                cell = new WorldCell(new Position(cellX * cellHalf, cellY * cellHalf, cellZ * cellHalf), CellSize);
                 _cells.TryAdd((cellX, cellY, cellZ), cell);
             }
             return cell;

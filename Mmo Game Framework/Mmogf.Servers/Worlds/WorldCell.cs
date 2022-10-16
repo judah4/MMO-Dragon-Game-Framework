@@ -13,6 +13,21 @@ namespace Mmogf.Servers.Worlds
     /// </summary>
     public class WorldCell
     {
+
+        /*
+                                (0,0,25)
+                                | 
+                                |
+                                |
+                                |
+            (-25,0,0)--------(0,0,0)--------(25,0,0)
+                                | 
+                                |
+                                |
+                                |
+                                (0,0,-25)
+        */
+
         public int EntityCount => _entities.Count;
 
         public Position Position { get; private set; }
@@ -37,17 +52,18 @@ namespace Mmogf.Servers.Worlds
 
         public bool WithinArea(Position point)
         {
-            var minX = Position.X - CellSize / 2f;
-            var maxX = Position.X + CellSize / 2f;
-            var minY = Position.Y - CellSize / 2f;
-            var maxY = Position.Y + CellSize / 2f;
-            var minZ = Position.Z - CellSize / 2f;
-            var maxZ = Position.Z + CellSize / 2f;
-            if (point.X > maxX || point.X < minX)
+            var halfCell = CellSize / 2.0;
+            var minX = Position.X - halfCell;
+            var maxX = Position.X + halfCell;
+            var minY = Position.Y - halfCell;
+            var maxY = Position.Y + halfCell;
+            var minZ = Position.Z - halfCell;
+            var maxZ = Position.Z + halfCell;
+            if (point.X >= maxX || point.X < minX)
                 return false;
-            if (point.Y > maxY || point.Y < minY)
+            if (point.Y >= maxY || point.Y < minY)
                 return false;
-            if (point.Z > maxZ || point.Z < minZ)
+            if (point.Z >= maxZ || point.Z < minZ)
                 return false;
             return true;
 
