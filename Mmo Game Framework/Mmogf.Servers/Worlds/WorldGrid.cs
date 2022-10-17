@@ -15,8 +15,8 @@ namespace Mmogf.Servers.Worlds
         private ConcurrentDictionary<(int x, int y, int z), WorldCell> _cells = new ConcurrentDictionary<(int x, int y, int z), WorldCell>();
         private ConcurrentDictionary<int, WorldCell> _entityCells = new ConcurrentDictionary<int, WorldCell>();
 
-        public Action<int, ConcurrentDictionary<long, string>> OnEntityAdd;
-        public Action<int, ConcurrentDictionary<long, string>> OnEntityRemove;
+        public event Action<int, ConcurrentDictionary<long, string>> OnEntityAdd;
+        public event Action<int, ConcurrentDictionary<long, string>> OnEntityRemove;
 
         public ConcurrentDictionary<(int x, int y, int z), WorldCell> Cells => _cells;
         public int CellSize { get; private set; }
@@ -107,13 +107,18 @@ namespace Mmogf.Servers.Worlds
             return list;
         }
 
-        public void UpdateWorkerInterestArea(WorkerConnection worker)
+        public (List<int> addEntityIds, List<int> removeEntityIds) UpdateWorkerInterestArea(WorkerConnection worker)
         {
+            List<int> addEntityIds = new List<int>();
+            List<int> removeEntityIds = new List<int>();
             var cells = GetCellsInArea(worker.InterestPosition, worker.InterestRange);
 
             foreach(var cell in cells)
             {
-                cell.AddWorkerSub(worker);
+                if(cell.AddWorkerSub(worker))
+                {
+                    addEntityIds.AddRange(cell.Entities.Keys);
+                }
             }
 
             for(int i = worker.CellSubscriptions.Count - 1; i >= 0; i--)
@@ -121,10 +126,15 @@ namespace Mmogf.Servers.Worlds
                 var cell = worker.CellSubscriptions[i];
                 if (!cells.Contains(cell))
                 {
-                    cell.RemoveWorkerSub(worker);
+                    if(cell.RemoveWorkerSub(worker))
+                    {
+                        removeEntityIds.AddRange(cell.Entities.Keys);  
+                    }
                     worker.CellSubscriptions.RemoveAt(i);
                 }
             }
+
+            return (addEntityIds, removeEntityIds);
 
         }
 

@@ -15,6 +15,14 @@ namespace MmoGameFramework
         public Lidgren.Network.NetConnection Connection { get; set; }
 
         public List<WorldCell> CellSubscriptions { get; set; }
+        /// <summary>
+        /// Used for sending entity for when moving cells
+        /// </summary>
+        public List<int> EntitiesToAdd { get; set; }
+        /// <summary>
+        /// Used for removing entity for when moving cells
+        /// </summary>
+        public List<int> EntitiesToRemove { get; set; }
 
         //figure out how to specify interest layers...
         /*
@@ -37,6 +45,8 @@ namespace MmoGameFramework
             InterestRange = 100;
             Connection = senderConnection;
             CellSubscriptions = new List<WorldCell>();
+            EntitiesToAdd = new List<int>();
+            EntitiesToRemove = new List<int>();
         }
 
         public List<int> GetSubscribedEntityIds()

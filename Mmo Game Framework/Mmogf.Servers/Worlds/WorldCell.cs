@@ -37,8 +37,8 @@ namespace Mmogf.Servers.Worlds
         private ConcurrentDictionary<int,int> _entities = new ConcurrentDictionary<int,int>();
         private ConcurrentDictionary<long, string> _workerSubscriptions = new ConcurrentDictionary<long, string>();
 
-        public Action<int, ConcurrentDictionary<long, string>> OnEntityAdd;
-        public Action<int, ConcurrentDictionary<long, string>> OnEntityRemove;
+        public event Action<int, ConcurrentDictionary<long, string>> OnEntityAdd;
+        public event Action<int, ConcurrentDictionary<long, string>> OnEntityRemove;
 
         public WorldCell(Position position, int cellSize)
         {
@@ -64,24 +64,27 @@ namespace Mmogf.Servers.Worlds
             }
         }
 
-        public void AddWorkerSub(WorkerConnection worker)
+        public bool AddWorkerSub(WorkerConnection worker)
         {
             if (!_workerSubscriptions.ContainsKey(worker.WorkerId))
             {
                 if (_workerSubscriptions.TryAdd(worker.WorkerId, worker.ConnectionType))
                 {
                     worker.CellSubscriptions.Add(this);
+                    return true;
                 }
             }
+            return false;
         }
 
-        public void RemoveWorkerSub(WorkerConnection worker)
+        public bool RemoveWorkerSub(WorkerConnection worker)
         {
             if(_workerSubscriptions.Remove(worker.WorkerId, out string value))
             {
                 worker.CellSubscriptions.Remove(this);
-
+                return true;
             }
+            return false;
         }
 
         public bool WithinArea(Position point)

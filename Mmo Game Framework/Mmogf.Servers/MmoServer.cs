@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
@@ -34,6 +35,8 @@ namespace MmoGameFramework
         int _tickRate;
 
         public Dictionary<long, WorkerConnection> _connections = new Dictionary<long, WorkerConnection>();
+        public List<WorkerConnection> _workerWithSubChanges = new List<WorkerConnection>();
+
 
         public MmoServer(OrchestrationService orchestrationService, EntityStore entities, NetPeerConfiguration config, bool clientWorker, ILogger<MmoServer> logger, IConfiguration configuration)
         {
@@ -62,6 +65,9 @@ namespace MmoGameFramework
             _entities.OnEntityCommand += OnEntityCommand;
             _entities.OnEntityCommandResponse += OnEntityCommandResponse;
             _entities.OnUpdateEntityPartial += OnEntityUpdatePartial;
+
+            _entities.OnEntityAddSubscription += ProcessOnEntityAddSubscription;
+            _entities.OnEntityRemoveSubscription += ProcessOnEntityRemoveSubscription;
 
         }
 
@@ -148,8 +154,11 @@ namespace MmoGameFramework
                                         {
                                             worker.InterestPosition = interestArea.Position.ToPosition();
 
-                                            _entities.UpdateWorkerInterestArea(worker);
-
+                                            var results = _entities.UpdateWorkerInterestArea(worker);
+                                            foreach(var add in results.addEntityIds)
+                                                HandleEntitySubChange(worker, true, add);
+                                            foreach (var add in results.removeEntityIds)
+                                                HandleEntitySubChange(worker, false, add);
                                             Send(im.SenderConnection, new MmoMessage()
                                             {
                                                 MessageId = ServerCodes.EntityCheckout,
@@ -198,6 +207,8 @@ namespace MmoGameFramework
 
                     //ConnectedWorkersGauge.Set(s_server.ConnectionsCount);
 
+                    HandleEntitySubChanges();
+
                     if(s_server.ConnectionsCount > 0)
                     {
                         await _orchestrationService.ReadyAsync();
@@ -223,6 +234,28 @@ namespace MmoGameFramework
             }
         }
 
+        private void HandleEntitySubChanges()
+        {
+            foreach (var worker in _workerWithSubChanges)
+            {
+                foreach (var add in worker.EntitiesToAdd)
+                {
+                    var entity = _entities.GetEntity(add);
+                    if (entity == null)
+                        continue;
+
+                    var message = EntityInfoMessage(entity.Value);
+                    Send(worker.Connection, message, NetDeliveryMethod.ReliableUnordered);
+                }
+                foreach (var remove in worker.EntitiesToRemove)
+                {
+                    var message = EntityDeleteMessage(remove);
+                    Send(worker.Connection, message, NetDeliveryMethod.ReliableUnordered);
+                }
+            }
+            _workerWithSubChanges.Clear();
+        }
+
         private void HandleWorkerDisconnect(NetIncomingMessage im, WorkerConnection worker)
         {
             if(worker == null)
@@ -239,7 +272,12 @@ namespace MmoGameFramework
             //todo: do some sort of worker type validation from a config
             var workerConnection = new WorkerConnection(im.SenderConnection.RemoteHailMessage.ReadString(), im.SenderConnection, Position.Zero);
             _connections.Add(im.SenderConnection.RemoteUniqueIdentifier, workerConnection);
-            _entities.UpdateWorkerInterestArea(workerConnection);
+            var results = _entities.UpdateWorkerInterestArea(workerConnection);
+            foreach (var add in results.addEntityIds)
+                HandleEntitySubChange(workerConnection, true, add);
+            foreach (var add in results.removeEntityIds)
+                HandleEntitySubChange(workerConnection, false, add);
+
             _logger.LogInformation("Remote hail: " + im.SenderConnection.RemoteHailMessage.ReadString());
             var message = new MmoMessage()
             {
@@ -488,30 +526,48 @@ namespace MmoGameFramework
             }
         }
 
-        private void OnEntityUpdate(Entity entityInfo)
+        private MmoMessage EntityInfoMessage(Entity entityInfo)
         {
+            //find who has checked out
             var message = new MmoMessage()
             {
                 MessageId = ServerCodes.EntityInfo,
-
                 Info = MessagePackSerializer.Serialize(entityInfo.ToEntityInfo()),
             };
-            if(_logger.IsEnabled(LogLevel.Debug))
+
+            return message;
+        }
+
+        private void OnEntityUpdate(Entity entityInfo)
+        {
+            var message = EntityInfoMessage(entityInfo);
+            if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"Sending Entity Info {entityInfo.EntityId}" );
             SendSubscribed(entityInfo, message, 0, NetDeliveryMethod.ReliableUnordered);
             //SendCheckedout(entityInfo.EntityId, message, NetDeliveryMethod.ReliableOrdered);
             //SendArea(entityInfo.Position, message, 0, NetDeliveryMethod.ReliableUnordered);
         }
 
-        private void OnEntityDelete(Entity entityInfo)
+        private MmoMessage EntityDeleteMessage(int entityId)
         {
             //find who has checked out
             var message = new MmoMessage()
             {
                 MessageId = ServerCodes.EntityDelete,
-
-                Info = MessagePackSerializer.Serialize(entityInfo),
+                Info = MessagePackSerializer.Serialize(new EntityInfo()
+                {
+                    EntityId = entityId,
+                    EntityData = new Dictionary<short, byte[]>(),
+                }),
             };
+
+            return message;
+        }
+
+        private void OnEntityDelete(Entity entityInfo)
+        {
+            //find who has checked out
+            var message = EntityDeleteMessage(entityInfo.EntityId);
 
             _logger.LogInformation($"Deleting Entity {entityInfo.EntityId}");
             //SendCheckedout(entityInfo.EntityId, message, NetDeliveryMethod.ReliableOrdered);
@@ -622,6 +678,58 @@ namespace MmoGameFramework
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"Sending Command Response {commandResponse.RequestId} {commandResponse.ComponentId}-{commandResponse.CommandId}");
             Send(worker.Connection, message, NetDeliveryMethod.ReliableUnordered);
+        }
+
+        private void ProcessOnEntityAddSubscription(int entityId, ConcurrentDictionary<long, string> workers)
+        {
+            //send as create
+            //probably should be buffered for 1 tick
+            foreach (var workerPair in workers)
+            {
+                if (!_connections.TryGetValue(workerPair.Key, out WorkerConnection worker))
+                    continue;
+                HandleEntitySubChange(worker, true, entityId);
+
+            }
+        }
+
+        private void ProcessOnEntityRemoveSubscription(int entityId, ConcurrentDictionary<long, string> workers)
+        {
+            //send as remove
+            //probably should be buffered for 1 tick
+            foreach (var workerPair in workers)
+            {
+                if (!_connections.TryGetValue(workerPair.Key, out WorkerConnection worker))
+                    continue;
+                HandleEntitySubChange(worker, false, entityId);
+            }
+        }
+
+        void HandleEntitySubChange(WorkerConnection worker, bool add, int entityId)
+        {
+            if(add)
+            {
+                if (worker.EntitiesToRemove.Contains(entityId))
+                {
+                    worker.EntitiesToRemove.Remove(entityId);
+                    return;
+                }
+                if (!worker.EntitiesToAdd.Contains(entityId))
+                    worker.EntitiesToAdd.Add(entityId);
+            }
+            else
+            {
+                if (worker.EntitiesToRemove.Contains(entityId))
+                {
+                    worker.EntitiesToAdd.Remove(entityId);
+                    return;
+                }
+                if (!worker.EntitiesToRemove.Contains(entityId))
+                    worker.EntitiesToRemove.Add(entityId);
+            }
+            
+            if(!_workerWithSubChanges.Contains(worker))
+                _workerWithSubChanges.Add(worker);
         }
 
     }

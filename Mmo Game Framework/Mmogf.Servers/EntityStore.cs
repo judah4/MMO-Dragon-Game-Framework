@@ -27,6 +27,9 @@ namespace MmoGameFramework
         public event Action<EventRequest> OnEntityEvent;
         public event Action<Entity> OnEntityDelete;
 
+        public event Action<int, ConcurrentDictionary<long, string>> OnEntityAddSubscription;
+        public event Action<int, ConcurrentDictionary<long, string>> OnEntityRemoveSubscription;
+
         public EntityStore(ILogger<EntityStore> logger)
         {
             _logger = logger;
@@ -35,10 +38,28 @@ namespace MmoGameFramework
             var grid1 = new WorldGrid(50);
             //default 2 layers. regular checkout and infinite size
             var grid2 = new WorldGrid(1000000);
-            GridLayers.Add(grid1);
-            GridLayers.Add(grid2);
+            AddGrid(grid1);
+            AddGrid(grid2);
 
         }
+
+        void AddGrid(WorldGrid grid)
+        {
+            grid.OnEntityAdd += ProcessOnEntityAdd;
+            grid.OnEntityRemove += ProcessOnEntityRemove;
+            GridLayers.Add(grid);
+        }
+
+        private void ProcessOnEntityAdd(int entityId, ConcurrentDictionary<long, string> workers)
+        {
+            OnEntityAddSubscription?.Invoke(entityId, workers);
+        }
+
+        private void ProcessOnEntityRemove(int entityId, ConcurrentDictionary<long, string> workers)
+        {
+            OnEntityRemoveSubscription?.Invoke(entityId, workers);
+        }
+
 
         public Entity Create(string entityType, Position position, Rotation rotation, List<Acl> acls, int? entityId = null, Dictionary<short, byte[]> additionalData = null)
         {
@@ -158,12 +179,18 @@ namespace MmoGameFramework
             OnEntityDelete?.Invoke(entity);
         }
 
-        public void UpdateWorkerInterestArea(WorkerConnection worker)
+        public (List<int> addEntityIds, List<int> removeEntityIds) UpdateWorkerInterestArea(WorkerConnection worker)
         {
-            foreach(var layer in GridLayers)
+            List<int> addEntityIds = new List<int>();
+            List<int> removeEntityIds = new List<int>();
+            foreach (var layer in GridLayers)
             {
-                layer.UpdateWorkerInterestArea(worker);
+                var results = layer.UpdateWorkerInterestArea(worker);
+                addEntityIds.AddRange(results.addEntityIds);
+                removeEntityIds.AddRange(results.removeEntityIds);
             }
+
+            return (addEntityIds, removeEntityIds);
         }
 
         public void RemoveWorker(WorkerConnection worker)
