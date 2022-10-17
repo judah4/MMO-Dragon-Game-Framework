@@ -717,7 +717,7 @@ namespace MmoGameFramework
             }
             else
             {
-                if (worker.EntitiesToRemove.Contains(entityId))
+                if (worker.EntitiesToAdd.Contains(entityId))
                 {
                     worker.EntitiesToAdd.Remove(entityId);
                     return;

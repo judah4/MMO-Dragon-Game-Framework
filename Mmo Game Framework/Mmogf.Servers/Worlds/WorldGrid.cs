@@ -130,7 +130,6 @@ namespace Mmogf.Servers.Worlds
                     {
                         removeEntityIds.AddRange(cell.Entities.Keys);  
                     }
-                    worker.CellSubscriptions.RemoveAt(i);
                 }
             }
 
