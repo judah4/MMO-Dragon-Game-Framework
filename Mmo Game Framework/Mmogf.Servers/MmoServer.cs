@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using Google.Protobuf.WellKnownTypes;
 using Lidgren.Network;
 using MessagePack;
 using Microsoft.Extensions.Configuration;
@@ -36,7 +35,6 @@ namespace MmoGameFramework
 
         public Dictionary<long, WorkerConnection> _connections = new Dictionary<long, WorkerConnection>();
         public List<WorkerConnection> _workerWithSubChanges = new List<WorkerConnection>();
-
 
         public MmoServer(OrchestrationService orchestrationService, EntityStore entities, NetPeerConfiguration config, bool clientWorker, ILogger<MmoServer> logger, IConfiguration configuration)
         {
