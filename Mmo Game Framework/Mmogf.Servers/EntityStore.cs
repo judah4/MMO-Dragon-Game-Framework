@@ -192,6 +192,11 @@ namespace MmoGameFramework
                 var results = layer.UpdateWorkerInterestArea(worker);
                 addEntityIds.AddRange(results.addEntityIds);
                 removeEntityIds.AddRange(results.removeEntityIds);
+
+                if (_logger.IsEnabled(LogLevel.Debug) && (results.addCells.Count > 0 || results.removeCells.Count > 0))
+                    _logger.LogDebug($"({worker.InterestPosition.ToString()}) Layer {layer.Layer} Cells Added ({string.Join(',', results.addCells.Select(x=>x.Position.ToString()))}), Cells Removed ({string.Join(',', results.removeCells.Select(x => x.Position.ToString()))}) from Worker {worker.ConnectionType}-{worker.WorkerId}");
+
+
             }
 
             return (addEntityIds, removeEntityIds);

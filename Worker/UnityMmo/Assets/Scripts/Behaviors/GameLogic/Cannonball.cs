@@ -36,9 +36,6 @@ namespace Mmogf
         private void OnCollisionEnter(Collision collision)
         {
             _destroy = true;
-            #if UNITY_EDITOR
-            Debug.Log($"Colliding with {collision.collider.name} Server:{(_fireBehavior != null)}");
-            #endif
             if(_fireBehavior != null)
             {
                 var healthBehavior = collision.collider.GetComponent<HealthBehavior>();
@@ -49,15 +46,17 @@ namespace Mmogf
                     {
                         if(result.CommandStatus != Core.CommandStatus.Success)
                         {
+#if UNITY_EDITOR
                             Debug.LogError($"Take Damage: {result.CommandStatus}: {result.Message}");
+#endif
                             return;
                         }
-
+#if UNITY_EDITOR
                         Debug.Log($"Damage dealt! {result.Request?.Amount}, Dead:{result.Response?.Dead}, Killed:{result.Response?.Killed}");
+#endif
                     });
                 }
             }
-
 
         }
 

@@ -236,6 +236,8 @@ namespace MmoGameFramework
         {
             foreach (var worker in _workerWithSubChanges)
             {
+                if (_logger.IsEnabled(LogLevel.Debug) && worker.EntitiesToAdd.Count > 0)
+                    _logger.LogDebug($"Adding Entities ({string.Join(',', worker.EntitiesToAdd)}) to Worker {worker.ConnectionType}-{worker.WorkerId}");
                 foreach (var add in worker.EntitiesToAdd)
                 {
                     var entity = _entities.GetEntity(add);
