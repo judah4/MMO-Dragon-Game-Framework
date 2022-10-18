@@ -6,9 +6,9 @@ namespace Mmogf.Servers.Tests.Worlds
     [TestClass]
     public class WorldCellTests
     {
-        WorldCell GetWorldCell(Position position, int cellSize = 50)
+        WorldCell GetWorldCell(Position position, int cellSize = 50, int layer = 0)
         {
-            return new WorldCell(position, cellSize);
+            return new WorldCell(position, cellSize, layer);
         }
 
         [TestMethod]

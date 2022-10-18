@@ -38,11 +38,14 @@ namespace MmoGameFramework
 
          */
 
-        public WorkerConnection(string connectionType, Lidgren.Network.NetConnection senderConnection, Position interestPosition)
+        public WorkerConnection(string connectionType, Lidgren.Network.NetConnection senderConnection, Position interestPosition, int interestRange)
         {
+            if(interestRange < 1)
+                interestRange = 10;
+
             ConnectionType = connectionType;
             InterestPosition = interestPosition;
-            InterestRange = 100;
+            InterestRange = interestRange;
             Connection = senderConnection;
             CellSubscriptions = new List<WorldCell>();
             EntitiesToAdd = new List<int>();

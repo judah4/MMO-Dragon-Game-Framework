@@ -6,6 +6,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Text;
 
 namespace MmoGameFramework
@@ -34,10 +35,10 @@ namespace MmoGameFramework
             _logger = logger;
 
             //get from config
-            var grid1 = new WorldGrid(50);
+            var grid1 = new WorldGrid(50, 0);
             //default 2 layers. regular checkout and infinite size
-            var grid2 = new WorldGrid(1000000);
-            AddGrid(grid1);
+            var grid2 = new WorldGrid(1000000, 1);
+            AddGrid(grid1); //make sure we set the right layer indexes later
             AddGrid(grid2);
 
         }
@@ -143,8 +144,12 @@ namespace MmoGameFramework
                 if(cell.Entities.ContainsKey(entity.EntityId))
                     return;
 
-                GridLayers[0].RemoveEntity(entity);
-                cell.AddEntity(entity);
+                var layer = GridLayers[0];
+                layer.RemoveEntity(entity);
+                cell = layer.AddEntity(entity, cell);
+
+                if (_logger.IsEnabled(LogLevel.Debug))
+                    _logger.LogDebug($"Layer {cell.Layer} Entity {entity.EntityId} moved to cell {cell.Position}");
             }
 
         }

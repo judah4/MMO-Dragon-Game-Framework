@@ -243,13 +243,18 @@ namespace MmoGameFramework
                         continue;
 
                     var message = EntityInfoMessage(entity.Value);
+                    
                     Send(worker.Connection, message, NetDeliveryMethod.ReliableUnordered);
                 }
+                if (_logger.IsEnabled(LogLevel.Debug) && worker.EntitiesToRemove.Count > 0)
+                    _logger.LogDebug($"Removing Entities ({string.Join(',', worker.EntitiesToRemove)}) from Worker {worker.ConnectionType}-{worker.WorkerId}");
                 foreach (var remove in worker.EntitiesToRemove)
                 {
                     var message = EntityDeleteMessage(remove);
                     Send(worker.Connection, message, NetDeliveryMethod.ReliableUnordered);
                 }
+                worker.EntitiesToAdd.Clear();
+                worker.EntitiesToRemove.Clear();
             }
             _workerWithSubChanges.Clear();
         }
@@ -267,8 +272,13 @@ namespace MmoGameFramework
 
         private void HandleWorkerConnect(NetIncomingMessage im)
         {
+            var interestRange = 1000;
+            if(_clientWorker)
+            {
+                interestRange = 100;
+            }
             //todo: do some sort of worker type validation from a config
-            var workerConnection = new WorkerConnection(im.SenderConnection.RemoteHailMessage.ReadString(), im.SenderConnection, Position.Zero);
+            var workerConnection = new WorkerConnection(im.SenderConnection.RemoteHailMessage.ReadString(), im.SenderConnection, Position.Zero, interestRange);
             _connections.Add(im.SenderConnection.RemoteUniqueIdentifier, workerConnection);
             var results = _entities.UpdateWorkerInterestArea(workerConnection);
             foreach (var add in results.addEntityIds)
@@ -399,10 +409,12 @@ namespace MmoGameFramework
         void HandleEntityUpdate(NetIncomingMessage im, MmoMessage simpleData)
         {
             var entityUpdate = MessagePackSerializer.Deserialize<EntityUpdate>(simpleData.Info);
-            var entity = _entities.GetEntity(entityUpdate.EntityId);
+            var entityVal = _entities.GetEntity(entityUpdate.EntityId);
 
-            if (entity == null)
+            if (entityVal == null)
                 return;
+
+            Entity entity = entityVal.Value;
 
             WorkerConnection worker;
             if (!_connections.TryGetValue(im.SenderConnection.RemoteUniqueIdentifier, out worker))
@@ -410,21 +422,21 @@ namespace MmoGameFramework
                 //disconnected??
                 return;
             }
-            var acls = entity.Value.Acls;
+            var acls = entity.Acls;
             if(!acls.CanWrite(entityUpdate.ComponentId, worker.ConnectionType))
             {
                 //log
                 return;
             }
 
-            entity.Value.UpdateComponent(entityUpdate.ComponentId, entityUpdate.Info);
+            entity.UpdateComponent(entityUpdate.ComponentId, entityUpdate.Info);
             //if (_logger.IsEnabled(LogLevel.Debug) && entityUpdate.ComponentId == Position.ComponentId)
             //{
             //    var position = MessagePackSerializer.Deserialize<Position>(entityUpdate.Info);
             //    _logger.LogDebug($"Entity: {entityInfo.Value.EntityId} position to {position.ToString()}");
             //}
 
-            _entities.UpdateEntityPartial(entity.Value, entityUpdate, worker.Connection.RemoteUniqueIdentifier);
+            _entities.UpdateEntityPartial(entity, entityUpdate, worker.Connection.RemoteUniqueIdentifier);
 
         }
 

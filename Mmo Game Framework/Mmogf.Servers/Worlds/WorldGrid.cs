@@ -20,16 +20,19 @@ namespace Mmogf.Servers.Worlds
 
         public ConcurrentDictionary<(int x, int y, int z), WorldCell> Cells => _cells;
         public int CellSize { get; private set; }
+        public int Layer { get; private set; }
 
-        public WorldGrid(int cellSize)
+        public WorldGrid(int cellSize, int layer)
         {
             CellSize = cellSize;
+            Layer = layer;
         }
 
-        public WorldCell AddEntity(Entity entity)
+        public WorldCell AddEntity(Entity entity, WorldCell cell = null)
         {
             var pos = entity.Position;
-            var cell = GetCell(pos);
+            if(cell == null)
+                cell = GetCell(pos);
             cell.AddEntity(entity);
             _entityCells.TryAdd(entity.EntityId, cell);
             return cell;
@@ -57,7 +60,7 @@ namespace Mmogf.Servers.Worlds
             WorldCell cell;
             if (!_cells.TryGetValue((cellX, cellY, cellZ), out cell))
             {
-                cell = new WorldCell(new Position(cellX * CellSize, cellY * CellSize, cellZ * CellSize), CellSize);
+                cell = new WorldCell(new Position(cellX * CellSize, cellY * CellSize, cellZ * CellSize), CellSize, Layer);
                 _cells.TryAdd((cellX, cellY, cellZ), cell);
                 cell.OnEntityAdd += ProcessOnEntityAdd;
                 cell.OnEntityRemove += ProcessOnEntityRemove;
@@ -95,9 +98,14 @@ namespace Mmogf.Servers.Worlds
                         WorldCell cell;
                         if(!_cells.TryGetValue((cntX,cntY,cntZ), out cell))
                         {
-                            cell = new WorldCell(new Position(cntX * CellSize, cntY * CellSize, cntZ * CellSize), CellSize);
+                            cell = new WorldCell(new Position(cntX * CellSize, cntY * CellSize, cntZ * CellSize), CellSize, Layer);
                             if(!_cells.TryAdd((cntX, cntY, cntZ), cell))
                                 _cells.TryGetValue((cntX, cntY, cntZ), out cell); //validate this for better concurrency
+                            else
+                            {
+                                cell.OnEntityAdd += ProcessOnEntityAdd;
+                                cell.OnEntityRemove += ProcessOnEntityRemove;
+                            }
                         }
                         list.Add(cell);
 
@@ -107,16 +115,19 @@ namespace Mmogf.Servers.Worlds
             return list;
         }
 
-        public (List<int> addEntityIds, List<int> removeEntityIds) UpdateWorkerInterestArea(WorkerConnection worker)
+        public (List<int> addEntityIds, List<int> removeEntityIds, List<WorldCell> addCells, List<WorldCell> removeCells) UpdateWorkerInterestArea(WorkerConnection worker)
         {
             List<int> addEntityIds = new List<int>();
             List<int> removeEntityIds = new List<int>();
+            var addCells = new List<WorldCell>();
+            var removeCells = new List<WorldCell>();
             var cells = GetCellsInArea(worker.InterestPosition, worker.InterestRange);
 
             foreach(var cell in cells)
             {
                 if(cell.AddWorkerSub(worker))
                 {
+                    addCells.Add(cell);
                     addEntityIds.AddRange(cell.Entities.Keys);
                 }
             }
@@ -124,16 +135,19 @@ namespace Mmogf.Servers.Worlds
             for(int i = worker.CellSubscriptions.Count - 1; i >= 0; i--)
             {
                 var cell = worker.CellSubscriptions[i];
+                if(cell.Layer != Layer)
+                    continue;
                 if (!cells.Contains(cell))
                 {
                     if(cell.RemoveWorkerSub(worker))
                     {
+                        removeCells.Add(cell);
                         removeEntityIds.AddRange(cell.Entities.Keys);  
                     }
                 }
             }
 
-            return (addEntityIds, removeEntityIds);
+            return (addEntityIds, removeEntityIds, addCells, removeCells);
 
         }
 

@@ -34,16 +34,18 @@ namespace Mmogf.Servers.Worlds
         public ConcurrentDictionary<long, string> WorkerSubscriptions => _workerSubscriptions;
         public Position Position { get; private set; }
         public int CellSize { get; private set; }
+        public int Layer { get; private set; }
         private ConcurrentDictionary<int,int> _entities = new ConcurrentDictionary<int,int>();
         private ConcurrentDictionary<long, string> _workerSubscriptions = new ConcurrentDictionary<long, string>();
 
         public event Action<int, ConcurrentDictionary<long, string>> OnEntityAdd;
         public event Action<int, ConcurrentDictionary<long, string>> OnEntityRemove;
 
-        public WorldCell(Position position, int cellSize)
+        public WorldCell(Position position, int cellSize, int layer)
         {
             this.Position = position;
             this.CellSize = cellSize;
+            Layer = layer;
         }
 
         public void AddEntity(Entity entity)
