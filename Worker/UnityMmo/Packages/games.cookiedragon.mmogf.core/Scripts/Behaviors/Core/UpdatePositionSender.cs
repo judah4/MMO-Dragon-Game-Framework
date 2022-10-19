@@ -1,5 +1,6 @@
 ﻿using MessagePack;
 using Mmogf.Core;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,7 +11,15 @@ namespace Mmogf.Core
     {
         private float updateTime = -1;
         private float updateTimeRotation = -1;
+        [SerializeField]
         private float updateTick = .12f;
+        [SerializeField]
+        private float _defaultTickRate = .12f;
+
+        [SerializeField]
+        private float _rotationUpdateTick = .25f;
+        [SerializeField]
+        private float _rotationDefaultTickRate = .25f;
 
         public bool UpdateRotation = true;
 
@@ -20,6 +29,9 @@ namespace Mmogf.Core
 
         void Update()
         {
+            if(!HasAuthority(FixedVector3.ComponentId))
+                return;
+
             updateTime -= Time.deltaTime;
             updateTimeRotation -= Time.deltaTime;
 
@@ -32,7 +44,7 @@ namespace Mmogf.Core
                     if (rot.Heading != currHeading.Heading)
                     {
                         Server.UpdateEntity(Entity.EntityId, Rotation.ComponentId, currHeading);
-                        updateTimeRotation = updateTick;
+                        updateTimeRotation = _rotationUpdateTick;
                     }
                 }
             }
@@ -63,6 +75,22 @@ namespace Mmogf.Core
                 Server.UpdateEntity(Entity.EntityId, FixedVector3.ComponentId, new PositionUpdate(Server, transform.position).Get().ToFixedVector3());
                 updateTime = updateTick;
             }
+        }
+
+        public void SetUpdateRate(float tickRate)
+        {
+            updateTick = tickRate;
+        }
+
+        public void SetRotationUpdateRate(float tickRate)
+        {
+            _rotationUpdateTick = tickRate;
+        }
+
+        public void ResetUpdateRate()
+        {
+            updateTick = _defaultTickRate;
+            _rotationUpdateTick = _rotationDefaultTickRate;
         }
     }
 }

@@ -1,20 +1,21 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using Google.Protobuf.WellKnownTypes;
 using Lidgren.Network;
 using MessagePack;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Mmogf.Core;
 using Mmogf.Servers.Services;
+using Mmogf.Servers.Worlds;
 //using Prometheus;
 
 namespace MmoGameFramework
 {
-    public class MmoServer
+    public sealed class MmoServer
     {
         public bool Active => s_server.Status == NetPeerStatus.Running;
         public string WorkerType => _config.AppIdentifier;
@@ -33,6 +34,7 @@ namespace MmoGameFramework
         int _tickRate;
 
         public Dictionary<long, WorkerConnection> _connections = new Dictionary<long, WorkerConnection>();
+        public List<WorkerConnection> _workerWithSubChanges = new List<WorkerConnection>();
 
         public MmoServer(OrchestrationService orchestrationService, EntityStore entities, NetPeerConfiguration config, bool clientWorker, ILogger<MmoServer> logger, IConfiguration configuration)
         {
@@ -61,6 +63,9 @@ namespace MmoGameFramework
             _entities.OnEntityCommand += OnEntityCommand;
             _entities.OnEntityCommandResponse += OnEntityCommandResponse;
             _entities.OnUpdateEntityPartial += OnEntityUpdatePartial;
+
+            _entities.OnEntityAddSubscription += ProcessOnEntityAddSubscription;
+            _entities.OnEntityRemoveSubscription += ProcessOnEntityRemoveSubscription;
 
         }
 
@@ -119,25 +124,15 @@ namespace MmoGameFramework
 
                                 if (status == NetConnectionStatus.Connected)
                                 {
-                                    //todo: do some sort of worker type validation from a config
-                                    _connections.Add(im.SenderConnection.RemoteUniqueIdentifier, new WorkerConnection(im.SenderConnection.RemoteHailMessage.ReadString(), im.SenderConnection, new Position()));
-                                        _logger.LogInformation("Remote hail: " + im.SenderConnection.RemoteHailMessage.ReadString());
-                                    var message = new MmoMessage()
-                                    {
-                                        MessageId = ServerCodes.ClientConnect,
-                                        Info = MessagePackSerializer.Serialize(new ClientConnect()
-                                        {
-                                            ClientId = im.SenderConnection.RemoteUniqueIdentifier,
-                                        }),
-                                    };
-                                    NetOutgoingMessage om = s_server.CreateMessage();
-                                    om.Write(MessagePackSerializer.Serialize(message));
-                                    s_server.SendMessage(om, im.SenderConnection, NetDeliveryMethod.ReliableUnordered);
+                                    HandleWorkerConnect(im);
+                                    
                                 }
                                 else if(status == NetConnectionStatus.Disconnected)
                                 {
                                     _logger.LogInformation($"{_config.AppIdentifier} {im.SenderConnection.RemoteUniqueIdentifier} Disconnected");
-                                    _connections.Remove(im.SenderConnection.RemoteUniqueIdentifier);
+                                    WorkerConnection worker;
+                                    if(_connections.TryGetValue(im.SenderConnection.RemoteUniqueIdentifier, out worker))
+                                        HandleWorkerDisconnect(im, worker);
                                 }
 
                                 break;
@@ -157,31 +152,17 @@ namespace MmoGameFramework
                                         {
                                             worker.InterestPosition = interestArea.Position.ToPosition();
 
-                                            var entities = _entities.GetInArea(worker.InterestPosition,
-                                                worker.InterestRange);
-
-                                            var newEntityIds = new List<int>();
-
-                                            foreach (var entityInfo in entities)
-                                            {
-                                                newEntityIds.Add(entityInfo.EntityId);
-                                                worker.EntitiesInRange.Add(entityInfo.EntityId);
-
-                                                //send of entities checkout change
-
-                                                Send(im.SenderConnection, new MmoMessage()
-                                                {
-                                                    MessageId = ServerCodes.EntityInfo,
-                                                    Info = MessagePackSerializer.Serialize(entityInfo.ToEntityInfo()),
-                                                }, NetDeliveryMethod.ReliableUnordered);
-                                            }
-
+                                            var results = _entities.UpdateWorkerInterestArea(worker);
+                                            foreach(var add in results.addEntityIds)
+                                                HandleEntitySubChange(worker, true, add);
+                                            foreach (var add in results.removeEntityIds)
+                                                HandleEntitySubChange(worker, false, add);
                                             Send(im.SenderConnection, new MmoMessage()
                                             {
                                                 MessageId = ServerCodes.EntityCheckout,
                                                 Info = MessagePackSerializer.Serialize(new EntityCheckout()
                                                 {
-                                                    Checkouts = newEntityIds,
+                                                    Checkouts = new List<int>(),
                                                     Remove = false,
                                                 }),
                                             }, NetDeliveryMethod.ReliableOrdered, 11);
@@ -224,6 +205,8 @@ namespace MmoGameFramework
 
                     //ConnectedWorkersGauge.Set(s_server.ConnectionsCount);
 
+                    HandleEntitySubChanges();
+
                     if(s_server.ConnectionsCount > 0)
                     {
                         await _orchestrationService.ReadyAsync();
@@ -247,6 +230,76 @@ namespace MmoGameFramework
                     _logger.LogError(e, e.Message);
                 }
             }
+        }
+
+        private void HandleEntitySubChanges()
+        {
+            foreach (var worker in _workerWithSubChanges)
+            {
+                if (_logger.IsEnabled(LogLevel.Debug) && worker.EntitiesToAdd.Count > 0)
+                    _logger.LogDebug($"Adding Entities ({string.Join(',', worker.EntitiesToAdd)}) to Worker {worker.ConnectionType}-{worker.WorkerId}");
+                foreach (var add in worker.EntitiesToAdd)
+                {
+                    var entity = _entities.GetEntity(add);
+                    if (entity == null)
+                        continue;
+
+                    var message = EntityInfoMessage(entity.Value);
+                    
+                    Send(worker.Connection, message, NetDeliveryMethod.ReliableUnordered);
+                }
+                if (_logger.IsEnabled(LogLevel.Debug) && worker.EntitiesToRemove.Count > 0)
+                    _logger.LogDebug($"Removing Entities ({string.Join(',', worker.EntitiesToRemove)}) from Worker {worker.ConnectionType}-{worker.WorkerId}");
+                foreach (var remove in worker.EntitiesToRemove)
+                {
+                    var message = EntityDeleteMessage(remove);
+                    Send(worker.Connection, message, NetDeliveryMethod.ReliableUnordered);
+                }
+                worker.EntitiesToAdd.Clear();
+                worker.EntitiesToRemove.Clear();
+            }
+            _workerWithSubChanges.Clear();
+        }
+
+        private void HandleWorkerDisconnect(NetIncomingMessage im, WorkerConnection worker)
+        {
+            if(worker == null)
+                return;
+
+            _entities.RemoveWorker(worker);
+
+            _connections.Remove(worker.WorkerId);
+
+        }
+
+        private void HandleWorkerConnect(NetIncomingMessage im)
+        {
+            var interestRange = 2000;
+            if(_clientWorker)
+            {
+                interestRange = 100;
+            }
+            //todo: do some sort of worker type validation from a config
+            var workerConnection = new WorkerConnection(im.SenderConnection.RemoteHailMessage.ReadString(), im.SenderConnection, Position.Zero, interestRange);
+            _connections.Add(im.SenderConnection.RemoteUniqueIdentifier, workerConnection);
+            var results = _entities.UpdateWorkerInterestArea(workerConnection);
+            foreach (var add in results.addEntityIds)
+                HandleEntitySubChange(workerConnection, true, add);
+            foreach (var add in results.removeEntityIds)
+                HandleEntitySubChange(workerConnection, false, add);
+
+            _logger.LogInformation("Remote hail: " + im.SenderConnection.RemoteHailMessage.ReadString());
+            var message = new MmoMessage()
+            {
+                MessageId = ServerCodes.ClientConnect,
+                Info = MessagePackSerializer.Serialize(new ClientConnect()
+                {
+                    ClientId = im.SenderConnection.RemoteUniqueIdentifier,
+                }),
+            };
+            NetOutgoingMessage om = s_server.CreateMessage();
+            om.Write(MessagePackSerializer.Serialize(message));
+            s_server.SendMessage(om, im.SenderConnection, NetDeliveryMethod.ReliableUnordered);
         }
 
         private void HandleEntityCommand(NetIncomingMessage im, MmoMessage simpleData)
@@ -358,10 +411,12 @@ namespace MmoGameFramework
         void HandleEntityUpdate(NetIncomingMessage im, MmoMessage simpleData)
         {
             var entityUpdate = MessagePackSerializer.Deserialize<EntityUpdate>(simpleData.Info);
-            var entity = _entities.GetEntity(entityUpdate.EntityId);
+            var entityVal = _entities.GetEntity(entityUpdate.EntityId);
 
-            if (entity == null)
+            if (entityVal == null)
                 return;
+
+            Entity entity = entityVal.Value;
 
             WorkerConnection worker;
             if (!_connections.TryGetValue(im.SenderConnection.RemoteUniqueIdentifier, out worker))
@@ -369,21 +424,21 @@ namespace MmoGameFramework
                 //disconnected??
                 return;
             }
-            var acls = entity.Value.Acls;
+            var acls = entity.Acls;
             if(!acls.CanWrite(entityUpdate.ComponentId, worker.ConnectionType))
             {
                 //log
                 return;
             }
 
-            entity.Value.UpdateComponent(entityUpdate.ComponentId, entityUpdate.Info);
+            entity.UpdateComponent(entityUpdate.ComponentId, entityUpdate.Info);
             //if (_logger.IsEnabled(LogLevel.Debug) && entityUpdate.ComponentId == Position.ComponentId)
             //{
             //    var position = MessagePackSerializer.Deserialize<Position>(entityUpdate.Info);
             //    _logger.LogDebug($"Entity: {entityInfo.Value.EntityId} position to {position.ToString()}");
             //}
 
-            _entities.UpdateEntityPartial(entity.Value, entityUpdate, worker.Connection.RemoteUniqueIdentifier);
+            _entities.UpdateEntityPartial(entity, entityUpdate, worker.Connection.RemoteUniqueIdentifier);
 
         }
 
@@ -421,15 +476,17 @@ namespace MmoGameFramework
             s_server.SendMessage(om, connection, deliveryMethod, sequenceChannel);
         }
 
-        public void SendCheckedout(int entityId, MmoMessage message, NetDeliveryMethod deliveryMethod = NetDeliveryMethod.Unreliable, int sequenceChannel = 0)
+        public void SendSubscribed(Entity entity, MmoMessage message, long workerExcludeId, NetDeliveryMethod deliveryMethod = NetDeliveryMethod.Unreliable, int sequenceChannel = 0)
         {
-            var connections = new List<NetConnection>();
-            foreach (var workerConnection in _connections)
+            var connections = new List<NetConnection>(10);
+            var workerIds = _entities.GetSubscribedWorkers(entity);
+            foreach (var workerId in workerIds)
             {
-                if(!workerConnection.Value.EntitiesInRange.Contains(entityId))
+                if (workerId == workerExcludeId)
                     continue;
 
-                connections.Add(workerConnection.Value.Connection);
+                if (_connections.TryGetValue(workerId, out WorkerConnection worker))
+                    connections.Add(worker.Connection);
             }
 
             if (connections.Count < 1)
@@ -440,6 +497,7 @@ namespace MmoGameFramework
             s_server.SendMessage(om, connections, deliveryMethod, sequenceChannel);
         }
 
+        [Obsolete]
         public void SendArea(Position position, MmoMessage message, long workerExcludeId, NetDeliveryMethod deliveryMethod = NetDeliveryMethod.Unreliable, int sequenceChannel = 0)
         {
             var connections = new List<NetConnection>(100);
@@ -480,33 +538,53 @@ namespace MmoGameFramework
             }
         }
 
-        private void OnEntityUpdate(Entity entityInfo)
+        private MmoMessage EntityInfoMessage(Entity entityInfo)
         {
+            //find who has checked out
             var message = new MmoMessage()
             {
                 MessageId = ServerCodes.EntityInfo,
-
                 Info = MessagePackSerializer.Serialize(entityInfo.ToEntityInfo()),
             };
-            if(_logger.IsEnabled(LogLevel.Debug))
-                _logger.LogDebug($"Sending Entity Info {entityInfo.EntityId}" );
-            //SendCheckedout(entityInfo.EntityId, message, NetDeliveryMethod.ReliableOrdered);
-            SendArea(entityInfo.Position, message, 0, NetDeliveryMethod.ReliableUnordered);
+
+            return message;
         }
 
-        private void OnEntityDelete(Entity entityInfo)
+        private void OnEntityUpdate(Entity entityInfo)
+        {
+            var message = EntityInfoMessage(entityInfo);
+            if (_logger.IsEnabled(LogLevel.Debug))
+                _logger.LogDebug($"Sending Entity Info {entityInfo.EntityId}" );
+            SendSubscribed(entityInfo, message, 0, NetDeliveryMethod.ReliableUnordered);
+            //SendCheckedout(entityInfo.EntityId, message, NetDeliveryMethod.ReliableOrdered);
+            //SendArea(entityInfo.Position, message, 0, NetDeliveryMethod.ReliableUnordered);
+        }
+
+        private MmoMessage EntityDeleteMessage(int entityId)
         {
             //find who has checked out
             var message = new MmoMessage()
             {
                 MessageId = ServerCodes.EntityDelete,
-
-                Info = MessagePackSerializer.Serialize(entityInfo),
+                Info = MessagePackSerializer.Serialize(new EntityInfo()
+                {
+                    EntityId = entityId,
+                    EntityData = new Dictionary<short, byte[]>(),
+                }),
             };
+
+            return message;
+        }
+
+        private void OnEntityDelete(Entity entityInfo)
+        {
+            //find who has checked out
+            var message = EntityDeleteMessage(entityInfo.EntityId);
 
             _logger.LogInformation($"Deleting Entity {entityInfo.EntityId}");
             //SendCheckedout(entityInfo.EntityId, message, NetDeliveryMethod.ReliableOrdered);
-            SendArea(entityInfo.Position, message, 0, NetDeliveryMethod.ReliableUnordered);
+            SendSubscribed(entityInfo, message, 0, NetDeliveryMethod.ReliableUnordered);
+            //SendArea(entityInfo.Position, message, 0, NetDeliveryMethod.ReliableUnordered);
         }
 
         private void OnEntityUpdatePartial(EntityUpdate entityUpdate, long workerId)
@@ -524,7 +602,8 @@ namespace MmoGameFramework
             };
             //if (_logger.IsEnabled(LogLevel.Debug))
             //    _logger.LogDebug("Sending Entity Update");
-            SendArea(entity.Value.Position, message, workerId, NetDeliveryMethod.Unreliable);
+            SendSubscribed(entity.Value, message, workerId, NetDeliveryMethod.Unreliable);
+            //SendArea(entity.Value.Position, message, workerId, NetDeliveryMethod.Unreliable);
         }
 
         private void OnEntityEvent(EventRequest eventRequest)
@@ -542,7 +621,8 @@ namespace MmoGameFramework
 
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"Sending Entity Event {eventRequest.ComponentId}-{eventRequest.EventId}");
-            SendArea(entity.Value.Position, message, 0, NetDeliveryMethod.ReliableUnordered);
+            SendSubscribed(entity.Value, message, 0, NetDeliveryMethod.ReliableUnordered);
+            //SendArea(entity.Value.Position, message, 0, NetDeliveryMethod.ReliableUnordered);
         }
 
         private void OnEntityCommand(CommandRequest commandRequest)
@@ -610,6 +690,58 @@ namespace MmoGameFramework
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"Sending Command Response {commandResponse.RequestId} {commandResponse.ComponentId}-{commandResponse.CommandId}");
             Send(worker.Connection, message, NetDeliveryMethod.ReliableUnordered);
+        }
+
+        private void ProcessOnEntityAddSubscription(int entityId, ConcurrentDictionary<long, string> workers)
+        {
+            //send as create
+            //probably should be buffered for 1 tick
+            foreach (var workerPair in workers)
+            {
+                if (!_connections.TryGetValue(workerPair.Key, out WorkerConnection worker))
+                    continue;
+                HandleEntitySubChange(worker, true, entityId);
+
+            }
+        }
+
+        private void ProcessOnEntityRemoveSubscription(int entityId, ConcurrentDictionary<long, string> workers)
+        {
+            //send as remove
+            //probably should be buffered for 1 tick
+            foreach (var workerPair in workers)
+            {
+                if (!_connections.TryGetValue(workerPair.Key, out WorkerConnection worker))
+                    continue;
+                HandleEntitySubChange(worker, false, entityId);
+            }
+        }
+
+        void HandleEntitySubChange(WorkerConnection worker, bool add, int entityId)
+        {
+            if(add)
+            {
+                if (worker.EntitiesToRemove.Contains(entityId))
+                {
+                    worker.EntitiesToRemove.Remove(entityId);
+                    return;
+                }
+                if (!worker.EntitiesToAdd.Contains(entityId))
+                    worker.EntitiesToAdd.Add(entityId);
+            }
+            else
+            {
+                if (worker.EntitiesToAdd.Contains(entityId))
+                {
+                    worker.EntitiesToAdd.Remove(entityId);
+                    return;
+                }
+                if (!worker.EntitiesToRemove.Contains(entityId))
+                    worker.EntitiesToRemove.Add(entityId);
+            }
+            
+            if(!_workerWithSubChanges.Contains(worker))
+                _workerWithSubChanges.Add(worker);
         }
 
     }

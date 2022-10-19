@@ -1,19 +1,22 @@
 using MessagePack;
 using Microsoft.Extensions.Logging;
 using Mmogf.Core;
+using Mmogf.Servers.Worlds;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Text;
-using static Grpc.Core.Metadata;
 
 namespace MmoGameFramework
 {
-    public class EntityStore
+    public sealed class EntityStore
     {
         private int lastId = 0;
 
         private ConcurrentDictionary<int, Entity> _entities = new ConcurrentDictionary<int, Entity>();
+        private List<WorldGrid> GridLayers = new List<WorldGrid>(2);
 
         ILogger _logger;
 
@@ -24,10 +27,38 @@ namespace MmoGameFramework
         public event Action<EventRequest> OnEntityEvent;
         public event Action<Entity> OnEntityDelete;
 
-        public EntityStore(ILogger<EntityStore> logger)
+        public event Action<int, ConcurrentDictionary<long, string>> OnEntityAddSubscription;
+        public event Action<int, ConcurrentDictionary<long, string>> OnEntityRemoveSubscription;
+
+        public EntityStore(ILogger<EntityStore> logger, int cellSize)
         {
             _logger = logger;
+
+            var grid1 = new WorldGrid(cellSize, 0);
+            //default 2 layers. regular checkout and infinite size
+            var grid2 = new WorldGrid(1000000, 1);
+            AddGrid(grid1); //make sure we set the right layer indexes later
+            AddGrid(grid2);
+
         }
+
+        void AddGrid(WorldGrid grid)
+        {
+            grid.OnEntityAdd += ProcessOnEntityAdd;
+            grid.OnEntityRemove += ProcessOnEntityRemove;
+            GridLayers.Add(grid);
+        }
+
+        private void ProcessOnEntityAdd(int entityId, ConcurrentDictionary<long, string> workers)
+        {
+            OnEntityAddSubscription?.Invoke(entityId, workers);
+        }
+
+        private void ProcessOnEntityRemove(int entityId, ConcurrentDictionary<long, string> workers)
+        {
+            OnEntityRemoveSubscription?.Invoke(entityId, workers);
+        }
+
 
         public Entity Create(string entityType, Position position, Rotation rotation, List<Acl> acls, int? entityId = null, Dictionary<short, byte[]> additionalData = null)
         {
@@ -63,9 +94,14 @@ namespace MmoGameFramework
             var entity = new Entity(entityId.Value, data);
 
             _entities.TryAdd(entityId.Value, entity);
+
+            GridLayers[0].AddEntity(entity);
+            //check if in other layers based on components
+
             return entity;
         }
 
+        [Obsolete]
         public List<Entity> GetInArea(Position position, float radius)
         {
             var entities = new List<Entity>();
@@ -99,6 +135,22 @@ namespace MmoGameFramework
         {
             _entities[entity.EntityId] = entity;
             OnUpdateEntityPartial?.Invoke(entityUpdate, workerId);
+
+            if(entityUpdate.ComponentId == FixedVector3.ComponentId)
+            {
+                //update regions
+                var cell = GridLayers[0].GetCell(entity.Position);
+                if(cell.Entities.ContainsKey(entity.EntityId))
+                    return;
+
+                var layer = GridLayers[0];
+                layer.RemoveEntity(entity);
+                cell = layer.AddEntity(entity, cell);
+
+                if (_logger.IsEnabled(LogLevel.Debug))
+                    _logger.LogDebug($"Layer {cell.Layer} Entity {entity.EntityId} moved to cell {cell.Position}");
+            }
+
         }
 
         public void SendCommand(CommandRequest commandRequest)
@@ -122,7 +174,56 @@ namespace MmoGameFramework
             if(!_entities.Remove(entityId, out entity))
                 return;
 
+            foreach(var layer in GridLayers)
+            {
+                layer.RemoveEntity(entity);
+            }
+
             OnEntityDelete?.Invoke(entity);
+        }
+
+        public (List<int> addEntityIds, List<int> removeEntityIds) UpdateWorkerInterestArea(WorkerConnection worker)
+        {
+            List<int> addEntityIds = new List<int>();
+            List<int> removeEntityIds = new List<int>();
+            foreach (var layer in GridLayers)
+            {
+                var results = layer.UpdateWorkerInterestArea(worker);
+                addEntityIds.AddRange(results.addEntityIds);
+                removeEntityIds.AddRange(results.removeEntityIds);
+
+                if (_logger.IsEnabled(LogLevel.Debug) && (results.addCells.Count > 0 || results.removeCells.Count > 0))
+                    _logger.LogDebug($"({worker.InterestPosition.ToString()}) Layer {layer.Layer} Cells Added ({string.Join(',', results.addCells.Select(x=>x.Position.ToString()))}), Cells Removed ({string.Join(',', results.removeCells.Select(x => x.Position.ToString()))}) from Worker {worker.ConnectionType}-{worker.WorkerId}");
+
+
+            }
+
+            return (addEntityIds, removeEntityIds);
+        }
+
+        public void RemoveWorker(WorkerConnection worker)
+        {
+            for (int cnt = worker.CellSubscriptions.Count - 1; cnt >= 0; cnt--)
+            {
+                var cell = worker.CellSubscriptions[cnt];
+                cell.RemoveWorkerSub(worker);
+            }
+        }
+
+        public List<long> GetSubscribedWorkers(Entity entity)
+        {
+            var workerIds = new List<long>();
+            //default to first layer, figure out how to check the components later
+
+            var layer = GridLayers[0];
+            var cell = layer.GetCell(entity.Position);
+
+            foreach(var workerPair in cell.WorkerSubscriptions)
+            {
+                workerIds.Add(workerPair.Key);
+            }
+
+            return workerIds;
         }
     }
 }

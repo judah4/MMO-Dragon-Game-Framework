@@ -30,6 +30,7 @@ namespace Mmogf.Core
             return Math.Sqrt(DistanceSquared(position1, position2));
         }
 
+
         public static bool WithinArea(Position position, Position point, float radius)
         {
             var dist = Distance(position, point);

@@ -1,8 +1,5 @@
 ﻿using Agones;
 using Grpc.Core;
-using Grpc.Core.Logging;
-using Lidgren.Network;
-using MessagePack;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using MmoGameFramework;

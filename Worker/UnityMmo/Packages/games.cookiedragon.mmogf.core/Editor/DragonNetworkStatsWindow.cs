@@ -201,9 +201,9 @@ namespace MessagePack.Unity.Editor
                         var entSumEl = new CommandDataElement("Entities", 0, 0, entitySummary);
                         list.Add(entSumEl);
 
-                        var totalSummary = stats.CurrentTimeSlice.Sum(new[] { updatesSummary, commandsSummary, eventsSummary, entitySummary, });
-                        var totalSumEl = new CommandDataElement("Totals", 0, 0, totalSummary);
-                        list.Add(totalSumEl);
+                        //var totalSummary = stats.CurrentTimeSlice.Sum(new[] { updatesSummary, commandsSummary, eventsSummary, entitySummary, });
+                        //var totalSumEl = new CommandDataElement("Totals", 0, 0, totalSummary);
+                        //list.Add(totalSumEl);
 
                         break;
                 }

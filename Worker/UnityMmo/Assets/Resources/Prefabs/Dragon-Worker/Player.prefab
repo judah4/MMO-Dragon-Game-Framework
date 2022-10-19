@@ -19,7 +19,7 @@ GameObject:
   - component: {fileID: 9007387733716159937}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -65,8 +65,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea37e6d9da8de0445a3a64000b9e9de1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _cannonballPrefab: {fileID: -7254135308357062617, guid: 2736b783467f3d540b562b86e7f2ac5f,
-    type: 3}
   _cannonFiring: {fileID: 1526328508417754731}
 --- !u!114 &-8345717820305908343
 MonoBehaviour:

@@ -15,8 +15,7 @@ namespace Mmogf.Core
         public Dictionary<short, byte[]> EntityData { get; set; }
 
 
-        /*
-         
+        /* 
         _entityStore.Create("PlayerCreator", new Position() { X = 0, Z = 0 }, new List<Acl>()
             {
                 new Acl() { ComponentId = Position.ComponentId, WorkerType = "Dragon-Worker" },
