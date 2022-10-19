@@ -75,19 +75,19 @@ namespace Mmogf.Servers.Worlds
 
             var cellHalf = CellSize / 2.0;
             //shift offset by half a cell
-            var maxBoundX = position.X + radius + cellHalf;
-            var minBoundX = position.X - radius - cellHalf;
-            var maxBoundY = position.Y + radius + cellHalf;
-            var minBoundY = position.Y - radius - cellHalf;
-            var maxBoundZ = position.Z + radius + cellHalf;
-            var minBoundZ = position.Z - radius - cellHalf;
+            var maxBoundX = position.X + radius;
+            var minBoundX = position.X - radius;
+            var maxBoundY = position.Y + radius;
+            var minBoundY = position.Y - radius;
+            var maxBoundZ = position.Z + radius;
+            var minBoundZ = position.Z - radius;
 
-            var maxCellX = (int)Math.Floor(maxBoundX / CellSize);
-            var minCellX = (int)Math.Ceiling(minBoundX / CellSize);
-            var maxCellY = (int)Math.Floor(maxBoundY / CellSize);
-            var minCellY = (int)Math.Ceiling(minBoundY / CellSize);
-            var maxCellZ = (int)Math.Floor(maxBoundZ / CellSize);
-            var minCellZ = (int)Math.Ceiling(minBoundZ / CellSize);
+            var maxCellX = (int)Math.Ceiling(maxBoundX / CellSize);
+            var minCellX = (int)Math.Floor(minBoundX / CellSize);
+            var maxCellY = (int)Math.Ceiling(maxBoundY / CellSize);
+            var minCellY = (int)Math.Floor(minBoundY / CellSize);
+            var maxCellZ = (int)Math.Ceiling(maxBoundZ / CellSize);
+            var minCellZ = (int)Math.Floor(minBoundZ / CellSize);
 
             for(int cntX = minCellX; cntX <= maxCellX; cntX++)
             {

@@ -63,6 +63,16 @@ namespace Mmogf.Servers.Tests.Worlds
         }
 
         [TestMethod]
+        public void WithinArea_Negative_Test2()
+        {
+            var cellSize = 50;
+            //(-50, 0, 0), (-1,0, 0)
+            var cell = GetWorldCell(new Position(-2 * cellSize, 0 * cellSize, -2 * cellSize), cellSize);
+            Assert.IsTrue(cell.WithinArea(new Position(-125, 1, -125)));
+            Assert.IsTrue(cell.WithinArea(new Position(-99, 0, -101)));
+        }
+
+        [TestMethod]
         public void WithinArea_CellSize10_Test()
         {
             var cell = GetWorldCell(Position.Zero, 10);
