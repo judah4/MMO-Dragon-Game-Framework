@@ -30,12 +30,11 @@ namespace MmoGameFramework
         public event Action<int, ConcurrentDictionary<long, string>> OnEntityAddSubscription;
         public event Action<int, ConcurrentDictionary<long, string>> OnEntityRemoveSubscription;
 
-        public EntityStore(ILogger<EntityStore> logger)
+        public EntityStore(ILogger<EntityStore> logger, int cellSize)
         {
             _logger = logger;
 
-            //get from config
-            var grid1 = new WorldGrid(50, 0);
+            var grid1 = new WorldGrid(cellSize, 0);
             //default 2 layers. regular checkout and infinite size
             var grid2 = new WorldGrid(1000000, 1);
             AddGrid(grid1); //make sure we set the right layer indexes later

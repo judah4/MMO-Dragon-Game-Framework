@@ -274,7 +274,7 @@ namespace MmoGameFramework
 
         private void HandleWorkerConnect(NetIncomingMessage im)
         {
-            var interestRange = 1000;
+            var interestRange = 2000;
             if(_clientWorker)
             {
                 interestRange = 100;
