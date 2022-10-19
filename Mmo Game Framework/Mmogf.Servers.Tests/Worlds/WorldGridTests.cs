@@ -279,5 +279,37 @@ namespace Mmogf.Servers.Tests.Worlds
             Assert.AreEqual(entityCount, 1);
         }
 
+        [TestMethod]
+        public void GetCellsInArea_Test7()
+        {
+            var cellSize = 100;
+            var grid = GetWorldGrid(cellSize, false);
+            grid.AddEntity(GetEntity(new Position(-30, 1, -30)));
+            var cells = grid.GetCellsInArea(new Position(-49, 1, -49), 100);
+
+            int xLower = -100;
+            int yLower = -100;
+            int zLower = -100;
+
+            int cellCnt = 0;
+            int entityCount = 0;
+            for (int cntX = xLower; cntX <= 100; cntX += cellSize)
+            {
+                for (int cntZ = zLower; cntZ <= 100; cntZ += cellSize)
+                {
+                    for (int cntY = yLower; cntY <= 100; cntY += cellSize)
+                    {
+                        Assert.IsTrue(cells.Count > cellCnt);
+                        Assert.AreEqual(new Position(cntX, cntY, cntZ), cells[cellCnt].Position, $"Iteration: ({cntX},{cntY},{cntZ})");
+                        entityCount += cells[cellCnt].EntityCount;
+                        cellCnt++;
+                    }
+                }
+            }
+
+            Assert.AreEqual(cellCnt, cells.Count);
+            Assert.AreEqual(entityCount, 1);
+        }
+
     }
 }
