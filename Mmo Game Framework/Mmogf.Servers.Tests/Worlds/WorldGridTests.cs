@@ -222,7 +222,6 @@ namespace Mmogf.Servers.Tests.Worlds
             var grid = GetWorldGrid(cellSize, false);
             grid.AddEntity(GetEntity(new Position(51.53, 1, 72.39003)));
             var cells = grid.GetCellsInArea(new Position(51.33, 1, 72.29003), 50);
-            //lower range, 220 - 50 = 170. 150?
 
             int xLower = 0;
             int yLower = -50;
@@ -230,14 +229,14 @@ namespace Mmogf.Servers.Tests.Worlds
 
             int cellCnt = 0;
             int entityCount = 0;
-            for (int cntX = xLower; cntX <= 150; cntX += cellSize)
+            for (int cntX = xLower; cntX <= 100; cntX += cellSize)
             {
-                for (int cntZ = zLower; cntZ <= 150; cntZ += cellSize)
+                for (int cntZ = zLower; cntZ <= 100; cntZ += cellSize)
                 {
-                    for (int cntY = yLower; cntY <= 100; cntY += cellSize)
+                    for (int cntY = yLower; cntY <= 50; cntY += cellSize)
                     {
                         Assert.IsTrue(cells.Count > cellCnt);
-                        Assert.AreEqual(new Position(cntX, cntY, cntZ), cells[cellCnt].Position);
+                        Assert.AreEqual(new Position(cntX, cntY, cntZ), cells[cellCnt].Position, $"Interation:{cellCnt}");
                         entityCount += cells[cellCnt].EntityCount;
                         cellCnt++;
                     }
