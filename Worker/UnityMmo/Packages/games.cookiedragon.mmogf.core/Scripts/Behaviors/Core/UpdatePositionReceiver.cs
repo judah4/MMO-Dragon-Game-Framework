@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using MessagePack;
 using Mmogf.Core;
 using UnityEngine;
+using UnityEngine.UIElements;
+
 namespace Mmogf.Core
 {
     public class UpdatePositionReceiver : BaseEntityBehavior
@@ -10,14 +12,22 @@ namespace Mmogf.Core
         [SerializeField]
         protected bool LocalControl;
 
+        Position _targetPostion;
+        Vector3 _lastVectorPostion;
+        float _smoothTime = 0;
+        Vector3 _targetVectorPostion;
+
         void OnEnable()
         {
-            //Entity.OnEntityUpdate += OnUpdate;
+
+            _targetPostion = GetEntityComponent<FixedVector3>().Value.ToPosition();
+            _targetVectorPostion = Server.PositionToClient(_targetPostion);
+            _lastVectorPostion = Server.PositionToClient(_targetPostion);
+
         }
 
         void OnDisable()
         {
-            //Entity.OnEntityUpdate -= OnUpdate;
         }
 
         void Update()
@@ -27,12 +37,22 @@ namespace Mmogf.Core
 
             var position = GetEntityComponent<FixedVector3>().Value.ToPosition();
             var rotation = GetEntityComponent<Rotation>().Value;
-            var localPos = Server.PositionToClient(position);
+            //var localPos = Server.PositionToClient(position);
 
             var updatedRot = rotation.ToQuaternion();
 
-            transform.position = SmoothPosition(transform.position, localPos, 5, Time.deltaTime);
-            transform.rotation = updatedRot;
+            if(_targetPostion != position)
+            {
+                _lastVectorPostion = transform.position;
+
+                _targetPostion = position;
+                _targetVectorPostion = Server.PositionToClient(_targetPostion);
+                _smoothTime = 0;
+            }
+
+            _smoothTime += Time.deltaTime;
+            transform.position = SmoothPosition(_lastVectorPostion, _targetVectorPostion, 1.2f, _smoothTime);
+            transform.rotation = Quaternion.Lerp(transform.rotation, updatedRot, 3f * Time.deltaTime);
 
         }
 
