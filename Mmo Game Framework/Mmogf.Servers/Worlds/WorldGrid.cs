@@ -4,7 +4,6 @@ using Mmogf.Core;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -53,9 +52,9 @@ namespace Mmogf.Servers.Worlds
         {
             var cellHalf = CellSize / 2.0;
 
-            var cellX = (int)((position.X + cellHalf) / CellSize);
-            var cellY = (int)((position.Y + cellHalf) / CellSize);
-            var cellZ = (int)((position.Z + cellHalf) / CellSize);
+            var cellX = (int)((Math.Abs(position.X) + cellHalf) / CellSize) * (position.X > 0 ? 1 : -1);
+            var cellY = (int)((Math.Abs(position.Y) + cellHalf) / CellSize) * (position.Y > 0 ? 1 : -1);
+            var cellZ = (int)((Math.Abs(position.Z) + cellHalf) / CellSize) * (position.Z > 0 ? 1 : -1);
             //add mutex
             WorldCell cell;
             if (!_cells.TryGetValue((cellX, cellY, cellZ), out cell))
