@@ -67,6 +67,29 @@ namespace Mmogf.Servers.Tests.Worlds
             Assert.IsTrue(grid.Cells.TryGetValue((1, 0, 1), out WorldCell? c));
         }
 
+        [TestMethod]
+        public void GetCell_Test4()
+        {
+            var cellSize = 50;
+            var grid = GetWorldGrid(cellSize, false);
+            var cell = grid.GetCell(new Position(-30, -50, -30));
+            Assert.IsNotNull(cell);
+            Assert.AreEqual(new Position(-50, -50, -50), cell.Position);
+            Assert.AreEqual(1, grid.Cells.Count);
+            Assert.IsTrue(grid.Cells.TryGetValue((-1, -1, -1), out WorldCell? c));
+        }
+
+        [TestMethod]
+        public void GetCell_Test5()
+        {
+            var cellSize = 50;
+            var grid = GetWorldGrid(cellSize, false);
+            var cell = grid.GetCell(new Position(-130, 99, -260));
+            Assert.IsNotNull(cell);
+            Assert.AreEqual(new Position(-150, 100, -250), cell.Position);
+            Assert.AreEqual(1, grid.Cells.Count);
+            Assert.IsTrue(grid.Cells.TryGetValue((-3, 2, -5), out WorldCell? c));
+        }
 
         [TestMethod]
         public void AddEntity_Test()
