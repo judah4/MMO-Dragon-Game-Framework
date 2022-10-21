@@ -15,6 +15,7 @@ namespace MmoGameFramework
         public Lidgren.Network.NetConnection Connection { get; set; }
 
         public List<WorldCell> CellSubscriptions { get; set; }
+        public Dictionary<int,List<PositionInt>> CellSubs { get; set; }
         /// <summary>
         /// Used for sending entity for when moving cells
         /// </summary>
@@ -50,21 +51,26 @@ namespace MmoGameFramework
             CellSubscriptions = new List<WorldCell>();
             EntitiesToAdd = new List<int>();
             EntitiesToRemove = new List<int>();
+            CellSubs = new Dictionary<int, List<PositionInt>>();
         }
 
-        public List<int> GetSubscribedEntityIds()
+        public void AddCellSubscription(int layer, PositionInt cellPos)
         {
-            List<int> entities = new List<int>(100);
-            foreach (var cell in CellSubscriptions)
-            {
-                foreach (var ent in cell.Entities)
-                {
-                    if(!entities.Contains(ent.Key))
-                        entities.Add(ent.Key);
-                }
-            }
+            if(!CellSubs.ContainsKey(layer))
+                CellSubs.Add(layer, new List<PositionInt>());
 
-            return entities;
+            var subs = CellSubs[layer];
+            if(!subs.Contains(cellPos))
+                subs.Add(cellPos);
+        }
+
+        public void RemoveCellSubscription(int layer, PositionInt cellPos)
+        {
+            if (!CellSubs.ContainsKey(layer))
+                CellSubs.Add(layer, new List<PositionInt>());
+
+            var subs = CellSubs[layer];
+            subs.Remove(cellPos);
         }
 
     }
