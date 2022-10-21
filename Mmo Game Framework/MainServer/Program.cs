@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Mmogf.Core;
 using Mmogf.Servers.Services;
+using Mmogf.Servers.Storage;
 //using Prometheus;
 using System;
 using System.Collections.Generic;
@@ -47,6 +48,11 @@ namespace MmoGameFramework
 
             var logger = host.Services.GetRequiredService<ILogger<Program>>();
             var configuration = host.Services.GetRequiredService<IConfiguration>();
+
+            var redis = new RedisStorage();
+            await redis.ConnectTest();
+            return;
+
             Console.WriteLine(
                     @"
      _                             _____ ______ 
