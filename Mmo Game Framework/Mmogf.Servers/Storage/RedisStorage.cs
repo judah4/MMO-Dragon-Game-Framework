@@ -22,11 +22,10 @@ namespace Mmogf.Servers.Storage
             
             var result = _redis.Add<string>("Foo", "bar");
             Console.WriteLine(result);
-            //container.Register<IRedisClientsManager>(c =>new RedisManagerPool("localhost:6379"));
+            //container.Register<IRedisClientsManager>(c =>new RedisManagerPool("gateway.docker.internal:6379"));
             //container.Register(c => c.Resolve<IRedisClientsManager>().GetCacheClient());
         }
 
     }
 
-}
 }
