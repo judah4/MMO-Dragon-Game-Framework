@@ -1,4 +1,6 @@
-﻿using StackExchange.Redis;
+﻿using ServiceStack.Caching;
+using ServiceStack.Redis;
+using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,21 +11,22 @@ namespace Mmogf.Servers.Storage
 {
     public class RedisStorage
     {
-        ConnectionMultiplexer _redis;
+        ICacheClient _redis;
 
         public async Task ConnectTest()
         {
             if(_redis == null)
             {
-                _redis = ConnectionMultiplexer.Connect(new ConfigurationOptions
-                {
-                    EndPoints = { "localhost:6379" },// change this to the docker ip
-                });
+                _redis = new MemoryCacheClient();
             }
             
-            var db = _redis.GetDatabase();
-            var pong = await db.PingAsync();
-            Console.WriteLine(pong);
+            var result = _redis.Add<string>("Foo", "bar");
+            Console.WriteLine(result);
+            //container.Register<IRedisClientsManager>(c =>new RedisManagerPool("localhost:6379"));
+            //container.Register(c => c.Resolve<IRedisClientsManager>().GetCacheClient());
         }
+
     }
+
+}
 }
