@@ -40,7 +40,7 @@ namespace Mmogf.Servers.Tests.Worlds
             Assert.IsNotNull(cell);
             Assert.AreEqual(new PositionInt(0, 0, 0), cell.position);
             Assert.AreEqual(1, grid.Cells.Count);
-            Assert.IsTrue(grid.Cells.TryGetValue(new PositionInt(0,0,0), out List<int>? c));
+            Assert.IsTrue(grid.Cells.TryGetValue(new GridInt(0,0,0), out List<int>? c));
         }
 
         [TestMethod]
@@ -50,10 +50,10 @@ namespace Mmogf.Servers.Tests.Worlds
             var grid = GetWorldGrid(cellSize, false);
             var cell = grid.GetCell(new Position(25, 1, 25));
             Assert.IsNotNull(cell);
-            Assert.AreEqual(new PositionInt(1, 0, 1), cell.grid);
+            Assert.AreEqual(new GridInt(1, 0, 1), cell.grid);
             Assert.AreEqual(new PositionInt(50, 0, 50), cell.position);
             Assert.AreEqual(1, grid.Cells.Count);
-            Assert.IsTrue(grid.Cells.TryGetValue(new PositionInt(1, 0, 1), out List<int>? c));
+            Assert.IsTrue(grid.Cells.TryGetValue(new GridInt(1, 0, 1), out List<int>? c));
         }
 
         [TestMethod]
@@ -63,10 +63,10 @@ namespace Mmogf.Servers.Tests.Worlds
             var grid = GetWorldGrid(cellSize, false);
             var cell = grid.GetCell(new Position(15, 1, 15));
             Assert.IsNotNull(cell);
-            Assert.AreEqual(new PositionInt(1, 0, 1), cell.grid);
+            Assert.AreEqual(new GridInt(1, 0, 1), cell.grid);
             Assert.AreEqual(new PositionInt(25, 0, 25), cell.position);
             Assert.AreEqual(1, grid.Cells.Count);
-            Assert.IsTrue(grid.Cells.TryGetValue(new PositionInt(1, 0, 1), out List<int>? c));
+            Assert.IsTrue(grid.Cells.TryGetValue(new GridInt(1, 0, 1), out List<int>? c));
         }
 
         [TestMethod]
@@ -76,7 +76,7 @@ namespace Mmogf.Servers.Tests.Worlds
             var grid = GetWorldGrid(cellSize, false);
             var cell = grid.GetCell(new Position(-30, -50, -30));
             Assert.IsNotNull(cell);
-            Assert.AreEqual(new PositionInt(-1, -1, -1), cell.grid);
+            Assert.AreEqual(new GridInt(-1, -1, -1), cell.grid);
             Assert.AreEqual(new PositionInt(-50,-50, -50), cell.position);
             Assert.AreEqual(1, grid.Cells.Count);
         }
@@ -88,7 +88,7 @@ namespace Mmogf.Servers.Tests.Worlds
             var grid = GetWorldGrid(cellSize, false);
             var cell = grid.GetCell(new Position(-130, 99, -260));
             Assert.IsNotNull(cell);
-            Assert.AreEqual(new PositionInt(-3, 2, -5), cell.grid);
+            Assert.AreEqual(new GridInt(-3, 2, -5), cell.grid);
             Assert.AreEqual(new PositionInt(-150, 100, -250), cell.position);
             Assert.AreEqual(1, grid.Cells.Count);
         }
@@ -101,7 +101,7 @@ namespace Mmogf.Servers.Tests.Worlds
             var entity = GetEntity(new Position(1, 1, 1));
             var cell = grid.AddEntity(entity);
             Assert.IsNotNull(cell);
-            Assert.AreEqual(new PositionInt(0, 0, 0), cell.grid);
+            Assert.AreEqual(new GridInt(0, 0, 0), cell.grid);
             Assert.AreEqual(new PositionInt(0,0,0), cell.position);
             Assert.AreEqual(1, cell.entities.Count);
         }
@@ -114,7 +114,7 @@ namespace Mmogf.Servers.Tests.Worlds
             var entity = GetEntity(new Position(85, 5, 74));
             var cell = grid.AddEntity(entity);
             Assert.IsNotNull(cell);
-            Assert.AreEqual(new PositionInt(2, 0, 1), cell.grid);
+            Assert.AreEqual(new GridInt(2, 0, 1), cell.grid);
             Assert.AreEqual(new PositionInt(100, 0, 50), cell.position);
             Assert.AreEqual(1, cell.entities.Count);
         }

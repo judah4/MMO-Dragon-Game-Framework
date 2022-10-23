@@ -4,7 +4,6 @@ using Mmogf.Core;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,15 +13,15 @@ namespace Mmogf.Servers.Worlds
 
     public sealed class GridLayer
     {
-        private ConcurrentDictionary<PositionInt, List<int>> _cells = new ConcurrentDictionary<PositionInt, List<int>>();
-        private ConcurrentDictionary<int, PositionInt> _entityCells = new ConcurrentDictionary<int, PositionInt>();
+        private ConcurrentDictionary<GridInt, List<int>> _cells = new ConcurrentDictionary<GridInt, List<int>>();
+        private ConcurrentDictionary<int, GridInt> _entityCells = new ConcurrentDictionary<int, GridInt>();
         private ConcurrentDictionary<PositionInt, List<long>> _workerSubscriptions = new ConcurrentDictionary<PositionInt, List<long>>();
         //indexed by position, not grid
 
         public event Action<int, List<long>> OnEntityAdd;
         public event Action<int, List<long>> OnEntityRemove;
 
-        public ConcurrentDictionary<PositionInt, List<int>> Cells => _cells;
+        public ConcurrentDictionary<GridInt, List<int>> Cells => _cells;
         public int CellSize { get; private set; }
         public int Layer { get; private set; }
 
@@ -32,12 +31,12 @@ namespace Mmogf.Servers.Worlds
             Layer = layer;
         }
 
-        PositionInt GridIndexToPosition(PositionInt grid)
+        PositionInt GridIndexToPosition(GridInt grid)
         {
             return new PositionInt(grid.X * CellSize, grid.Y * CellSize, grid.Z * CellSize);
         }
 
-        public (PositionInt grid, PositionInt position, List<int> entities) AddEntity(Entity entity)
+        public (GridInt grid, PositionInt position, List<int> entities) AddEntity(Entity entity)
         {
             var pos = entity.Position;
             var cell = GetCell(pos);
@@ -47,7 +46,7 @@ namespace Mmogf.Servers.Worlds
                 var ents = cell.entities;
                 ents.Add(entity.EntityId);
                 //write back to _cells
-                if(_cells.TryUpdate(cell.position, ents, cell.entities))
+                if(_cells.TryUpdate(cell.grid, ents, cell.entities))
                 {
                     List<long> subs;
                     if(!_workerSubscriptions.TryGetValue(cell.position, out subs))
@@ -55,7 +54,7 @@ namespace Mmogf.Servers.Worlds
                         subs = new List<long>();
                     }
                     OnEntityAdd?.Invoke(entity.EntityId, subs);
-                    _entityCells.TryAdd(entity.EntityId, cell.position);
+                    _entityCells.TryAdd(entity.EntityId, cell.grid);
 
                 }
             }
@@ -66,7 +65,7 @@ namespace Mmogf.Servers.Worlds
         public List<int> RemoveEntity(Entity entity)
         {
             var id = entity.EntityId;
-            PositionInt grid;
+            GridInt grid;
             if (!_entityCells.TryGetValue(id, out grid))
                 return null;
             var cellPos = GridIndexToPosition(grid);
@@ -74,7 +73,7 @@ namespace Mmogf.Servers.Worlds
             var ents = cell.entities;
             ents.Remove(entity.EntityId);
             //write back to _cells
-            if (_cells.TryUpdate(cell.position, ents, cell.entities))
+            if (_cells.TryUpdate(cell.grid, ents, cell.entities))
             {
                 List<long> subs;
                 if (!_workerSubscriptions.TryGetValue(cell.position, out subs))
@@ -82,13 +81,13 @@ namespace Mmogf.Servers.Worlds
                     subs = new List<long>();
                 }
                 OnEntityRemove?.Invoke(entity.EntityId, subs);
-                _entityCells.TryRemove(entity.EntityId, out cellPos);
+                _entityCells.TryRemove(entity.EntityId, out cell.grid);
 
             }
             return cell.entities;
         }
 
-        public (PositionInt grid, PositionInt position, List<int> entities) GetCell(Position position)
+        public (GridInt grid, PositionInt position, List<int> entities) GetCell(Position position)
         {
             var cellHalf = CellSize / 2.0;
 
@@ -97,7 +96,7 @@ namespace Mmogf.Servers.Worlds
             var cellZ = (int)((Math.Abs(position.Z) + cellHalf) / CellSize) * (position.Z > 0 ? 1 : -1);
             //add mutex
             List<int> cell;
-            var grid = new PositionInt(cellX, cellY, cellZ);
+            var grid = new GridInt(cellX, cellY, cellZ);
             if (!_cells.TryGetValue(grid, out cell))
             {
                 cell = new List<int>(100);
@@ -107,10 +106,10 @@ namespace Mmogf.Servers.Worlds
             return (grid, pos, cell);
         }
 
-        public Dictionary<PositionInt, (PositionInt grid, List<int> entities)> GetCellsInArea(Position position, float interestArea)
+        public Dictionary<PositionInt, (GridInt grid, List<int> entities)> GetCellsInArea(Position position, float interestArea)
         {
             var radius = interestArea / 2.0f;
-            var cells = new Dictionary<PositionInt, (PositionInt grid, List<int> entities)>(10);
+            var cells = new Dictionary<PositionInt, (GridInt grid, List<int> entities)>(10);
 
             //shift offset by half a cell
             var maxBoundX = position.X + radius;
@@ -167,7 +166,8 @@ namespace Mmogf.Servers.Worlds
                     if (!cells.ContainsKey(sub))
                     {
                         removeCells.Add(sub);
-                        removeEntityIds.AddRange(cells[sub].entities);
+                        var cell = GetCell(new Position(sub.X, sub.Y, sub.Z));
+                        removeEntityIds.AddRange(cell.entities);
                     }
 
                 }
