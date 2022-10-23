@@ -331,7 +331,7 @@ namespace Mmogf.Core
             var timespan = DateTime.UtcNow - _pingRequestAt;
             Ping = (int)timespan.TotalMilliseconds;
         }
-        public void SendCommand<T,TRequest,TResponse>(int entityId, short componentId, T command, Action<CommandResult<T, TRequest, TResponse>> callback) where T : ICommandBase<TRequest,TResponse> where TRequest : struct where TResponse : struct
+        public void SendCommand<T,TRequest,TResponse>(int entityId, short componentId, T command, Action<CommandResult<T, TRequest, TResponse>> callback, float timeout = 10f) where T : ICommandBase<TRequest,TResponse> where TRequest : struct where TResponse : struct
         {
             var requestId = Guid.NewGuid().ToString();
 
@@ -347,7 +347,7 @@ namespace Mmogf.Core
             };
 
             //register callback
-            var holder = _commandHolderCache.Get(request, command, callback, 10f);
+            var holder = _commandHolderCache.Get(request, command, callback, timeout);
             _commandCallbacks.Add(requestId, holder);
 
             var byteLength = Send(new MmoMessage()

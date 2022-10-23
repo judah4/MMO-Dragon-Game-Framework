@@ -70,8 +70,6 @@ namespace Mmogf
             if(_playerCheckTimer > 0)
                 return;
 
-            var anyPlayer = false;
-
             float playerDistance = 9999;
 
             foreach(var entityPair in Server.GameObjectRepresentation.Entities)
@@ -80,7 +78,6 @@ namespace Mmogf
 
                 if(entType.Value.Name == _playerEntityName)
                 {
-                    anyPlayer = true;
                     var playerPos = entityPair.Value.GetEntityComponent<FixedVector3>(FixedVector3.ComponentId).Value.ToPosition();
 
                     var dist = (float)Position.Distance(position, playerPos);

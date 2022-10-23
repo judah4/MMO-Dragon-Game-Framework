@@ -47,6 +47,7 @@ namespace MmoGameFramework
 
             var logger = host.Services.GetRequiredService<ILogger<Program>>();
             var configuration = host.Services.GetRequiredService<IConfiguration>();
+
             Console.WriteLine(
                     @"
      _                             _____ ______ 

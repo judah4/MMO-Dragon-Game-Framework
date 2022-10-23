@@ -5,11 +5,11 @@ using Mmogf.Servers.Worlds;
 namespace Mmogf.Servers.Tests.Worlds
 {
     [TestClass]
-    public class WorldGridTests
+    public class GridLayerTests
     {
-        WorldGrid GetWorldGrid(int cellSize, bool addEntity, int layer = 0)
+        GridLayer GetWorldGrid(int cellSize, bool addEntity, int layer = 0)
         {
-            var grid =  new WorldGrid(cellSize, layer);
+            var grid =  new GridLayer(cellSize, layer);
 
             if(addEntity)
             {
@@ -38,9 +38,9 @@ namespace Mmogf.Servers.Tests.Worlds
             var grid = GetWorldGrid(cellSize, false);
             var cell = grid.GetCell(new Position(1, 1, 1));
             Assert.IsNotNull(cell);
-            Assert.AreEqual(new Position(0, 0, 0), cell.Position);
+            Assert.AreEqual(new PositionInt(0, 0, 0), cell.position);
             Assert.AreEqual(1, grid.Cells.Count);
-            Assert.IsTrue(grid.Cells.TryGetValue((0,0,0), out WorldCell? c));
+            Assert.IsTrue(grid.Cells.TryGetValue(new GridInt(0,0,0), out List<int>? c));
         }
 
         [TestMethod]
@@ -50,9 +50,10 @@ namespace Mmogf.Servers.Tests.Worlds
             var grid = GetWorldGrid(cellSize, false);
             var cell = grid.GetCell(new Position(25, 1, 25));
             Assert.IsNotNull(cell);
-            Assert.AreEqual(new Position(50, 0, 50), cell.Position);
+            Assert.AreEqual(new GridInt(1, 0, 1), cell.grid);
+            Assert.AreEqual(new PositionInt(50, 0, 50), cell.position);
             Assert.AreEqual(1, grid.Cells.Count);
-            Assert.IsTrue(grid.Cells.TryGetValue((1, 0, 1), out WorldCell? c));
+            Assert.IsTrue(grid.Cells.TryGetValue(new GridInt(1, 0, 1), out List<int>? c));
         }
 
         [TestMethod]
@@ -62,9 +63,10 @@ namespace Mmogf.Servers.Tests.Worlds
             var grid = GetWorldGrid(cellSize, false);
             var cell = grid.GetCell(new Position(15, 1, 15));
             Assert.IsNotNull(cell);
-            Assert.AreEqual(new Position(25, 0, 25), cell.Position);
+            Assert.AreEqual(new GridInt(1, 0, 1), cell.grid);
+            Assert.AreEqual(new PositionInt(25, 0, 25), cell.position);
             Assert.AreEqual(1, grid.Cells.Count);
-            Assert.IsTrue(grid.Cells.TryGetValue((1, 0, 1), out WorldCell? c));
+            Assert.IsTrue(grid.Cells.TryGetValue(new GridInt(1, 0, 1), out List<int>? c));
         }
 
         [TestMethod]
@@ -74,9 +76,9 @@ namespace Mmogf.Servers.Tests.Worlds
             var grid = GetWorldGrid(cellSize, false);
             var cell = grid.GetCell(new Position(-30, -50, -30));
             Assert.IsNotNull(cell);
-            Assert.AreEqual(new Position(-50, -50, -50), cell.Position);
+            Assert.AreEqual(new GridInt(-1, -1, -1), cell.grid);
+            Assert.AreEqual(new PositionInt(-50,-50, -50), cell.position);
             Assert.AreEqual(1, grid.Cells.Count);
-            Assert.IsTrue(grid.Cells.TryGetValue((-1, -1, -1), out WorldCell? c));
         }
 
         [TestMethod]
@@ -86,9 +88,9 @@ namespace Mmogf.Servers.Tests.Worlds
             var grid = GetWorldGrid(cellSize, false);
             var cell = grid.GetCell(new Position(-130, 99, -260));
             Assert.IsNotNull(cell);
-            Assert.AreEqual(new Position(-150, 100, -250), cell.Position);
+            Assert.AreEqual(new GridInt(-3, 2, -5), cell.grid);
+            Assert.AreEqual(new PositionInt(-150, 100, -250), cell.position);
             Assert.AreEqual(1, grid.Cells.Count);
-            Assert.IsTrue(grid.Cells.TryGetValue((-3, 2, -5), out WorldCell? c));
         }
 
         [TestMethod]
@@ -99,8 +101,9 @@ namespace Mmogf.Servers.Tests.Worlds
             var entity = GetEntity(new Position(1, 1, 1));
             var cell = grid.AddEntity(entity);
             Assert.IsNotNull(cell);
-            Assert.AreEqual(new Position(0,0,0), cell.Position);
-            Assert.AreEqual(1, cell.EntityCount);
+            Assert.AreEqual(new GridInt(0, 0, 0), cell.grid);
+            Assert.AreEqual(new PositionInt(0,0,0), cell.position);
+            Assert.AreEqual(1, cell.entities.Count);
         }
 
         [TestMethod]
@@ -111,8 +114,9 @@ namespace Mmogf.Servers.Tests.Worlds
             var entity = GetEntity(new Position(85, 5, 74));
             var cell = grid.AddEntity(entity);
             Assert.IsNotNull(cell);
-            Assert.AreEqual(new Position(100, 0, 50), cell.Position);
-            Assert.AreEqual(1, cell.EntityCount);
+            Assert.AreEqual(new GridInt(2, 0, 1), cell.grid);
+            Assert.AreEqual(new PositionInt(100, 0, 50), cell.position);
+            Assert.AreEqual(1, cell.entities.Count);
         }
 
         [TestMethod]
@@ -135,8 +139,9 @@ namespace Mmogf.Servers.Tests.Worlds
                 {
                     for (int cntY = yLower; cntY <= 100; cntY += cellSize)
                     {
-                        Assert.IsTrue(cells.Count > cellCnt);
-                        Assert.AreEqual(new Position(cntX, cntY, cntZ), cells[cellCnt].Position);
+                        var cellPos = new PositionInt(cntX, cntY, cntZ);
+                        Assert.IsTrue(cells.Count > cellCnt, "Cell Count not valid!");
+                        Assert.IsTrue(cells.ContainsKey(cellPos), $"Pos {cellPos}");
                         cellCnt++;
                     }
                 }
@@ -165,8 +170,9 @@ namespace Mmogf.Servers.Tests.Worlds
                 {
                     for (int cntY = yLower; cntY <= 100; cntY += cellSize)
                     {
-                        Assert.IsTrue(cells.Count > cellCnt);
-                        Assert.AreEqual(new Position(cntX, cntY, cntZ), cells[cellCnt].Position);
+                        var cellPos = new PositionInt(cntX, cntY, cntZ);
+                        Assert.IsTrue(cells.Count > cellCnt, "Cell Count not valid!");
+                        Assert.IsTrue(cells.ContainsKey(cellPos), $"Pos {cellPos}");
                         cellCnt++;
                     }
                 }
@@ -196,8 +202,9 @@ namespace Mmogf.Servers.Tests.Worlds
                 {
                     for (int cntY = yLower; cntY <= 100; cntY += cellSize)
                     {
-                        Assert.IsTrue(cells.Count > cellCnt);
-                        Assert.AreEqual(new Position(cntX, cntY, cntZ), cells[cellCnt].Position);
+                        var cellPos = new PositionInt(cntX, cntY, cntZ);
+                        Assert.IsTrue(cells.Count > cellCnt, "Cell Count not valid!");
+                        Assert.IsTrue(cells.ContainsKey(cellPos), $"Pos {cellPos}");
                         cellCnt++;
                     }
                 }
@@ -226,9 +233,10 @@ namespace Mmogf.Servers.Tests.Worlds
                 {
                     for (int cntY = yLower; cntY <= 100; cntY += cellSize)
                     {
-                        Assert.IsTrue(cells.Count > cellCnt);
-                        Assert.AreEqual(new Position(cntX, cntY, cntZ), cells[cellCnt].Position);
-                        entityCount += cells[cellCnt].EntityCount;
+                        var cellPos = new PositionInt(cntX, cntY, cntZ);
+                        Assert.IsTrue(cells.Count > cellCnt, "Cell Count not valid!");
+                        Assert.IsTrue(cells.ContainsKey(cellPos), $"Pos {cellPos}");
+                        entityCount += cells[cellPos].entities.Count;
                         cellCnt++;
                     }
                 }
@@ -258,9 +266,10 @@ namespace Mmogf.Servers.Tests.Worlds
                 {
                     for (int cntY = yLower; cntY <= 50; cntY += cellSize)
                     {
-                        Assert.IsTrue(cells.Count > cellCnt);
-                        Assert.AreEqual(new Position(cntX, cntY, cntZ), cells[cellCnt].Position, $"Interation:{cellCnt}");
-                        entityCount += cells[cellCnt].EntityCount;
+                        var cellPos = new PositionInt(cntX, cntY, cntZ);
+                        Assert.IsTrue(cells.Count > cellCnt, "Cell Count not valid!");
+                        Assert.IsTrue(cells.ContainsKey(cellPos), $"Pos {cellPos}");
+                        entityCount += cells[cellPos].entities.Count;
                         cellCnt++;
                     }
                 }
@@ -290,9 +299,10 @@ namespace Mmogf.Servers.Tests.Worlds
                 {
                     for (int cntY = yLower; cntY <= 100; cntY += cellSize)
                     {
-                        Assert.IsTrue(cells.Count > cellCnt);
-                        Assert.AreEqual(new Position(cntX, cntY, cntZ), cells[cellCnt].Position, $"Iteration: ({cntX},{cntY},{cntZ})");
-                        entityCount += cells[cellCnt].EntityCount;
+                        var cellPos = new PositionInt(cntX, cntY, cntZ);
+                        Assert.IsTrue(cells.Count > cellCnt, "Cell Count not valid!");
+                        Assert.IsTrue(cells.ContainsKey(cellPos), $"Pos {cellPos}");
+                        entityCount += cells[cellPos].entities.Count;
                         cellCnt++;
                     }
                 }
@@ -322,9 +332,76 @@ namespace Mmogf.Servers.Tests.Worlds
                 {
                     for (int cntY = yLower; cntY <= 100; cntY += cellSize)
                     {
-                        Assert.IsTrue(cells.Count > cellCnt);
-                        Assert.AreEqual(new Position(cntX, cntY, cntZ), cells[cellCnt].Position, $"Iteration: ({cntX},{cntY},{cntZ})");
-                        entityCount += cells[cellCnt].EntityCount;
+                        var cellPos = new PositionInt(cntX, cntY, cntZ);
+                        Assert.IsTrue(cells.Count > cellCnt, "Cell Count not valid!");
+                        Assert.IsTrue(cells.ContainsKey(cellPos), $"Pos {cellPos}");
+                        entityCount += cells[cellPos].entities.Count;
+                        cellCnt++;
+                    }
+                }
+            }
+
+            Assert.AreEqual(cellCnt, cells.Count);
+            Assert.AreEqual(entityCount, 1);
+        }
+
+        [TestMethod]
+        public void GetCellsInArea_Test8()
+        {
+            var cellSize = 1000000;
+            var grid = GetWorldGrid(cellSize, false);
+            grid.AddEntity(GetEntity(new Position(-30, 1, -30)));
+            var cells = grid.GetCellsInArea(new Position(-49, 1, -49), 100);
+
+            int xLower = 0;
+            int yLower = 0;
+            int zLower = 0;
+
+            int cellCnt = 0;
+            int entityCount = 0;
+            for (int cntX = xLower; cntX <= 0; cntX += cellSize)
+            {
+                for (int cntZ = zLower; cntZ <= 0; cntZ += cellSize)
+                {
+                    for (int cntY = yLower; cntY <= 0; cntY += cellSize)
+                    {
+                        var cellPos = new PositionInt(cntX, cntY, cntZ);
+                        Assert.IsTrue(cells.Count > cellCnt, "Cell Count not valid!");
+                        Assert.IsTrue(cells.ContainsKey(cellPos), $"Pos {cellPos}");
+                        entityCount += cells[cellPos].entities.Count;
+                        cellCnt++;
+                    }
+                }
+            }
+
+            Assert.AreEqual(cellCnt, cells.Count);
+            Assert.AreEqual(entityCount, 1);
+        }
+
+        [TestMethod]
+        public void GetCellsInArea_Test9()
+        {
+            var cellSize = 1000000;
+            var grid = GetWorldGrid(cellSize, false);
+            grid.AddEntity(GetEntity(new Position(-30, 1, -30)));
+            var cells = grid.GetCellsInArea(new Position(-499999, 1, -50), 100);
+
+            int xLower = -1000000;
+            int yLower = 0;
+            int zLower = 0;
+
+            int cellCnt = 0;
+            int entityCount = 0;
+            for (int cntX = xLower; cntX <= 0; cntX += cellSize)
+            {
+                for (int cntZ = zLower; cntZ <= 0; cntZ += cellSize)
+                {
+                    for (int cntY = yLower; cntY <= 0; cntY += cellSize)
+                    {
+                        var cellPos = new PositionInt(cntX, cntY, cntZ);
+                        Assert.IsTrue(cells.Count > cellCnt, "Cell Count not valid!");
+                        Assert.IsTrue(cells.ContainsKey(cellPos), $"Pos {cellPos}");
+                        entityCount += cells[cellPos].entities.Count;
                         cellCnt++;
                     }
                 }
