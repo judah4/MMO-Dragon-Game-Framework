@@ -292,9 +292,9 @@ namespace Mmogf.Core
             EventRequests.Add(eventRequest);
         }
 
-        public void SendWorldCommand<T, TRequest, TResponse>(TRequest request, System.Action<CommandResult<T, TRequest, TResponse>> callback = null, float timeout = 10f) where T : ICommandBase<TRequest, TResponse>, new() where TRequest : struct where TResponse : struct
+        public void SendWorldCommand<T, TRequest, TResponse>(TRequest request, System.Action<CommandResult<T, TRequest, TResponse>> callback = null, float timeout = 10f) where T : ICommandBase<TRequest, TResponse>, IWorldCommand, new() where TRequest : struct where TResponse : struct
         {
-            SendCommand<T, TRequest, TResponse>(0,0,request, callback, timeout);
+            SendCommand(0, 0, request, callback, timeout);
         }
 
         public void SendCommand<T, TRequest, TResponse>(int entityId, short componentId, TRequest request, System.Action<CommandResult<T, TRequest, TResponse>> callback = null, float timeout = 10f) where T : ICommandBase<TRequest, TResponse>, new () where TRequest : struct where TResponse : struct

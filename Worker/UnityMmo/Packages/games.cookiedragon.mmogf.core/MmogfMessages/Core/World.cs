@@ -41,11 +41,13 @@ namespace Mmogf.Core
         }
     }
 
+    public interface IWorldCommand { }
+
     public struct World
     {
 
         [MessagePackObject]
-        public struct ChangeInterestAreaCommand : ICommandBase<NothingInternal, NothingInternal>
+        public struct ChangeInterestAreaCommand : ICommandBase<NothingInternal, NothingInternal>, IWorldCommand
         {
             public const short CommandId = 98;
             public short GetCommandId() => CommandId;
@@ -58,7 +60,7 @@ namespace Mmogf.Core
         }
 
         [MessagePackObject]
-        public struct PingCommand : ICommandBase<NothingInternal, NothingInternal>
+        public struct PingCommand : ICommandBase<NothingInternal, NothingInternal>, IWorldCommand
         {
             public const short CommandId = 99;
             public short GetCommandId() => CommandId;
@@ -72,7 +74,7 @@ namespace Mmogf.Core
 
 
         [MessagePackObject]
-        public struct CreateEntity : ICommandBase<CreateEntityRequest, NothingInternal>
+        public struct CreateEntity : ICommandBase<CreateEntityRequest, NothingInternal>, IWorldCommand
         {
             public const short CommandId = 100;
             public short GetCommandId() => CommandId;
@@ -85,7 +87,7 @@ namespace Mmogf.Core
         }
 
         [MessagePackObject]
-        public struct DeleteEntity : ICommandBase<DeleteEntityRequest, NothingInternal>
+        public struct DeleteEntity : ICommandBase<DeleteEntityRequest, NothingInternal>, IWorldCommand
         {
             public const short CommandId = 101;
             public short GetCommandId() => CommandId;
