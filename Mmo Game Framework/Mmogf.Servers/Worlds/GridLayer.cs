@@ -111,22 +111,32 @@ namespace Mmogf.Servers.Worlds
             var radius = interestArea / 2.0f;
             var cells = new Dictionary<PositionInt, (GridInt grid, List<int> entities)>(10);
 
+            //check cell half vs radius check out, whichever is bigger
+            var checkoutBoundary = Math.Min(CellSize / 2.0f, radius);
+
             //shift offset by half a cell
-            var maxBoundX = position.X + radius;
-            var minBoundX = position.X - radius;
-            var maxBoundY = position.Y + radius;
-            var minBoundY = position.Y - radius;
-            var maxBoundZ = position.Z + radius;
-            var minBoundZ = position.Z - radius;
+            var maxBoundX = position.X + radius + checkoutBoundary;
+            var minBoundX = position.X - radius - checkoutBoundary;
+            var maxBoundY = position.Y + radius + checkoutBoundary;
+            var minBoundY = position.Y - radius - checkoutBoundary;
+            var maxBoundZ = position.Z + radius + checkoutBoundary;
+            var minBoundZ = position.Z - radius - checkoutBoundary;
 
-            var maxCellX = (int)Math.Ceiling(maxBoundX / CellSize);
-            var minCellX = (int)Math.Floor(minBoundX / CellSize);
-            var maxCellY = (int)Math.Ceiling(maxBoundY / CellSize);
-            var minCellY = (int)Math.Floor(minBoundY / CellSize);
-            var maxCellZ = (int)Math.Ceiling(maxBoundZ / CellSize);
-            var minCellZ = (int)Math.Floor(minBoundZ / CellSize);
+            var maxCellXd = Math.Round(maxBoundX / CellSize, MidpointRounding.AwayFromZero);
+            var minCellXd = Math.Round(minBoundX / CellSize, MidpointRounding.AwayFromZero);
+            var maxCellYd = Math.Round(maxBoundY / CellSize, MidpointRounding.AwayFromZero);
+            var minCellYd = Math.Round(minBoundY / CellSize, MidpointRounding.AwayFromZero);
+            var maxCellZd = Math.Round(maxBoundZ / CellSize, MidpointRounding.AwayFromZero);
+            var minCellZd = Math.Round(minBoundZ / CellSize, MidpointRounding.AwayFromZero);
 
-            for(int cntX = minCellX; cntX <= maxCellX; cntX++)
+            var maxCellX = (int)maxCellXd; //Math.Ceiling(maxBoundX / CellSize);
+            var minCellX = (int)minCellXd; //Math.Floor(minBoundX / CellSize);
+            var maxCellY = (int)maxCellYd; //Math.Ceiling(maxBoundY / CellSize);
+            var minCellY = (int)minCellYd; //Math.Floor(minBoundY / CellSize);
+            var maxCellZ = (int)maxCellZd; //Math.Ceiling(maxBoundZ / CellSize);
+            var minCellZ = (int)minCellZd; //Math.Floor(minBoundZ / CellSize);
+
+            for (int cntX = minCellX; cntX <= maxCellX; cntX++)
             {
                 for (int cntZ = minCellZ; cntZ <= maxCellZ; cntZ++)
                 {

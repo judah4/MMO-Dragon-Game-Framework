@@ -345,5 +345,71 @@ namespace Mmogf.Servers.Tests.Worlds
             Assert.AreEqual(entityCount, 1);
         }
 
+        [TestMethod]
+        public void GetCellsInArea_Test8()
+        {
+            var cellSize = 1000000;
+            var grid = GetWorldGrid(cellSize, false);
+            grid.AddEntity(GetEntity(new Position(-30, 1, -30)));
+            var cells = grid.GetCellsInArea(new Position(-49, 1, -49), 100);
+
+            int xLower = 0;
+            int yLower = 0;
+            int zLower = 0;
+
+            int cellCnt = 0;
+            int entityCount = 0;
+            for (int cntX = xLower; cntX <= 0; cntX += cellSize)
+            {
+                for (int cntZ = zLower; cntZ <= 0; cntZ += cellSize)
+                {
+                    for (int cntY = yLower; cntY <= 0; cntY += cellSize)
+                    {
+                        var cellPos = new PositionInt(cntX, cntY, cntZ);
+                        Assert.IsTrue(cells.Count > cellCnt, "Cell Count not valid!");
+                        Assert.IsTrue(cells.ContainsKey(cellPos), $"Pos {cellPos}");
+                        entityCount += cells[cellPos].entities.Count;
+                        cellCnt++;
+                    }
+                }
+            }
+
+            Assert.AreEqual(cellCnt, cells.Count);
+            Assert.AreEqual(entityCount, 1);
+        }
+
+        [TestMethod]
+        public void GetCellsInArea_Test9()
+        {
+            var cellSize = 1000000;
+            var grid = GetWorldGrid(cellSize, false);
+            grid.AddEntity(GetEntity(new Position(-30, 1, -30)));
+            var cells = grid.GetCellsInArea(new Position(-499999, 1, -50), 100);
+
+            int xLower = -1000000;
+            int yLower = 0;
+            int zLower = 0;
+
+            int cellCnt = 0;
+            int entityCount = 0;
+            for (int cntX = xLower; cntX <= 0; cntX += cellSize)
+            {
+                for (int cntZ = zLower; cntZ <= 0; cntZ += cellSize)
+                {
+                    for (int cntY = yLower; cntY <= 0; cntY += cellSize)
+                    {
+                        var cellPos = new PositionInt(cntX, cntY, cntZ);
+                        Assert.IsTrue(cells.Count > cellCnt, "Cell Count not valid!");
+                        Assert.IsTrue(cells.ContainsKey(cellPos), $"Pos {cellPos}");
+                        entityCount += cells[cellPos].entities.Count;
+                        cellCnt++;
+                    }
+                }
+            }
+
+            Assert.AreEqual(cellCnt, cells.Count);
+            Assert.AreEqual(entityCount, 1);
+        }
+
     }
 }
