@@ -20,7 +20,7 @@ namespace MmoGameFramework
 
         ILogger _logger;
 
-        public event Action<Entity> OnUpdateEntity;
+        public event Action<Entity> OnUpdateEntityFull;
         public event Action<CommandRequest> OnEntityCommand;
         public event Action<CommandResponse> OnEntityCommandResponse;
         public event Action<EntityUpdate, long> OnUpdateEntityPartial;
@@ -95,25 +95,17 @@ namespace MmoGameFramework
 
             _entities.TryAdd(entityId.Value, entity);
 
-            GridLayers[0].AddEntity(entity);
+            //make this configurable in the future
+            var gridIndex = 0;
+            if(data.ContainsKey(PlayerCreator.ComponentId))
+            {
+                gridIndex = 1;
+            }
+
+            GridLayers[gridIndex].AddEntity(entity);
             //check if in other layers based on components
 
             return entity;
-        }
-
-        [Obsolete]
-        public List<Entity> GetInArea(Position position, float radius)
-        {
-            var entities = new List<Entity>();
-            foreach (var entityInfo in _entities)
-            {
-                if (Position.WithinArea(entityInfo.Value.Position, position, radius))
-                {
-                    entities.Add(entityInfo.Value);
-                }
-            }
-
-            return entities;
         }
 
         public Entity? GetEntity(int entityId)
@@ -128,7 +120,7 @@ namespace MmoGameFramework
         public void UpdateEntity(Entity entity)
         {
             _entities[entity.EntityId] = entity;
-            OnUpdateEntity?.Invoke(entity);
+            OnUpdateEntityFull?.Invoke(entity);
         }
 
         public void UpdateEntityPartial(Entity entity, EntityUpdate entityUpdate, long workerId)
@@ -139,11 +131,17 @@ namespace MmoGameFramework
             if(entityUpdate.ComponentId == FixedVector3.ComponentId)
             {
                 //update regions
-                var cell = GridLayers[0].GetCell(entity.Position);
+                //make this configurable, figure out how to check the components later
+                int gridIndex = 0;
+                if (entity.EntityData.ContainsKey(PlayerCreator.ComponentId))
+                {
+                    gridIndex = 1;
+                }
+                var layer = GridLayers[gridIndex];
+                var cell = layer.GetCell(entity.Position);
                 if(cell.entities.Contains(entity.EntityId))
                     return;
 
-                var layer = GridLayers[0];
                 layer.RemoveEntity(entity);
                 cell = layer.AddEntity(entity);
 
@@ -223,9 +221,13 @@ namespace MmoGameFramework
         public List<long> GetSubscribedWorkers(Entity entity)
         {
             var workerIds = new List<long>();
-            //default to first layer, figure out how to check the components later
-
-            var layer = GridLayers[0];
+            //make this configurable, figure out how to check the components later
+            int gridIndex = 0;
+            if (entity.EntityData.ContainsKey(PlayerCreator.ComponentId))
+            {
+                gridIndex = 1;
+            }
+            var layer = GridLayers[gridIndex];
             var cell = layer.GetCell(entity.Position);
             
             var workerSubs = layer.GetWorkerSubscriptions(cell.position);

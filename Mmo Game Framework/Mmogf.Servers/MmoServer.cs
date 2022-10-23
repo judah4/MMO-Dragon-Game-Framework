@@ -57,7 +57,7 @@ namespace MmoGameFramework
             s_server = new NetServer(_config);
             _logger = logger;
 
-            _entities.OnUpdateEntity += OnEntityUpdate;
+            _entities.OnUpdateEntityFull += OnEntityUpdateFull;
             _entities.OnEntityDelete += OnEntityDelete;
             _entities.OnEntityEvent += OnEntityEvent;
             _entities.OnEntityCommand += OnEntityCommand;
@@ -550,7 +550,7 @@ namespace MmoGameFramework
             return message;
         }
 
-        private void OnEntityUpdate(Entity entityInfo)
+        private void OnEntityUpdateFull(Entity entityInfo)
         {
             var message = EntityInfoMessage(entityInfo);
             if (_logger.IsEnabled(LogLevel.Debug))
