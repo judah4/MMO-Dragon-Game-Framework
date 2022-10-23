@@ -236,7 +236,7 @@ namespace Mmogf.Servers.Tests.Worlds
                         var cellPos = new PositionInt(cntX, cntY, cntZ);
                         Assert.IsTrue(cells.Count > cellCnt, "Cell Count not valid!");
                         Assert.IsTrue(cells.ContainsKey(cellPos), $"Pos {cellPos}");
-                        entityCount += cells[cellPos].Count;
+                        entityCount += cells[cellPos].entities.Count;
                         cellCnt++;
                     }
                 }
@@ -269,7 +269,7 @@ namespace Mmogf.Servers.Tests.Worlds
                         var cellPos = new PositionInt(cntX, cntY, cntZ);
                         Assert.IsTrue(cells.Count > cellCnt, "Cell Count not valid!");
                         Assert.IsTrue(cells.ContainsKey(cellPos), $"Pos {cellPos}");
-                        entityCount += cells[cellPos].Count;
+                        entityCount += cells[cellPos].entities.Count;
                         cellCnt++;
                     }
                 }
@@ -302,7 +302,7 @@ namespace Mmogf.Servers.Tests.Worlds
                         var cellPos = new PositionInt(cntX, cntY, cntZ);
                         Assert.IsTrue(cells.Count > cellCnt, "Cell Count not valid!");
                         Assert.IsTrue(cells.ContainsKey(cellPos), $"Pos {cellPos}");
-                        entityCount += cells[cellPos].Count;
+                        entityCount += cells[cellPos].entities.Count;
                         cellCnt++;
                     }
                 }
@@ -335,7 +335,7 @@ namespace Mmogf.Servers.Tests.Worlds
                         var cellPos = new PositionInt(cntX, cntY, cntZ);
                         Assert.IsTrue(cells.Count > cellCnt, "Cell Count not valid!");
                         Assert.IsTrue(cells.ContainsKey(cellPos), $"Pos {cellPos}");
-                        entityCount += cells[cellPos].Count;
+                        entityCount += cells[cellPos].entities.Count;
                         cellCnt++;
                     }
                 }
