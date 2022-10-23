@@ -14,7 +14,6 @@ namespace MmoGameFramework
         public float InterestRange { get; set; }
         public Lidgren.Network.NetConnection Connection { get; set; }
 
-        public List<WorldCell> CellSubscriptions { get; set; }
         public Dictionary<int,List<PositionInt>> CellSubs { get; set; }
         /// <summary>
         /// Used for sending entity for when moving cells
@@ -48,7 +47,6 @@ namespace MmoGameFramework
             InterestPosition = interestPosition;
             InterestRange = interestRange;
             Connection = senderConnection;
-            CellSubscriptions = new List<WorldCell>();
             EntitiesToAdd = new List<int>();
             EntitiesToRemove = new List<int>();
             CellSubs = new Dictionary<int, List<PositionInt>>();

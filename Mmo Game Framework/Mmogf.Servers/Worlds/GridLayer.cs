@@ -17,7 +17,7 @@ namespace Mmogf.Servers.Worlds
         private ConcurrentDictionary<PositionInt, List<int>> _cells = new ConcurrentDictionary<PositionInt, List<int>>();
         private ConcurrentDictionary<int, PositionInt> _entityCells = new ConcurrentDictionary<int, PositionInt>();
         private ConcurrentDictionary<PositionInt, List<long>> _workerSubscriptions = new ConcurrentDictionary<PositionInt, List<long>>();
-
+        //indexed by position, not grid
 
         public event Action<int, List<long>> OnEntityAdd;
         public event Action<int, List<long>> OnEntityRemove;
@@ -107,10 +107,10 @@ namespace Mmogf.Servers.Worlds
             return (grid, pos, cell);
         }
 
-        public Dictionary<PositionInt, List<int>> GetCellsInArea(Position position, float interestArea)
+        public Dictionary<PositionInt, (PositionInt grid, List<int> entities)> GetCellsInArea(Position position, float interestArea)
         {
             var radius = interestArea / 2.0f;
-            var cells = new Dictionary<PositionInt, List<int>>(10);
+            var cells = new Dictionary<PositionInt, (PositionInt grid, List<int> entities)>(10);
 
             //shift offset by half a cell
             var maxBoundX = position.X + radius;
@@ -135,7 +135,7 @@ namespace Mmogf.Servers.Worlds
                     {
                         var worldPos = new Position(cntX * CellSize, cntY * CellSize, cntZ * CellSize);
                         var cell = GetCell(worldPos);
-                        cells.Add(cell.position, cell.entities);
+                        cells.Add(cell.position, (cell.grid,cell.entities));
                     }
                 }
             }
@@ -155,7 +155,7 @@ namespace Mmogf.Servers.Worlds
                 if(AddWorkerSub(cell.Key, worker))
                 {
                     addCells.Add(cell.Key);
-                    addEntityIds.AddRange(cell.Value);
+                    addEntityIds.AddRange(cell.Value.entities);
                 }
             }
 
@@ -167,7 +167,7 @@ namespace Mmogf.Servers.Worlds
                     if (!cells.ContainsKey(sub))
                     {
                         removeCells.Add(sub);
-                        removeEntityIds.AddRange(cells[sub]);
+                        removeEntityIds.AddRange(cells[sub].entities);
                     }
 
                 }
@@ -223,5 +223,12 @@ namespace Mmogf.Servers.Worlds
             return false;
         }
 
+        public List<long> GetWorkerSubscriptions(PositionInt cellPos)
+        {
+            if (_workerSubscriptions.TryGetValue(cellPos, out List<long> subs))
+                return subs;
+
+            return null;
+        }
     }
 }

@@ -692,26 +692,26 @@ namespace MmoGameFramework
             Send(worker.Connection, message, NetDeliveryMethod.ReliableUnordered);
         }
 
-        private void ProcessOnEntityAddSubscription(int entityId, ConcurrentDictionary<long, string> workers)
+        private void ProcessOnEntityAddSubscription(int entityId, List<long> workers)
         {
             //send as create
             //probably should be buffered for 1 tick
-            foreach (var workerPair in workers)
+            foreach (var workerId in workers)
             {
-                if (!_connections.TryGetValue(workerPair.Key, out WorkerConnection worker))
+                if (!_connections.TryGetValue(workerId, out WorkerConnection worker))
                     continue;
                 HandleEntitySubChange(worker, true, entityId);
 
             }
         }
 
-        private void ProcessOnEntityRemoveSubscription(int entityId, ConcurrentDictionary<long, string> workers)
+        private void ProcessOnEntityRemoveSubscription(int entityId, List<long> workers)
         {
             //send as remove
             //probably should be buffered for 1 tick
-            foreach (var workerPair in workers)
+            foreach (var workerId in workers)
             {
-                if (!_connections.TryGetValue(workerPair.Key, out WorkerConnection worker))
+                if (!_connections.TryGetValue(workerId, out WorkerConnection worker))
                     continue;
                 HandleEntitySubChange(worker, false, entityId);
             }
