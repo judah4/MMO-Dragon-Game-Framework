@@ -37,7 +37,6 @@ namespace Mmogf.Core
 
             var position = GetEntityComponent<FixedVector3>().Value.ToPosition();
             var rotation = GetEntityComponent<Rotation>().Value;
-            //var localPos = Server.PositionToClient(position);
 
             var updatedRot = rotation.ToQuaternion();
 
@@ -51,9 +50,14 @@ namespace Mmogf.Core
             }
 
             _smoothTime += Time.deltaTime;
-            transform.position = SmoothPosition(_lastVectorPostion, _targetVectorPostion, 1.2f, _smoothTime);
-            transform.rotation = Quaternion.Lerp(transform.rotation, updatedRot, 3f * Time.deltaTime);
+            transform.position = LinearPostion(_lastVectorPostion, _targetVectorPostion, _smoothTime);
+            transform.rotation = Quaternion.Lerp(transform.rotation, updatedRot, 1.2f * Time.deltaTime);
 
+        }
+
+        public static Vector3 LinearPostion(Vector3 pastPosition, Vector3 targetPosition, float deltaTime)
+        {
+            return Vector3.LerpUnclamped(pastPosition, targetPosition, deltaTime);
         }
 
         public static Vector3 SmoothPosition(Vector3 pastPosition, Vector3 targetPosition, float speed, float deltaTime)
