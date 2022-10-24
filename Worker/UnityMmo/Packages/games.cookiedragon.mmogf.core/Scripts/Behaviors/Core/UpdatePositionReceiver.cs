@@ -57,7 +57,7 @@ namespace Mmogf.Core
 
         public static Vector3 LinearPostion(Vector3 pastPosition, Vector3 targetPosition, float deltaTime)
         {
-            return Vector3.LerpUnclamped(pastPosition, targetPosition, deltaTime);
+            return Vector3.Lerp(pastPosition, targetPosition, deltaTime);
         }
 
         public static Vector3 SmoothPosition(Vector3 pastPosition, Vector3 targetPosition, float speed, float deltaTime)
