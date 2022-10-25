@@ -34,7 +34,7 @@ namespace MmoGameFramework
         int _tickRate;
 
         public Dictionary<long, WorkerConnection> _connections = new Dictionary<long, WorkerConnection>();
-        public List<WorkerConnection> _workerWithSubChanges = new List<WorkerConnection>();
+        public ConcurrentDictionary<long, WorkerConnection> _workerWithSubChanges = new ConcurrentDictionary<long,WorkerConnection>();
 
         public MmoServer(OrchestrationService orchestrationService, EntityStore entities, NetPeerConfiguration config, bool clientWorker, ILogger<MmoServer> logger, IConfiguration configuration)
         {
@@ -234,13 +234,14 @@ namespace MmoGameFramework
 
         private void HandleEntitySubChanges()
         {
-            foreach (var worker in _workerWithSubChanges)
+            foreach (var workerPair in _workerWithSubChanges)
             {
+                var worker = workerPair.Value;
                 if (_logger.IsEnabled(LogLevel.Debug) && worker.EntitiesToAdd.Count > 0)
                     _logger.LogDebug($"Adding Entities ({string.Join(',', worker.EntitiesToAdd)}) to Worker {worker.ConnectionType}-{worker.WorkerId}");
                 foreach (var add in worker.EntitiesToAdd)
                 {
-                    var entity = _entities.GetEntity(add);
+                    var entity = _entities.GetEntity(add.Key);
                     if (entity == null)
                         continue;
 
@@ -252,7 +253,7 @@ namespace MmoGameFramework
                     _logger.LogDebug($"Removing Entities ({string.Join(',', worker.EntitiesToRemove)}) from Worker {worker.ConnectionType}-{worker.WorkerId}");
                 foreach (var remove in worker.EntitiesToRemove)
                 {
-                    var message = EntityDeleteMessage(remove);
+                    var message = EntityDeleteMessage(remove.Key);
                     Send(worker.Connection, message, NetDeliveryMethod.ReliableUnordered);
                 }
                 worker.EntitiesToAdd.Clear();
@@ -721,27 +722,27 @@ namespace MmoGameFramework
         {
             if(add)
             {
-                if (worker.EntitiesToRemove.Contains(entityId))
+                if (worker.EntitiesToRemove.ContainsKey(entityId))
                 {
-                    worker.EntitiesToRemove.Remove(entityId);
+                    worker.EntitiesToRemove.TryRemove(entityId, out int val);
                     return;
                 }
-                if (!worker.EntitiesToAdd.Contains(entityId))
-                    worker.EntitiesToAdd.Add(entityId);
+                if (!worker.EntitiesToAdd.ContainsKey(entityId))
+                    worker.EntitiesToAdd.TryAdd(entityId, entityId);
             }
             else
             {
-                if (worker.EntitiesToAdd.Contains(entityId))
+                if (worker.EntitiesToAdd.ContainsKey(entityId))
                 {
-                    worker.EntitiesToAdd.Remove(entityId);
+                    worker.EntitiesToAdd.TryRemove(entityId, out int val);
                     return;
                 }
-                if (!worker.EntitiesToRemove.Contains(entityId))
-                    worker.EntitiesToRemove.Add(entityId);
+                if (!worker.EntitiesToRemove.ContainsKey(entityId))
+                    worker.EntitiesToRemove.TryAdd(entityId, entityId);
             }
             
-            if(!_workerWithSubChanges.Contains(worker))
-                _workerWithSubChanges.Add(worker);
+            if(!_workerWithSubChanges.ContainsKey(worker.WorkerId))
+                _workerWithSubChanges.TryAdd(worker.WorkerId, worker);
         }
 
     }
