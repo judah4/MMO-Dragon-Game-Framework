@@ -5,6 +5,9 @@ using UnityEngine;
 
 namespace Mmogf.Core
 {
+    /// <summary>
+    /// Access Control List. Component for tracking data ownership for clients and server workers.
+    /// </summary>
     [MessagePackObject]
     public partial struct Acls : IEntityComponent
     {

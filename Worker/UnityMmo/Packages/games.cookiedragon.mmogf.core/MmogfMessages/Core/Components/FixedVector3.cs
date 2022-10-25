@@ -5,7 +5,7 @@ namespace Mmogf.Core
 {
 
     /// <summary>
-    /// 21.10 Fixed point decimal
+    /// 21.10 Fixed point decimal for entity position.
     /// </summary>
     [MessagePackObject]
     public partial struct FixedVector3 : IEntityComponent
