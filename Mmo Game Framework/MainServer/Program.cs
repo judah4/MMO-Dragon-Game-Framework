@@ -111,7 +111,7 @@ namespace MmoGameFramework
                 timeout = 25;
             logger.LogInformation($"Setting Server Tick Rate {tickRate}");
             if(timeout != 25)
-            logger.LogInformation($"Setting Server Timeout To {timeout}");
+                logger.LogInformation($"Setting Server Timeout To {timeout}");
             logger.LogInformation("Starting Dragon-Client connections. Port 1337");
             // create and start the server
             server = new MmoServer(orchestationService, _entityStore, new NetPeerConfiguration("Dragon-Client")
