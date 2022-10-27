@@ -12,6 +12,9 @@ using Mmogf.Servers.Services;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Resources;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -47,18 +50,9 @@ namespace MmoGameFramework
 
             var logger = host.Services.GetRequiredService<ILogger<Program>>();
             var configuration = host.Services.GetRequiredService<IConfiguration>();
-
-            Console.WriteLine(
-                    @"
-     _                             _____ ______ 
-    | |                           |  __ \|  ___|
-  __| |_ __ __ _  __ _  ___  _ __ | |  \/| |_   
- / _` | '__/ _` |/ _` |/ _ \| '_ \| | __ |  _|  
-| (_| | | | (_| | (_| | (_) | | | | |_\ \| |    
- \__,_|_|  \__,_|\__, |\___/|_| |_|\____/\_|    
-                  __/ |                         
-                 |___/                          
-");
+                
+            // Print Banner
+            Console.WriteLine(Resources.Data.Banner);
 
             var version = System.Reflection.Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "1.0.0";
             logger.LogInformation($"Dragon Game Framework MMO Networking Version {version}");
@@ -139,6 +133,5 @@ namespace MmoGameFramework
             workerServer.Stop();
             //metricServer.Stop();
         }
-
     }
 }
