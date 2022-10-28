@@ -245,6 +245,9 @@ namespace MmoGameFramework
             }
         }
 
+        /// <summary>
+        /// Handle interest area changes once per tick
+        /// </summary>
         private void HandleEntitySubChanges()
         {
             foreach (var workerPair in _workerWithSubChanges)
