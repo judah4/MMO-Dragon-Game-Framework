@@ -1,7 +1,7 @@
 
 # MMO Dragon Game Framework
 
-<a href="https://matrix.to/#/#dragongf:matrix.org"><img src="https://img.shields.io/badge/chat-matrix-blue" ></a>
+<a href="https://matrix.to/#/#dragongf:matrix.org" target="_blank" ><img src="https://img.shields.io/badge/chat-matrix-blue" ></a>
 
 Proof of concept networking entities and load balancing with distributed server workers. 
 
