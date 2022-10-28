@@ -1,6 +1,8 @@
 
 # MMO Dragon Game Framework
 
+<a href="https://matrix.to/#/#dragongf:matrix.org"><img src="https://img.shields.io/badge/chat-matrix-blue" ></a>
+
 Proof of concept networking entities and load balancing with distributed server workers. 
 
 ### Warning  
@@ -80,7 +82,7 @@ Example build file for the test game.
 Run in the main folder.  
 
 ## Main Server Build
-`docker build -f Docker/MainServer/Dockerfile -t judah4/dragongf:v0.1.1 -t judah4/dragongf:latest .`
+`docker build -f Docker/MainServer/Dockerfile -t judah4/dragongf:v0.1.2 -t judah4/dragongf:latest .`
 Only required for core dev.
 
 ## Push
