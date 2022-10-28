@@ -15,8 +15,7 @@ namespace Mmogf.Core
         public Dictionary<short, byte[]> EntityData { get; set; }
 
 
-        /*
-         
+        /* 
         _entityStore.Create("PlayerCreator", new Position() { X = 0, Z = 0 }, new List<Acl>()
             {
                 new Acl() { ComponentId = Position.ComponentId, WorkerType = "Dragon-Worker" },
@@ -28,6 +27,32 @@ namespace Mmogf.Core
                 { PlayerCreator.ComponentId, MessagePack.MessagePackSerializer.Serialize(new PlayerCreator() { }) },
             });
          */
+		 
+		 public CreateEntityRequest ToCreateRequest()
+        {
+
+            Rotation? rotation = null;
+            byte[] rotationBytes;
+            if (EntityData.TryGetValue(Rotation.ComponentId, out rotationBytes))
+            {
+                rotation = MessagePackSerializer.Deserialize<Rotation>(rotationBytes);
+            }
+
+            var aclList = MessagePackSerializer.Deserialize<Acls>(EntityData[Acls.ComponentId]).AclList;
+
+            var comps = new Dictionary<short, byte[]>();
+
+            foreach (var comp in EntityData)
+            {
+                if (comp.Key == FixedVector3.ComponentId || comp.Key == Rotation.ComponentId || comp.Key == Acls.ComponentId)
+                    continue;
+
+                comps[comp.Key] = comp.Value;
+            }
+
+            var createEntity = new CreateEntityRequest(Name, MessagePackSerializer.Deserialize<FixedVector3>(EntityData[FixedVector3.ComponentId]), rotation ?? Rotation.Zero, comps, aclList);
+            return createEntity;
+        }
 
         public static EntityWorldConfig Create(string name, int entityId, Position position, Rotation rotation, List<Acl> acls, Dictionary<short, IEntityComponent> additionalData)
         {

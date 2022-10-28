@@ -29,6 +29,16 @@ namespace Mmogf
             serializerRegistered = true;
         }
 
+#if UNITY_EDITOR
+
+        [UnityEditor.InitializeOnLoadMethod]
+        static void EditorInitialize()
+        {
+            RegisterSerializers();
+        }
+
+#endif
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         public static void Initialize()
         {

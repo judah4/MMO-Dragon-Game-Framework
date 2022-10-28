@@ -10,6 +10,9 @@ namespace Mmogf
     {
         private void Update()
         {
+            if(!HasAuthority(Health.ComponentId))
+                return;
+
             for (int cnt = 0; cnt < Server.CommandRequests.Count; cnt++)
             {
                 if (Server.CommandRequests[cnt].ComponentId != Health.ComponentId)

@@ -9,6 +9,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Servers", "Servers", "{E17D
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mmogf.Servers", "Mmogf.Servers\Mmogf.Servers.csproj", "{DDA937D0-D0A1-44FD-AE2C-0DF899872805}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mmogf.Servers.Tests", "Mmogf.Servers.Tests\Mmogf.Servers.Tests.csproj", "{C463F041-36F6-491D-94F7-68EF5B221BDC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,6 +25,10 @@ Global
 		{DDA937D0-D0A1-44FD-AE2C-0DF899872805}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DDA937D0-D0A1-44FD-AE2C-0DF899872805}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DDA937D0-D0A1-44FD-AE2C-0DF899872805}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C463F041-36F6-491D-94F7-68EF5B221BDC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C463F041-36F6-491D-94F7-68EF5B221BDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C463F041-36F6-491D-94F7-68EF5B221BDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C463F041-36F6-491D-94F7-68EF5B221BDC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

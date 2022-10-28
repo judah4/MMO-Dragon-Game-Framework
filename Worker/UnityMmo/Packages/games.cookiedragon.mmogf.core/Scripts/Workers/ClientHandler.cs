@@ -38,7 +38,7 @@ namespace Mmogf.Core
                 new ConnectPlayerRequest() { PlayerId = playerId }, response =>
             {
                 Debug.Log($"Player connect result! {response.CommandStatus} - {response.Message}");
-            });
+            }, 20f);
 
             OnConnectClient?.Invoke(this);
         }

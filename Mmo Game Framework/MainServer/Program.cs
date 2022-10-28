@@ -12,6 +12,7 @@ using Prometheus;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -47,22 +48,15 @@ namespace MmoGameFramework
 
             var logger = host.Services.GetRequiredService<ILogger<Program>>();
             var configuration = host.Services.GetRequiredService<IConfiguration>();
-            Console.WriteLine(
-                    @"
-     _                             _____ ______ 
-    | |                           |  __ \|  ___|
-  __| |_ __ __ _  __ _  ___  _ __ | |  \/| |_   
- / _` | '__/ _` |/ _` |/ _ \| '_ \| | __ |  _|  
-| (_| | | | (_| | (_| | (_) | | | | |_\ \| |    
- \__,_|_|  \__,_|\__, |\___/|_| |_|\____/\_|    
-                  __/ |                         
-                 |___/                          
-");
+                
+            // Print Banner
+            Console.WriteLine(Resources.Data.Banner);
 
             var version = System.Reflection.Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "1.0.0";
             logger.LogInformation($"Dragon Game Framework MMO Networking Version {version}");
-            logger.LogInformation("Attaching Entity Storage.");
-            _entityStore = new EntityStore(host.Services.GetRequiredService<ILogger<EntityStore>>());
+            int cellSize = configuration.GetValue<int?>("ChunkSize") ?? 50;
+            logger.LogInformation($"Attaching Entity Storage. Cell Size {cellSize}.");
+            _entityStore = new EntityStore(host.Services.GetRequiredService<ILogger<EntityStore>>(), cellSize);
 
             //var lz4Options = MessagePackSerializerOptions.Standard.WithCompression(MessagePackCompression.Lz4BlockArray);
             //MessagePackSerializer.DefaultOptions = lz4Options;
@@ -109,7 +103,7 @@ namespace MmoGameFramework
                 timeout = 25;
             logger.LogInformation($"Setting Server Tick Rate {tickRate}");
             if(timeout != 25)
-            logger.LogInformation($"Setting Server Timeout To {timeout}");
+                logger.LogInformation($"Setting Server Timeout To {timeout}");
             logger.LogInformation("Starting Dragon-Client connections. Port 1337");
             // create and start the server
             server = new MmoServer(orchestationService, _entityStore, new NetPeerConfiguration("Dragon-Client")
@@ -137,6 +131,5 @@ namespace MmoGameFramework
             workerServer.Stop();
             metricServer.Stop();
         }
-
     }
 }

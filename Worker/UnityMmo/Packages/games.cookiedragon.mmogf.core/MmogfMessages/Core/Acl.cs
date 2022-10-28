@@ -11,6 +11,9 @@ namespace Mmogf.Core
         Write,
     }
 
+    /// <summary>
+    /// Access Control List
+    /// </summary>
     [MessagePackObject]
     public struct Acl : IMessage
     {

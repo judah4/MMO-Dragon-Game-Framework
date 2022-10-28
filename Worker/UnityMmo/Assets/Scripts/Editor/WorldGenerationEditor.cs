@@ -47,7 +47,6 @@ namespace Mmogf
             });
             worldConfig.Entities.Add(playerCreatorEntity);
 
-
             if(playerOnly == false)
             {
 

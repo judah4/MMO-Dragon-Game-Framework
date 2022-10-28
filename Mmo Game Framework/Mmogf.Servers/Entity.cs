@@ -1,5 +1,4 @@
 using MessagePack;
-using Microsoft.Extensions.Logging;
 using Mmogf.Core;
 using System;
 using System.Collections.Generic;
