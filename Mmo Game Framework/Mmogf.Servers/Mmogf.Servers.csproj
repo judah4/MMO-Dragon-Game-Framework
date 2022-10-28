@@ -16,7 +16,7 @@
     <PackageReference Include="ServiceStack.Redis" Version="6.4.0" />
     <PackageReference Include="StackExchange.Redis" Version="2.6.70" />
     <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="6.0.1" />
-    <PackageReference Include="prometheus-net.AspNetCore" Version="7.0.0-pre-000296-5b1a1c4" />
+    <PackageReference Include="prometheus-net.AspNetCore" Version="7.0.0" />
   </ItemGroup>
 	<ItemGroup>
 		<Compile Include="..\..\Worker\UnityMmo\Packages\games.cookiedragon.mmogf.core\MmogfMessages\Core\**\*.cs" LinkBase="Shared" />
