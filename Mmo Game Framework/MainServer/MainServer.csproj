@@ -33,6 +33,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Mmogf.Servers\Mmogf.Servers.csproj" />
+    <ProjectReference Include="..\WebCommon\WebCommon.csproj" />
   </ItemGroup>
 
   <ItemGroup>

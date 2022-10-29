@@ -1,0 +1,31 @@
+﻿@{
+    ViewData["Title"] = "Server Data";
+}
+
+@model MmoGameFramework.Models.ServerStatusModel
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+</div>
+
+<table class="table">
+    
+    @foreach (var entity in Model.entities.Values)
+    {
+        <tr>
+            <td>
+                @entity.EntityId
+            </td>
+            <td>
+                @entity.EntityType.Name)
+            </td>
+            <td>
+                @entity.Position.X
+                @entity.Position.Y
+                @entity.Position.Z
+            </td>
+        </tr>
+    }
+
+</table>
