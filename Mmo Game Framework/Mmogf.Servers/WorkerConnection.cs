@@ -15,7 +15,8 @@ namespace MmoGameFramework
         public float InterestRange { get; set; }
         public Lidgren.Network.NetConnection Connection { get; set; }
 
-        public ConcurrentDictionary<int,List<PositionInt>> CellSubs { get; set; }
+        //the int value doesn't matter, we just want the concurrent set up.
+        public ConcurrentDictionary<int, ConcurrentDictionary<PositionInt, int>> CellSubs { get; set; }
         /// <summary>
         /// Used for sending entity for when moving cells
         /// </summary>
@@ -50,26 +51,26 @@ namespace MmoGameFramework
             Connection = senderConnection;
             EntitiesToAdd = new ConcurrentDictionary<int, int> ();
             EntitiesToRemove = new ConcurrentDictionary<int, int>();
-            CellSubs = new ConcurrentDictionary<int, List<PositionInt>>();
+            CellSubs = new ConcurrentDictionary<int, ConcurrentDictionary<PositionInt, int>>();
         }
 
         public void AddCellSubscription(int layer, PositionInt cellPos)
         {
             if(!CellSubs.ContainsKey(layer))
-                CellSubs.TryAdd(layer, new List<PositionInt>());
+                CellSubs.TryAdd(layer, new ConcurrentDictionary<PositionInt, int>());
 
             var subs = CellSubs[layer];
-            if(!subs.Contains(cellPos))
-                subs.Add(cellPos);
+            if(!subs.ContainsKey(cellPos))
+                subs.TryAdd(cellPos, 0);
         }
 
         public void RemoveCellSubscription(int layer, PositionInt cellPos)
         {
             if (!CellSubs.ContainsKey(layer))
-                CellSubs.TryAdd(layer, new List<PositionInt>());
+                CellSubs.TryAdd(layer, new ConcurrentDictionary<PositionInt, int>());
 
             var subs = CellSubs[layer];
-            subs.Remove(cellPos);
+            subs.TryRemove(cellPos, out int val);
         }
 
     }
