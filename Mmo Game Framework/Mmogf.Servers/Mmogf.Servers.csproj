@@ -12,9 +12,6 @@
     <PackageReference Include="MessagePack" Version="2.4.35" />
     <PackageReference Include="MessagePack.UnityShims" Version="2.4.35" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.2" />
-    <PackageReference Include="ServiceStack" Version="6.4.0" />
-    <PackageReference Include="ServiceStack.Redis" Version="6.4.0" />
-    <PackageReference Include="StackExchange.Redis" Version="2.6.70" />
     <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="6.0.1" />
   </ItemGroup>
 	<ItemGroup>

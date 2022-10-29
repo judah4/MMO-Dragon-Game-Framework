@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 using Mmogf.Core;
@@ -14,15 +15,15 @@ namespace MmoGameFramework
         public float InterestRange { get; set; }
         public Lidgren.Network.NetConnection Connection { get; set; }
 
-        public Dictionary<int,List<PositionInt>> CellSubs { get; set; }
+        public ConcurrentDictionary<int,List<PositionInt>> CellSubs { get; set; }
         /// <summary>
         /// Used for sending entity for when moving cells
         /// </summary>
-        public List<int> EntitiesToAdd { get; set; }
+        public ConcurrentDictionary<int,int> EntitiesToAdd { get; set; }
         /// <summary>
         /// Used for removing entity for when moving cells
         /// </summary>
-        public List<int> EntitiesToRemove { get; set; }
+        public ConcurrentDictionary<int, int> EntitiesToRemove { get; set; }
 
         //figure out how to specify interest layers...
         /*
@@ -47,15 +48,15 @@ namespace MmoGameFramework
             InterestPosition = interestPosition;
             InterestRange = interestRange;
             Connection = senderConnection;
-            EntitiesToAdd = new List<int>();
-            EntitiesToRemove = new List<int>();
-            CellSubs = new Dictionary<int, List<PositionInt>>();
+            EntitiesToAdd = new ConcurrentDictionary<int, int> ();
+            EntitiesToRemove = new ConcurrentDictionary<int, int>();
+            CellSubs = new ConcurrentDictionary<int, List<PositionInt>>();
         }
 
         public void AddCellSubscription(int layer, PositionInt cellPos)
         {
             if(!CellSubs.ContainsKey(layer))
-                CellSubs.Add(layer, new List<PositionInt>());
+                CellSubs.TryAdd(layer, new List<PositionInt>());
 
             var subs = CellSubs[layer];
             if(!subs.Contains(cellPos))
@@ -65,7 +66,7 @@ namespace MmoGameFramework
         public void RemoveCellSubscription(int layer, PositionInt cellPos)
         {
             if (!CellSubs.ContainsKey(layer))
-                CellSubs.Add(layer, new List<PositionInt>());
+                CellSubs.TryAdd(layer, new List<PositionInt>());
 
             var subs = CellSubs[layer];
             subs.Remove(cellPos);

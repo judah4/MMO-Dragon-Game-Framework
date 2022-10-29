@@ -1,6 +1,8 @@
 
 # MMO Dragon Game Framework
 
+<a href="https://matrix.to/#/#dragongf:matrix.org" target="_blank" ><img src="https://img.shields.io/badge/chat-matrix-blue" ></a>
+
 Proof of concept networking entities and load balancing with distributed server workers. 
 
 ### Warning  
@@ -60,7 +62,7 @@ Build Server build in the `Builds/Linux` folder.
 Run in the main folder.  
 
 ## Game Build
-`docker build -f Docker/Worker/Dockerfile -t judah4/dragongf-testgame:v0.1.0 -t judah4/dragongf-testgame:latest .`
+`docker build -f Docker/Worker/Dockerfile -t judah4/dragongf-testgame:v0.1.1 -t judah4/dragongf-testgame:latest .`
 Example build file for the test game.
 
 ## Run On Docker
@@ -69,7 +71,7 @@ Example build file for the test game.
 ## Push
 
 `docker push judah4/dragongf-testgame:latest`  
-`docker push judah4/dragongf-testgame:v0.1.0`  
+`docker push judah4/dragongf-testgame:v0.1.1`  
 
 # Agones and Kubernetes
 
@@ -80,10 +82,10 @@ Example build file for the test game.
 Run in the main folder.  
 
 ## Main Server Build
-`docker build -f Docker/MainServer/Dockerfile -t judah4/dragongf:v0.1.0 -t judah4/dragongf:latest .`
+`docker build -f Docker/MainServer/Dockerfile -t judah4/dragongf:v0.1.2 -t judah4/dragongf:latest .`
 Only required for core dev.
 
 ## Push
 
 `docker push judah4/dragongf:latest`  
-`docker push judah4/dragongf:v0.1.0`  
+`docker push judah4/dragongf:v0.1.1`  

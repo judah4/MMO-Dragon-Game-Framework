@@ -34,7 +34,7 @@ namespace MmoGameFramework
         int _tickRate;
 
         public Dictionary<long, WorkerConnection> _connections = new Dictionary<long, WorkerConnection>();
-        public List<WorkerConnection> _workerWithSubChanges = new List<WorkerConnection>();
+        public ConcurrentDictionary<long, WorkerConnection> _workerWithSubChanges = new ConcurrentDictionary<long,WorkerConnection>();
 
         public MmoServer(OrchestrationService orchestrationService, EntityStore entities, NetPeerConfiguration config, bool clientWorker, ILogger<MmoServer> logger, IConfiguration configuration)
         {
@@ -76,7 +76,126 @@ namespace MmoGameFramework
             var thread1 = new Thread(async () => await Loop());
             thread1.Priority = ThreadPriority.AboveNormal;
             thread1.Start();
+            
+        }
 
+        private void MessageCallback(object state)
+        {
+            NetIncomingMessage im = s_server.ReadMessage();
+
+            // Note: This should never happen but I'm not going to bet it won't.
+            if (im == null)
+            {
+                _logger.LogError("Callback with no Message");
+                return;
+            }
+
+            // handle incoming message
+            switch (im.MessageType)
+            {
+                case NetIncomingMessageType.DebugMessage:
+                    string text = im.ReadString();
+                    _logger.LogDebug(text);
+                    break;
+                case NetIncomingMessageType.ErrorMessage:
+                    string text2 = im.ReadString();
+                    _logger.LogError(text2);
+                    break;
+                case NetIncomingMessageType.WarningMessage:
+                    string text3 = im.ReadString();
+                    _logger.LogWarning(text3);
+                    break;
+                case NetIncomingMessageType.VerboseDebugMessage:
+                    string text4 = im.ReadString();
+                    _logger.LogDebug(text4);
+                    break;
+                case NetIncomingMessageType.StatusChanged:
+                    NetConnectionStatus status = (NetConnectionStatus)im.ReadByte();
+
+                    string reason = im.ReadString();
+                    if (_logger.IsEnabled(LogLevel.Debug))
+                        _logger.LogDebug(im.SenderConnection.RemoteUniqueIdentifier + " " + status + ": " + reason);
+
+                    if (status == NetConnectionStatus.Connected)
+                    {
+                        HandleWorkerConnect(im);
+                    }
+                    else if (status == NetConnectionStatus.Disconnected)
+                    {
+                        _logger.LogInformation($"{_config.AppIdentifier} {im.SenderConnection.RemoteUniqueIdentifier} Disconnected");
+                        WorkerConnection worker;
+                        if (_connections.TryGetValue(im.SenderConnection.RemoteUniqueIdentifier, out worker))
+                            HandleWorkerDisconnect(im, worker);
+                    }
+
+                    break;
+                case NetIncomingMessageType.Data:
+                    //if(_logger.IsEnabled(LogLevel.Debug))
+                    //    _logger.LogDebug(im.SenderConnection.RemoteUniqueIdentifier +" - '" + BitConverter.ToString(im.Data) + "'");
+                    var simpleData = MessagePackSerializer.Deserialize<MmoMessage>(im.Data);
+                    //if (_logger.IsEnabled(LogLevel.Debug))
+                    //    _logger.LogDebug($"Serve Codes {simpleData.MessageId}");
+
+                    switch (simpleData.MessageId)
+                    {
+                        case ServerCodes.ChangeInterestArea:
+                            var interestArea = MessagePackSerializer.Deserialize<ChangeInterestArea>(simpleData.Info);
+                            WorkerConnection worker;
+                            if (_connections.TryGetValue(im.SenderConnection.RemoteUniqueIdentifier, out worker))
+                            {
+                                worker.InterestPosition = interestArea.Position.ToPosition();
+
+                                var results = _entities.UpdateWorkerInterestArea(worker);
+                                foreach (var add in results.addEntityIds)
+                                    HandleEntitySubChange(worker, true, add);
+                                foreach (var add in results.removeEntityIds)
+                                    HandleEntitySubChange(worker, false, add);
+                                Send(im.SenderConnection, new MmoMessage()
+                                {
+                                    MessageId = ServerCodes.EntityCheckout,
+                                    Info = MessagePackSerializer.Serialize(new EntityCheckout()
+                                    {
+                                        Checkouts = new List<int>(),
+                                        Remove = false,
+                                    }),
+                                }, NetDeliveryMethod.ReliableOrdered, 11);
+                            }
+
+                            break;
+                        case ServerCodes.EntityUpdate:
+                            HandleEntityUpdate(im, simpleData);
+                            break;
+                        case ServerCodes.EntityEvent:
+                            HandleEntityEvent(im, simpleData);
+                            break;
+                        case ServerCodes.EntityCommandRequest:
+                            HandleEntityCommand(im, simpleData);
+                            break;
+                        case ServerCodes.EntityCommandResponse:
+                            HandleEntityCommandResponse(im, simpleData);
+                            break;
+                        case ServerCodes.Ping:
+                            Send(im.SenderConnection, new MmoMessage()
+                            {
+                                MessageId = ServerCodes.Ping,
+                                Info = new byte[0],
+                            });
+                            break;
+                        default:
+                            // incoming chat message from a client
+                            //string chat = im.ReadString();
+
+                            break;
+                    }
+
+                    break;
+                default:
+                    _logger.LogError("Unhandled type: " + im.MessageType + " " + im.LengthBytes + " bytes " + im.DeliveryMethod + "|" + im.SequenceChannel);
+                    break;
+            }
+
+            s_server.Recycle(im);
+            
         }
 
         public void Stop()
@@ -87,124 +206,18 @@ namespace MmoGameFramework
 
         async Task Loop()
         {
+            // No idea what this does but Lidgren needs it to be happy
+            SynchronizationContext.SetSynchronizationContext(new SynchronizationContext());
+            
+            // Register a Callback for Testing
+            s_server.RegisterReceivedCallback(MessageCallback, SynchronizationContext.Current);
+            
             while (s_server.Status != NetPeerStatus.NotRunning)
             {
                 _stopwatch.Restart();
                 try
                 {
-
-                    NetIncomingMessage im;
-                    while ((im = s_server.ReadMessage()) != null)
-                    {
-                        // handle incoming message
-                        switch (im.MessageType)
-                        {
-                            case NetIncomingMessageType.DebugMessage:
-                                string text = im.ReadString();
-                                _logger.LogDebug(text);
-                                break;
-                            case NetIncomingMessageType.ErrorMessage:
-                                string text2 = im.ReadString();
-                                _logger.LogError(text2);
-                                break;
-                            case NetIncomingMessageType.WarningMessage:
-                                string text3 = im.ReadString();
-                                _logger.LogWarning(text3);
-                                break;
-                            case NetIncomingMessageType.VerboseDebugMessage:
-                                string text4 = im.ReadString();
-                                _logger.LogDebug(text4);
-                                break;
-                            case NetIncomingMessageType.StatusChanged:
-                                NetConnectionStatus status = (NetConnectionStatus)im.ReadByte();
-
-                                string reason = im.ReadString();
-                                if(_logger.IsEnabled(LogLevel.Debug))
-                                    _logger.LogDebug(im.SenderConnection.RemoteUniqueIdentifier + " " + status + ": " + reason);
-
-                                if (status == NetConnectionStatus.Connected)
-                                {
-                                    HandleWorkerConnect(im);
-                                    
-                                }
-                                else if(status == NetConnectionStatus.Disconnected)
-                                {
-                                    _logger.LogInformation($"{_config.AppIdentifier} {im.SenderConnection.RemoteUniqueIdentifier} Disconnected");
-                                    WorkerConnection worker;
-                                    if(_connections.TryGetValue(im.SenderConnection.RemoteUniqueIdentifier, out worker))
-                                        HandleWorkerDisconnect(im, worker);
-                                }
-
-                                break;
-                            case NetIncomingMessageType.Data:
-                                //if(_logger.IsEnabled(LogLevel.Debug))
-                                //    _logger.LogDebug(im.SenderConnection.RemoteUniqueIdentifier +" - '" + BitConverter.ToString(im.Data) + "'");
-                                var simpleData = MessagePackSerializer.Deserialize<MmoMessage>(im.Data);
-                                //if (_logger.IsEnabled(LogLevel.Debug))
-                                //    _logger.LogDebug($"Serve Codes {simpleData.MessageId}");
-
-                                switch (simpleData.MessageId)
-                                {
-                                    case ServerCodes.ChangeInterestArea:
-                                        var interestArea = MessagePackSerializer.Deserialize<ChangeInterestArea>(simpleData.Info);
-                                        WorkerConnection worker;
-                                        if (_connections.TryGetValue(im.SenderConnection.RemoteUniqueIdentifier, out worker))
-                                        {
-                                            worker.InterestPosition = interestArea.Position.ToPosition();
-
-                                            var results = _entities.UpdateWorkerInterestArea(worker);
-                                            foreach(var add in results.addEntityIds)
-                                                HandleEntitySubChange(worker, true, add);
-                                            foreach (var add in results.removeEntityIds)
-                                                HandleEntitySubChange(worker, false, add);
-                                            Send(im.SenderConnection, new MmoMessage()
-                                            {
-                                                MessageId = ServerCodes.EntityCheckout,
-                                                Info = MessagePackSerializer.Serialize(new EntityCheckout()
-                                                {
-                                                    Checkouts = new List<int>(),
-                                                    Remove = false,
-                                                }),
-                                            }, NetDeliveryMethod.ReliableOrdered, 11);
-                                        }
-
-                                        break;
-                                    case ServerCodes.EntityUpdate:
-                                        HandleEntityUpdate(im, simpleData);
-                                        break;
-                                    case ServerCodes.EntityEvent:
-                                        HandleEntityEvent(im, simpleData);
-                                        break;
-                                    case ServerCodes.EntityCommandRequest:
-                                        HandleEntityCommand(im, simpleData);
-                                        break;
-                                    case ServerCodes.EntityCommandResponse:
-                                        HandleEntityCommandResponse(im, simpleData);
-                                        break;
-                                    case ServerCodes.Ping:
-                                        Send(im.SenderConnection, new MmoMessage()
-                                        {
-                                            MessageId = ServerCodes.Ping,
-                                            Info = new byte[0],
-                                        });
-                                        break;
-                                    default:
-                                        // incoming chat message from a client
-                                        //string chat = im.ReadString();
-
-                                        break;
-                                }
-                                
-                                break;
-                            default:
-                                _logger.LogError("Unhandled type: " + im.MessageType + " " + im.LengthBytes + " bytes " + im.DeliveryMethod + "|" + im.SequenceChannel);
-                                break;
-                        }
-                        s_server.Recycle(im);
-                    }
-
-                    //ConnectedWorkersGauge.Set(s_server.ConnectionsCount);
-
+                    
                     HandleEntitySubChanges();
 
                     if(s_server.ConnectionsCount > 0)
@@ -232,15 +245,19 @@ namespace MmoGameFramework
             }
         }
 
+        /// <summary>
+        /// Handle interest area changes once per tick
+        /// </summary>
         private void HandleEntitySubChanges()
         {
-            foreach (var worker in _workerWithSubChanges)
+            foreach (var workerPair in _workerWithSubChanges)
             {
+                var worker = workerPair.Value;
                 if (_logger.IsEnabled(LogLevel.Debug) && worker.EntitiesToAdd.Count > 0)
                     _logger.LogDebug($"Adding Entities ({string.Join(',', worker.EntitiesToAdd)}) to Worker {worker.ConnectionType}-{worker.WorkerId}");
                 foreach (var add in worker.EntitiesToAdd)
                 {
-                    var entity = _entities.GetEntity(add);
+                    var entity = _entities.GetEntity(add.Key);
                     if (entity == null)
                         continue;
 
@@ -252,7 +269,7 @@ namespace MmoGameFramework
                     _logger.LogDebug($"Removing Entities ({string.Join(',', worker.EntitiesToRemove)}) from Worker {worker.ConnectionType}-{worker.WorkerId}");
                 foreach (var remove in worker.EntitiesToRemove)
                 {
-                    var message = EntityDeleteMessage(remove);
+                    var message = EntityDeleteMessage(remove.Key);
                     Send(worker.Connection, message, NetDeliveryMethod.ReliableUnordered);
                 }
                 worker.EntitiesToAdd.Clear();
@@ -721,27 +738,27 @@ namespace MmoGameFramework
         {
             if(add)
             {
-                if (worker.EntitiesToRemove.Contains(entityId))
+                if (worker.EntitiesToRemove.ContainsKey(entityId))
                 {
-                    worker.EntitiesToRemove.Remove(entityId);
+                    worker.EntitiesToRemove.TryRemove(entityId, out int val);
                     return;
                 }
-                if (!worker.EntitiesToAdd.Contains(entityId))
-                    worker.EntitiesToAdd.Add(entityId);
+                if (!worker.EntitiesToAdd.ContainsKey(entityId))
+                    worker.EntitiesToAdd.TryAdd(entityId, entityId);
             }
             else
             {
-                if (worker.EntitiesToAdd.Contains(entityId))
+                if (worker.EntitiesToAdd.ContainsKey(entityId))
                 {
-                    worker.EntitiesToAdd.Remove(entityId);
+                    worker.EntitiesToAdd.TryRemove(entityId, out int val);
                     return;
                 }
-                if (!worker.EntitiesToRemove.Contains(entityId))
-                    worker.EntitiesToRemove.Add(entityId);
+                if (!worker.EntitiesToRemove.ContainsKey(entityId))
+                    worker.EntitiesToRemove.TryAdd(entityId, entityId);
             }
             
-            if(!_workerWithSubChanges.Contains(worker))
-                _workerWithSubChanges.Add(worker);
+            if(!_workerWithSubChanges.ContainsKey(worker.WorkerId))
+                _workerWithSubChanges.TryAdd(worker.WorkerId, worker);
         }
 
     }
