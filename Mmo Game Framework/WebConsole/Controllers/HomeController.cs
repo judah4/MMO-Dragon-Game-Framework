@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using MmoGameFramework.Models;
+using Newtonsoft.Json;
 using WebConsole.Models;
 
 namespace WebConsole.Controllers;
@@ -37,7 +38,7 @@ public class HomeController : Controller
         var response = task.Result;
         
         // Deserialize Response
-        var model = JsonSerializer.Deserialize<ServerStatusModel>(response);
+        var model = JsonConvert.DeserializeObject<ServerStatusModel>(response);
         
         // Pass model into View
         return View(model);

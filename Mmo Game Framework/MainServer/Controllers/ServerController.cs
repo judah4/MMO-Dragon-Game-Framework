@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using MmoGameFramework.Models;
+using WebCommon.Factory;
 
 namespace MmoGameFramework.Controllers;
 
@@ -28,14 +29,20 @@ public class ServerController : ControllerBase
             
             connections.Add(connectionStatusModel);
         }
+
+        var entities = new List<EntityModel>();
+        foreach (var entity in server.Entities.Entities.Values)
+        {
+            entities.Add(EntityWebFactory.Convert(entity));
+        }
         
         // Populate Model
         var model = new ServerStatusModel
         {
-            type = server.WorkerType,
-            active = server.Active,
-            connections = connections,
-            entities = server.Entities.Entities
+            Type = server.WorkerType,
+            Active = server.Active,
+            Connections = connections,
+            Entities = entities
         };
 
         
