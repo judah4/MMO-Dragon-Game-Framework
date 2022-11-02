@@ -1,6 +1,7 @@
-FROM mcr.microsoft.com/dotnet/runtime:6.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
 WORKDIR /app
 EXPOSE 1234
+EXPOSE 3000
 EXPOSE 1337/udp
 EXPOSE 1338/udp
 

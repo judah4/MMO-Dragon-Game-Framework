@@ -16,6 +16,8 @@ namespace MmoGameFramework
         private int lastId = 0;
 
         private ConcurrentDictionary<int, Entity> _entities = new ConcurrentDictionary<int, Entity>();
+        public ConcurrentDictionary<int, Entity> Entities => _entities;
+        
         private List<GridLayer> GridLayers = new List<GridLayer>(2);
 
         ILogger _logger;
