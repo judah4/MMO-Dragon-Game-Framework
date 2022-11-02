@@ -210,10 +210,12 @@ namespace MmoGameFramework
                 {
                     if(layer.Layer != sub.Key)
                         continue;
-                    for (int cnt = sub.Value.Count - 1; cnt >= 0; cnt--)
+
+                    var subCells = sub.Value.Keys.ToList(); //figure out how to do this better
+                    for (int cnt = subCells.Count - 1; cnt >= 0; cnt--)
                     {
 
-                        layer.RemoveWorkerSub(sub.Value[cnt], worker);
+                        layer.RemoveWorkerSub(subCells[cnt], worker);
                     }
                 }
             }
