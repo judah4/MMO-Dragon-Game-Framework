@@ -29,13 +29,10 @@ public class HomeController : Controller
         return View();
     }
     
-    public IActionResult Server()
+    public async Task<IActionResult> Server()
     {
         // Format Request
-        var task = client.GetStringAsync("http://localhost:3000/api/server/status");
-        
-        // Get Response
-        var response = task.Result;
+        var response = await client.GetStringAsync("http://localhost:3000/api/server/status");
         
         // Deserialize Response
         var model = JsonConvert.DeserializeObject<ServerStatusModel>(response);
