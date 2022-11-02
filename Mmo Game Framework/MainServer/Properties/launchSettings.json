@@ -2,6 +2,7 @@
   "profiles": {
     "MainServer": {
       "commandName": "Project",
+      "applicationUrl": "http://localhost:3000",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
         //"AGONES_SDK_GRPC_HOST": "192.168.4.241"
