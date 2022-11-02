@@ -31,21 +31,7 @@ namespace MmoGameFramework
             //var metricServer = new KestrelMetricServer(port: 1234);
             //metricServer.Start();
 
-            IHost host = Host.CreateDefaultBuilder(args)
-                .ConfigureLogging(builder =>
-                {
-                    builder.AddSimpleConsole(options =>
-                    {
-                        options.IncludeScopes = true;
-                        options.SingleLine = true;
-                        options.TimestampFormat = "hh:mm:ss ";
-                    });
-                })
-                .ConfigureServices(x =>
-                {
-                    x.AddSingleton<OrchestrationService>();
-                })
-                .Build();
+            IHost host = BuildHost(args);
 
 
             _logger = host.Services.GetRequiredService<ILogger<Program>>();
@@ -124,8 +110,6 @@ namespace MmoGameFramework
             }, false, host.Services.GetRequiredService<ILogger<MmoServer>>(), configuration);
             workerServer.Start();
 
-            StartAPI();
-
             _logger.LogInformation("DragonGF is ready.");
 
             
@@ -137,23 +121,29 @@ namespace MmoGameFramework
             //metricServer.Stop();
         }
 
-        private static async void StartAPI()
-        {
-            _logger.LogInformation("Starting Console API");
-            
-            // 
-            var builder = WebApplication.CreateBuilder();
+        
 
-            //
+        private static WebApplication BuildHost(string[] args)
+        {
+            
+            var builder = WebApplication.CreateBuilder(args);
+            builder.Logging.AddSimpleConsole(options =>
+                {
+                    options.IncludeScopes = true;
+                    options.SingleLine = true;
+                    options.TimestampFormat = "hh:mm:ss ";
+                });
+
+            builder.Services.AddSingleton<OrchestrationService>();
+
             builder.Services.AddControllers();
             
             var app = builder.Build();
-            
-            // app.UseHttpsRedirection();
+
+            //app.UseHttpsRedirection();
             app.UseAuthorization();
             app.MapControllers();
-            
-            await app.RunAsync("http://localhost:3000");
+            return app;
         }
 
         public static MmoServer GetServer()
