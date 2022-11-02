@@ -16,6 +16,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 
 namespace MmoGameFramework
 {
@@ -127,6 +128,7 @@ namespace MmoGameFramework
         {
             
             var builder = WebApplication.CreateBuilder(args);
+            builder.WebHost.UseUrls("http://*:3000");
             builder.Logging.AddSimpleConsole(options =>
                 {
                     options.IncludeScopes = true;
