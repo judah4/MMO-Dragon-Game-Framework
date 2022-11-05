@@ -82,10 +82,25 @@ Example build file for the test game.
 Run in the main folder.  
 
 ## Main Server Build
-`docker build -f Docker/MainServer/Dockerfile -t judah4/dragongf:v0.1.2 -t judah4/dragongf:latest .`
+```SHELL
+docker build -f Docker/MainServer/Dockerfile -t judah4/dragongf:v0.1.2 -t judah4/dragongf:latest .
+```
 Only required for core dev.
+
+### Dev
+```SHELL
+docker build -f Docker/MainServer/Dockerfile -t judah4/dragongf:dev .
+```
+
 
 ## Push
 
-`docker push judah4/dragongf:latest`  
-`docker push judah4/dragongf:v0.1.1`  
+```SHELL
+docker push judah4/dragongf:latest  
+docker push judah4/dragongf:v0.1.2  
+``` 
+
+### Dev
+```SHELL
+docker push judah4/dragongf:dev
+```

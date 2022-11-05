@@ -25,6 +25,7 @@ namespace MmoGameFramework
         private NetServer s_server;
         OrchestrationService _orchestrationService;
         private EntityStore _entities;
+        public EntityStore Entities => _entities;
         NetPeerConfiguration _config;
         ILogger _logger;
         IConfiguration _configuration;
@@ -32,6 +33,9 @@ namespace MmoGameFramework
         bool _clientWorker = false;
         Stopwatch _stopwatch;
         int _tickRate;
+        public int TickRate => _tickRate;
+
+        
 
         public Dictionary<long, WorkerConnection> _connections = new Dictionary<long, WorkerConnection>();
         public ConcurrentDictionary<long, WorkerConnection> _workerWithSubChanges = new ConcurrentDictionary<long,WorkerConnection>();
