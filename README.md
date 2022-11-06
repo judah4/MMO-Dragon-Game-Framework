@@ -62,17 +62,21 @@ Build Server build in the `Builds/Linux` folder.
 Run in the main folder.  
 
 ## Game Build
-`docker build -f Docker/Worker/Dockerfile -t judah4/dragongf-testgame:v0.1.1 -t judah4/dragongf-testgame:latest .`
+```SHELL
+docker build -f Docker/Worker/Dockerfile -t judah4/dragongf-testgame:v0.1.2 -t judah4/dragongf-testgame:latest .  
+```
 Example build file for the test game.
 
 ## Run On Docker
-`docker compose -f Docker/Compose/docker-compose.yml up -d`
+```SHELL
+docker compose -f Docker/Compose/docker-compose.yml up -d  
+```
 
 ## Push
-
-`docker push judah4/dragongf-testgame:latest`  
-`docker push judah4/dragongf-testgame:v0.1.1`  
-
+```SHELL
+docker push judah4/dragongf-testgame:latest  
+docker push judah4/dragongf-testgame:v0.1.2  
+```
 # Agones and Kubernetes
 
 `kubectl create -f Agones/dragongf-gameserver.yaml`
@@ -87,20 +91,9 @@ docker build -f Docker/MainServer/Dockerfile -t judah4/dragongf:v0.1.2 -t judah4
 ```
 Only required for core dev.
 
-### Dev
-```SHELL
-docker build -f Docker/MainServer/Dockerfile -t judah4/dragongf:dev .
-```
-
-
 ## Push
 
 ```SHELL
 docker push judah4/dragongf:latest  
 docker push judah4/dragongf:v0.1.2  
 ``` 
-
-### Dev
-```SHELL
-docker push judah4/dragongf:dev
-```

@@ -35,7 +35,7 @@ spec:
     spec:
       containers:
       - name: dragongf-game-server
-        image: judah4/dragongf:v0.1.0
+        image: judah4/dragongf:v0.1.2
         args: ["--orchestration=agones", "--worldfilepath=worlds/default.world"]
         imagePullPolicy: Always
         resources:
@@ -43,7 +43,7 @@ spec:
             memory: "120Mi"
             cpu: "20m"
       - name: dragongf-game-worker
-        image: judah4/dragongf-testgame:v0.1.0
+        image: judah4/dragongf-testgame:v0.1.2
         # args: ["-hostIp=172.16.238.10"]
         imagePullPolicy: Always
         resources:
