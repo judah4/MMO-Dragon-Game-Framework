@@ -2,6 +2,7 @@ using MessagePack;
 using Microsoft.Extensions.Logging;
 using Mmogf.Core;
 using Mmogf.Servers.Worlds;
+using Prometheus;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -14,13 +15,15 @@ namespace MmoGameFramework
     public sealed class EntityStore
     {
         private int lastId = 0;
+        private readonly Gauge EntitiesGauge = Metrics.CreateGauge($"dragongf_entities", "Number of entities in the world.");
 
         private ConcurrentDictionary<int, Entity> _entities = new ConcurrentDictionary<int, Entity>();
-        public ConcurrentDictionary<int, Entity> Entities => _entities;
         
         private List<GridLayer> GridLayers = new List<GridLayer>(2);
 
         ILogger _logger;
+
+        public ConcurrentDictionary<int, Entity> Entities => _entities;
 
         public event Action<Entity> OnUpdateEntityFull;
         public event Action<CommandRequest> OnEntityCommand;
@@ -107,6 +110,8 @@ namespace MmoGameFramework
             GridLayers[gridIndex].AddEntity(entity);
             //check if in other layers based on components
 
+            EntitiesGauge.Set(_entities.Count);
+
             return entity;
         }
 
@@ -180,6 +185,9 @@ namespace MmoGameFramework
             }
 
             OnEntityDelete?.Invoke(entity);
+
+            EntitiesGauge.Set(_entities.Count);
+
         }
 
         public (List<int> addEntityIds, List<int> removeEntityIds) UpdateWorkerInterestArea(WorkerConnection worker)
