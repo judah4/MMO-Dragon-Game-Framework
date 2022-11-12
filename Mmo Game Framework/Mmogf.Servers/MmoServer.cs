@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 using Mmogf.Core;
 using Mmogf.Servers.Services;
 using Mmogf.Servers.Worlds;
-//using Prometheus;
+using Prometheus;
 
 namespace MmoGameFramework
 {
@@ -20,11 +20,12 @@ namespace MmoGameFramework
         public bool Active => s_server.Status == NetPeerStatus.Running;
         public string WorkerType => _config.AppIdentifier;
 
-        //private readonly Gauge ConnectedWorkersGauge;
+        private readonly Gauge ConnectedWorkersGauge;
 
         private NetServer s_server;
         OrchestrationService _orchestrationService;
         private EntityStore _entities;
+        public EntityStore Entities => _entities;
         NetPeerConfiguration _config;
         ILogger _logger;
         IConfiguration _configuration;
@@ -32,6 +33,9 @@ namespace MmoGameFramework
         bool _clientWorker = false;
         Stopwatch _stopwatch;
         int _tickRate;
+        public int TickRate => _tickRate;
+
+        
 
         public Dictionary<long, WorkerConnection> _connections = new Dictionary<long, WorkerConnection>();
         public ConcurrentDictionary<long, WorkerConnection> _workerWithSubChanges = new ConcurrentDictionary<long,WorkerConnection>();
@@ -44,12 +48,12 @@ namespace MmoGameFramework
             _clientWorker = clientWorker;
             _configuration = configuration;
             _tickRate = _configuration.GetValue<int?>(key: "TickRate") ?? 60;
-            //var description = "Number of connected workers.";
-            //if(_clientWorker)
-            //{
-            //    description = "Number of connected clients.";
-            //}
-            //ConnectedWorkersGauge = Metrics.CreateGauge($"dragongf_{config.AppIdentifier.Replace('-', '_')}", description);
+            var description = "Number of connected workers.";
+            if (_clientWorker)
+            {
+                description = "Number of connected clients.";
+            }
+            ConnectedWorkersGauge = Metrics.CreateGauge($"dragongf_{config.AppIdentifier.Replace('-', '_')}", description);
             _stopwatch = new Stopwatch();
 
             // set up network
@@ -219,6 +223,8 @@ namespace MmoGameFramework
                 {
                     
                     HandleEntitySubChanges();
+
+                    ConnectedWorkersGauge.Set(s_server.ConnectionsCount);
 
                     if(s_server.ConnectionsCount > 0)
                     {

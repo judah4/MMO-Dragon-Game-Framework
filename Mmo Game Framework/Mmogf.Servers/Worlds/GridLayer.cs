@@ -173,10 +173,10 @@ namespace Mmogf.Servers.Worlds
                 var subs = worker.CellSubs[Layer];
                 foreach (var sub in subs)
                 {
-                    if (!cells.ContainsKey(sub))
+                    if (!cells.ContainsKey(sub.Key))
                     {
-                        removeCells.Add(sub);
-                        var cell = GetCell(new Position(sub.X, sub.Y, sub.Z));
+                        removeCells.Add(sub.Key);
+                        var cell = GetCell(new Position(sub.Key.X, sub.Key.Y, sub.Key.Z));
                         removeEntityIds.AddRange(cell.entities);
                     }
 

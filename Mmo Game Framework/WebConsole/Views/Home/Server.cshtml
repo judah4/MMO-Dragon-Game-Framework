@@ -1,0 +1,55 @@
+﻿@{
+    ViewData["Title"] = "Server Data";
+}
+
+@model MmoGameFramework.Models.ServerStatusModel
+
+<div class="text-center">
+    <h1 class="display-4">Live Positions</h1>
+    
+    <div class="card">
+        <div class="card-header">
+            <div class="chart">
+                <canvas id="bubbleChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+
+<script type="text/javascript">
+
+    setTimeout(reload, 5000);
+
+    function reload() {
+        location.reload();    
+    }
+    
+    let positions=[];
+    @if (Model.Entities.Count > 0)
+    {
+        foreach (var entity in Model.Entities)
+        {
+            @:positions.push({x: @entity.Position.X, y: @entity.Position.Z} )
+        }
+    }
+
+    const data = {
+    datasets: [{
+        label: 'Entities',
+        data: positions,
+        backgroundColor: 'rgb(255, 99, 132)'
+      }]
+    };
+
+    let chart = document.getElementById("bubbleChart");
+    
+    let myChart = new Chart(chart, {
+            type: 'bubble',
+            data: data,
+            options: {}
+        });
+
+</script>
