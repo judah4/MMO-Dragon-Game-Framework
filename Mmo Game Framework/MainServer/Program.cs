@@ -17,6 +17,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Mmogf.Servers.Storage;
+using ServiceStack.Caching;
 
 namespace MmoGameFramework
 {
@@ -45,7 +47,7 @@ namespace MmoGameFramework
             _logger.LogInformation($"Dragon Game Framework MMO Networking Version {version}");
             int cellSize = configuration.GetValue<int?>("ChunkSize") ?? 50;
             _logger.LogInformation($"Attaching Entity Storage. Cell Size {cellSize}.");
-            _entityStore = new EntityStore(host.Services.GetRequiredService<ILogger<EntityStore>>(), cellSize);
+            _entityStore = new EntityStore(host.Services.GetRequiredService<ILogger<EntityStore>>(), host.Services.GetRequiredService<ICacheClient>(), cellSize);
 
             //var lz4Options = MessagePackSerializerOptions.Standard.WithCompression(MessagePackCompression.Lz4BlockArray);
             //MessagePackSerializer.DefaultOptions = lz4Options;
@@ -137,6 +139,8 @@ namespace MmoGameFramework
                 });
 
             builder.Services.AddSingleton<OrchestrationService>();
+            var storageClient = new StorageSetupService(builder.Configuration);
+            builder.Services.AddSingleton<ICacheClient>(storageClient.GetStorage());
 
             builder.Services.AddControllers();
             

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Mmogf.Core;
 using Mmogf.Servers.Worlds;
 using Prometheus;
+using ServiceStack.Caching;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -18,7 +19,8 @@ namespace MmoGameFramework
         private readonly Gauge EntitiesGauge = Metrics.CreateGauge($"dragongf_entities", "Number of entities in the world.");
 
         private ConcurrentDictionary<int, Entity> _entities = new ConcurrentDictionary<int, Entity>();
-        
+        ICacheClient _cacheClient;
+
         private List<GridLayer> GridLayers = new List<GridLayer>(2);
 
         ILogger _logger;
@@ -35,9 +37,10 @@ namespace MmoGameFramework
         public event Action<int, List<long>> OnEntityAddSubscription;
         public event Action<int, List<long>> OnEntityRemoveSubscription;
 
-        public EntityStore(ILogger<EntityStore> logger, int cellSize)
+        public EntityStore(ILogger<EntityStore> logger, ICacheClient cacheClient, int cellSize)
         {
             _logger = logger;
+            _cacheClient = cacheClient;
 
             var grid1 = new GridLayer(cellSize, 0);
             //default 2 layers. regular checkout and infinite size
