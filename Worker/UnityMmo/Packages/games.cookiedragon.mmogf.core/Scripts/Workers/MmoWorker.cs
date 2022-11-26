@@ -331,7 +331,7 @@ namespace Mmogf.Core
             var timespan = DateTime.UtcNow - _pingRequestAt;
             Ping = (int)timespan.TotalMilliseconds;
         }
-        public void SendCommand<T,TRequest,TResponse>(int entityId, short componentId, T command, Action<CommandResult<T, TRequest, TResponse>> callback, float timeout = 10f) where T : ICommandBase<TRequest,TResponse> where TRequest : struct where TResponse : struct
+        public string SendCommand<T,TRequest,TResponse>(int entityId, short componentId, T command, Action<CommandResult<T, TRequest, TResponse>> callback, float timeout = 10f) where T : ICommandBase<TRequest,TResponse> where TRequest : struct where TResponse : struct
         {
             var requestId = Guid.NewGuid().ToString();
 
@@ -356,6 +356,7 @@ namespace Mmogf.Core
                 Info = MessagePackSerializer.Serialize(request),
             });
             _dataStatisticsSent.RecordMessage(command.GetCommandId(), byteLength, DataStat.Command);
+            return requestId;
         }
 
         public void SendCommandResponse<T, TRequest, TResponse>(CommandRequest request, T command) where T : ICommandBase<TRequest, TResponse> where TRequest : struct where TResponse : struct
