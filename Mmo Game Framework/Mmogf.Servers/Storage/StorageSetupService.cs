@@ -35,7 +35,7 @@ namespace Mmogf.Servers.Storage
                 default: //memory
                     _cacheClient = new MemoryCacheClient();
                     break;
-                case "memcahce":
+                case "memcache":
                     //package is dotnet framework for some reason. Unsupported for linux at the moment.
                     //_cacheClient = new MemcachedClientCache(new[] { "127.0.0.0" });
                     throw new Exception("memcache is not supported yet.");
