@@ -292,18 +292,18 @@ namespace Mmogf.Core
             EventRequests.Add(eventRequest);
         }
 
-        public void SendWorldCommand<T, TRequest, TResponse>(TRequest request, System.Action<CommandResult<T, TRequest, TResponse>> callback = null, float timeout = 10f) where T : ICommandBase<TRequest, TResponse>, IWorldCommand, new() where TRequest : struct where TResponse : struct
+        public string SendWorldCommand<T, TRequest, TResponse>(TRequest request, System.Action<CommandResult<T, TRequest, TResponse>> callback = null, float timeout = 10f) where T : ICommandBase<TRequest, TResponse>, IWorldCommand, new() where TRequest : struct where TResponse : struct
         {
-            SendCommand(0, 0, request, callback, timeout);
+            return SendCommand(0, 0, request, callback, timeout);
         }
 
-        public void SendCommand<T, TRequest, TResponse>(int entityId, short componentId, TRequest request, System.Action<CommandResult<T, TRequest, TResponse>> callback = null, float timeout = 10f) where T : ICommandBase<TRequest, TResponse>, new () where TRequest : struct where TResponse : struct
+        public string SendCommand<T, TRequest, TResponse>(int entityId, short componentId, TRequest request, System.Action<CommandResult<T, TRequest, TResponse>> callback = null, float timeout = 10f) where T : ICommandBase<TRequest, TResponse>, new () where TRequest : struct where TResponse : struct
         {
             var command = new T()
             {
                 Request = request,
             };
-            Client.SendCommand<T, TRequest, TResponse>(entityId, componentId, command, callback, timeout);
+            return Client.SendCommand<T, TRequest, TResponse>(entityId, componentId, command, callback, timeout);
         }
         public void SendCommandResponse<T, TRequest, TResponse>(CommandRequest request, T command, TResponse responsePayload) where T : ICommandBase<TRequest,TResponse> where TRequest : struct where TResponse : struct
         {
