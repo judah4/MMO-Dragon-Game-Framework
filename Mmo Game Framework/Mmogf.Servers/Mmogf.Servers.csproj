@@ -8,9 +8,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AgonesSDK" Version="1.27.0" />
-    <PackageReference Include="MessagePack" Version="2.4.35" />
-    <PackageReference Include="MessagePack.UnityShims" Version="2.4.35" />
+    <PackageReference Include="AgonesSDK" Version="1.29.0" />
+    <PackageReference Include="MessagePack" Version="2.4.59" />
+    <PackageReference Include="MessagePack.UnityShims" Version="2.4.59" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.2" />
     <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="6.0.1" />
     <PackageReference Include="prometheus-net.AspNetCore" Version="7.0.0" />
