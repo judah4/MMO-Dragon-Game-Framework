@@ -47,7 +47,7 @@ namespace MmoGameFramework
             _logger.LogInformation($"Dragon Game Framework MMO Networking Version {version}");
             int cellSize = configuration.GetValue<int?>("ChunkSize") ?? 50;
             _logger.LogInformation($"Attaching Entity Storage. Cell Size {cellSize}.");
-            _entityStore = new EntityStore(host.Services.GetRequiredService<ILogger<EntityStore>>(), host.Services.GetRequiredService<ICacheClient>(), cellSize);
+            _entityStore = new EntityStore(host.Services.GetRequiredService<ILogger<EntityStore>>(), host.Services.GetRequiredService<IStorageService>(), cellSize);
 
             //var lz4Options = MessagePackSerializerOptions.Standard.WithCompression(MessagePackCompression.Lz4BlockArray);
             //MessagePackSerializer.DefaultOptions = lz4Options;
@@ -141,6 +141,7 @@ namespace MmoGameFramework
             builder.Services.AddSingleton<OrchestrationService>();
             var storageClient = new StorageSetupService(builder.Configuration);
             builder.Services.AddSingleton<ICacheClient>(storageClient.GetStorage());
+            builder.Services.AddTransient<IStorageService,StorageService>();
 
             builder.Services.AddControllers();
             

@@ -23,11 +23,33 @@ namespace Mmogf.Servers.Storage
             return _cacheClient.Get<T>(key);
         }
 
-        public bool Add<T>(string key, T data)
+        public bool Set<T>(string key, T data)
         {
             if (string.IsNullOrEmpty(key))
                 throw new ArgumentNullException(nameof(key));
-            return _cacheClient.Add(key, data);
+            return _cacheClient.Set(key, data);
+        }
+
+        public bool Remove(string key)
+        {
+            if (string.IsNullOrEmpty(key))
+                throw new ArgumentNullException(nameof(key));
+
+            return _cacheClient.Remove(key);
+        }
+
+        public long Increment(string key, uint data)
+        {
+            if (string.IsNullOrEmpty(key))
+                throw new ArgumentNullException(nameof(key));
+            return _cacheClient.Increment(key, data);
+        }
+
+        public long Decrement(string key, uint data)
+        {
+            if (string.IsNullOrEmpty(key))
+                throw new ArgumentNullException(nameof(key));
+            return _cacheClient.Decrement(key, data);
         }
     }
 }

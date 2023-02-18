@@ -61,7 +61,7 @@ namespace MmoGameFramework
             s_server = new NetServer(_config);
             _logger = logger;
 
-            _entities.OnUpdateEntityFull += OnEntityUpdateFull;
+            _entities.OnCreateEntity += OnEntityUpdateFull;
             _entities.OnEntityDelete += OnEntityDelete;
             _entities.OnEntityEvent += OnEntityEvent;
             _entities.OnEntityCommand += OnEntityCommand;
@@ -394,7 +394,6 @@ namespace MmoGameFramework
 
                     var requestPayload = createEntity.Request.Value;
                     var entityInfo = _entities.Create(requestPayload.EntityType, requestPayload.Position.ToPosition(), requestPayload.Rotation, requestPayload.Acls, null, requestPayload.Components);
-                    _entities.UpdateEntity(entityInfo);
                     createEntity.Response = new NothingInternal();
                     Send(im.SenderConnection, new MmoMessage()
                     {

@@ -1,6 +1,7 @@
 using MessagePack;
 using Microsoft.Extensions.Logging;
 using Mmogf.Core;
+using Mmogf.Servers.Storage;
 using Mmogf.Servers.Worlds;
 using Prometheus;
 using ServiceStack.Caching;
@@ -9,7 +10,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Text;
 
 namespace MmoGameFramework
 {
@@ -18,16 +18,13 @@ namespace MmoGameFramework
         private int lastId = 0;
         private readonly Gauge EntitiesGauge = Metrics.CreateGauge($"dragongf_entities", "Number of entities in the world.");
 
-        private ConcurrentDictionary<int, Entity> _entities = new ConcurrentDictionary<int, Entity>();
-        ICacheClient _cacheClient;
+        IStorageService _storageService;
 
         private List<GridLayer> GridLayers = new List<GridLayer>(2);
 
         ILogger _logger;
 
-        public ConcurrentDictionary<int, Entity> Entities => _entities;
-
-        public event Action<Entity> OnUpdateEntityFull;
+        public event Action<Entity> OnCreateEntity;
         public event Action<CommandRequest> OnEntityCommand;
         public event Action<CommandResponse> OnEntityCommandResponse;
         public event Action<EntityUpdate, long> OnUpdateEntityPartial;
@@ -37,10 +34,10 @@ namespace MmoGameFramework
         public event Action<int, List<long>> OnEntityAddSubscription;
         public event Action<int, List<long>> OnEntityRemoveSubscription;
 
-        public EntityStore(ILogger<EntityStore> logger, ICacheClient cacheClient, int cellSize)
+        public EntityStore(ILogger<EntityStore> logger, IStorageService storageService, int cellSize)
         {
             _logger = logger;
-            _cacheClient = cacheClient;
+            _storageService = storageService;
 
             var grid1 = new GridLayer(cellSize, 0);
             //default 2 layers. regular checkout and infinite size
@@ -101,7 +98,7 @@ namespace MmoGameFramework
 
             var entity = new Entity(entityId.Value, data);
 
-            _entities.TryAdd(entityId.Value, entity);
+            AddEntity(entity); //new 
 
             //make this configurable in the future
             var gridIndex = 0;
@@ -113,29 +110,72 @@ namespace MmoGameFramework
             GridLayers[gridIndex].AddEntity(entity);
             //check if in other layers based on components
 
-            EntitiesGauge.Set(_entities.Count);
+            OnCreateEntity?.Invoke(entity);
 
             return entity;
         }
 
+        void AddEntity(Entity entity)
+        {
+            _storageService.Set($"Ent:{entity.EntityId}", entity.EntityId);
+            _storageService.Set($"Ent:{entity.EntityId}:Comps", string.Join(",",entity.EntityData.Keys));
+            foreach (var comp in entity.EntityData)
+            {
+                _storageService.Set($"Ent:{entity.EntityId}:{comp.Key}", comp.Value);
+            }
+
+            var entCount = _storageService.Increment("Ent:Count", 1);
+            EntitiesGauge.Set(entCount);
+
+        }
+
+        void RemoveEntity(int entityId)
+        {
+            _storageService.Remove($"Ent:{entityId}");
+            var compIdKey = $"Ent:{entityId}:Comps";
+            var comps = _storageService.Get<string>(compIdKey);
+            if(comps == null)
+                return;
+            var compList = comps.Split(",");
+            _storageService.Remove(compIdKey);
+            foreach (var compId in compList)
+            {
+                _storageService.Remove($"Ent:{entityId}:{compId}");
+            }
+
+            var entCount = _storageService.Decrement("Ent:Count", 1);
+            EntitiesGauge.Set(entCount);
+
+        }
+
         public Entity? GetEntity(int entityId)
         {
-            Entity entityInfo;
-            if(!_entities.TryGetValue(entityId, out entityInfo))
+
+            //how do we create this entity info?
+            var compIdKey = $"Ent:{entityId}:Comps";
+            var comps = _storageService.Get<string>(compIdKey);
+            if (comps == null)
                 return null;
+            var compList = comps.Split(",");
+            var data = new Dictionary<short, byte[]>();
+            foreach (var compId in compList)
+            {
+                short compIdShort;
+                if (!short.TryParse(compId, out compIdShort))
+                    continue;
+                var info = _storageService.Get<byte[]>($"Ent:{entityId}:{compId}");
+                data.Add(compIdShort, info);
+            }
+
+            var entityInfo = new Entity(entityId, data);
 
             return entityInfo;        
         }
 
-        public void UpdateEntity(Entity entity)
-        {
-            _entities[entity.EntityId] = entity;
-            OnUpdateEntityFull?.Invoke(entity);
-        }
-
         public void UpdateEntityPartial(Entity entity, EntityUpdate entityUpdate, long workerId)
         {
-            _entities[entity.EntityId] = entity;
+            _storageService.Set($"Ent:{entityUpdate.EntityId}:{entityUpdate.ComponentId}", entityUpdate.Info);
+
             OnUpdateEntityPartial?.Invoke(entityUpdate, workerId);
 
             if(entityUpdate.ComponentId == FixedVector3.ComponentId)
@@ -178,18 +218,18 @@ namespace MmoGameFramework
 
         public void Delete(int entityId)
         {
-            Entity entity;
-            if(!_entities.Remove(entityId, out entity))
+            var entity = GetEntity(entityId);
+            if(entity == null)
                 return;
 
             foreach(var layer in GridLayers)
             {
-                layer.RemoveEntity(entity);
+                layer.RemoveEntity(entity.Value);
             }
 
-            OnEntityDelete?.Invoke(entity);
+            RemoveEntity(entityId);
 
-            EntitiesGauge.Set(_entities.Count);
+            OnEntityDelete?.Invoke(entity.Value);
 
         }
 
