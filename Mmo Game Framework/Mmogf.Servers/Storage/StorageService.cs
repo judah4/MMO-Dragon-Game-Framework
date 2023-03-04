@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace Mmogf.Servers.Storage
 {
-    public class StorageService : IStorageService
+    public sealed class StorageService : IStorageService
     {
-        private ICacheClient _cacheClient;
+        private readonly ICacheClient _cacheClient;
 
         public StorageService(ICacheClient cacheClient)
         {

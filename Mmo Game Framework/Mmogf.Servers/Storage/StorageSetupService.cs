@@ -11,9 +11,11 @@ namespace Mmogf.Servers.Storage
 {
     public class StorageSetupService
     {
-        readonly IConfiguration _configuration;
-        ICacheClient _cacheClient;
-        RedisManagerPool _redisManagerPool;
+        private readonly IConfiguration _configuration;
+        private ICacheClient _cacheClient;
+        private RedisManagerPool _redisManagerPool;
+
+        public string StorageType {  get; private set; }
 
         public StorageSetupService(IConfiguration configuration)
         {
@@ -27,13 +29,14 @@ namespace Mmogf.Servers.Storage
 
             //https://docs.servicestack.net/caching
 
-            var type = _configuration["Storage:Type"];
             var host = _configuration["Storage:Host"];
+            StorageType = _configuration["Storage:Type"];
 
-            switch(type)
+            switch (StorageType)
             {
                 default: //memory
                     _cacheClient = new MemoryCacheClient();
+                    StorageType = "in-memory";
                     break;
                 case "memcache":
                     //package is dotnet framework for some reason. Unsupported for linux at the moment.

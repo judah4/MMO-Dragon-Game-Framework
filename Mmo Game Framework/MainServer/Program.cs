@@ -45,6 +45,9 @@ namespace MmoGameFramework
 
             var version = System.Reflection.Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "1.0.0";
             _logger.LogInformation($"Dragon Game Framework MMO Networking Version {version}");
+
+            //todo: Log the storage type
+
             int cellSize = configuration.GetValue<int?>("ChunkSize") ?? 50;
             _logger.LogInformation($"Attaching Entity Storage. Cell Size {cellSize}.");
             _entityStore = new EntityStore(host.Services.GetRequiredService<ILogger<EntityStore>>(), host.Services.GetRequiredService<IStorageService>(), cellSize);

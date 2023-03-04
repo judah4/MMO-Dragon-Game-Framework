@@ -31,10 +31,11 @@ public class ServerController : ControllerBase
         }
 
         var entities = new List<EntityModel>();
-        foreach (var entity in server.Entities.Entities.Values)
-        {
-            entities.Add(EntityWebFactory.Convert(entity));
-        }
+        //todo: reimplement this
+        //foreach (var entity in server.Entities.GetEntities())
+        //{
+        //    entities.Add(EntityWebFactory.Convert(entity));
+        //}
         
         // Populate Model
         var model = new ServerStatusModel
