@@ -39,14 +39,17 @@ namespace MmoGameFramework
 
             _logger = host.Services.GetRequiredService<ILogger<Program>>();
             var configuration = host.Services.GetRequiredService<IConfiguration>();
-                
+
+
             // Print Banner
             Console.WriteLine(Resources.Data.Banner);
 
             var version = System.Reflection.Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "1.0.0";
             _logger.LogInformation($"Dragon Game Framework MMO Networking Version {version}");
 
-            //todo: Log the storage type
+            //Log the storage type
+            var storageSetupService = host.Services.GetRequiredService<StorageSetupService>();
+            _logger.LogInformation($"Attaching Storage: {storageSetupService.StorageType}");
 
             int cellSize = configuration.GetValue<int?>("ChunkSize") ?? 50;
             _logger.LogInformation($"Attaching Entity Storage. Cell Size {cellSize}.");
@@ -127,7 +130,8 @@ namespace MmoGameFramework
             metricServer.Stop();
         }
 
-        
+
+
 
         private static WebApplication BuildHost(string[] args)
         {
@@ -142,9 +146,10 @@ namespace MmoGameFramework
                 });
 
             builder.Services.AddSingleton<OrchestrationService>();
-            var storageClient = new StorageSetupService(builder.Configuration);
-            builder.Services.AddSingleton<ICacheClient>(storageClient.GetStorage());
-            builder.Services.AddTransient<IStorageService,StorageService>();
+            var storageSetupService = new StorageSetupService(builder.Configuration);
+            builder.Services.AddSingleton(storageSetupService);
+            builder.Services.AddSingleton<ICacheClient>(storageSetupService.GetStorage());
+            builder.Services.AddTransient<IStorageService, StorageService>();
 
             builder.Services.AddControllers();
             
