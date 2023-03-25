@@ -48,8 +48,8 @@ namespace MmoGameFramework
             _logger.LogInformation($"Dragon Game Framework MMO Networking Version {version}");
 
             //Log the storage type
-            var storageSetupService = host.Services.GetRequiredService<StorageSetupService>();
-            _logger.LogInformation($"Attaching Storage: {storageSetupService.StorageType}");
+            var storageService = host.Services.GetRequiredService<IStorageService>();
+            _logger.LogInformation($"Attaching Storage: {storageService.ToString()}");
 
             int cellSize = configuration.GetValue<int?>("ChunkSize") ?? 50;
             _logger.LogInformation($"Attaching Entity Storage. Cell Size {cellSize}.");
@@ -147,9 +147,7 @@ namespace MmoGameFramework
 
             builder.Services.AddSingleton<OrchestrationService>();
             var storageSetupService = new StorageSetupService(builder.Configuration);
-            builder.Services.AddSingleton(storageSetupService);
-            builder.Services.AddSingleton<ICacheClient>(storageSetupService.GetStorage());
-            builder.Services.AddTransient<IStorageService, StorageService>();
+            builder.Services.AddSingleton<IStorageService>(storageSetupService.GetStorage());
 
             builder.Services.AddControllers();
             

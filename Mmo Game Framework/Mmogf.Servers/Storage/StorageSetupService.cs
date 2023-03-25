@@ -13,6 +13,7 @@ namespace Mmogf.Servers.Storage
     {
         private readonly IConfiguration _configuration;
         private ICacheClient _cacheClient;
+        private IStorageService _storageService;
         private RedisManagerPool _redisManagerPool;
 
         public string StorageType {  get; private set; }
@@ -37,6 +38,7 @@ namespace Mmogf.Servers.Storage
                 default: //memory
                     _cacheClient = new MemoryCacheClient();
                     StorageType = "in-memory";
+                    _storageService = new CacheClientStorageService(_cacheClient, StorageType);
                     break;
                 case "memcache":
                     //package is dotnet framework for some reason. Unsupported for linux at the moment.
@@ -47,17 +49,18 @@ namespace Mmogf.Servers.Storage
                     //"gateway.docker.internal:6379"
                     _redisManagerPool = new RedisManagerPool(host);
                     _cacheClient = _redisManagerPool.GetCacheClient();
+                    _storageService = new CacheClientStorageService(_cacheClient, StorageType);
                     break;
             }
 
 
         }
 
-        public ICacheClient GetStorage()
+        public IStorageService GetStorage()
         {
             Init();
 
-            return _cacheClient;
+            return _storageService;
         }
 
     }

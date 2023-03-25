@@ -7,13 +7,21 @@ using System.Threading.Tasks;
 
 namespace Mmogf.Servers.Storage
 {
-    public sealed class StorageService : IStorageService
+    public sealed class CacheClientStorageService : IStorageService
     {
         private readonly ICacheClient _cacheClient;
 
-        public StorageService(ICacheClient cacheClient)
+        private string _storageType;
+
+        public CacheClientStorageService(ICacheClient cacheClient, string storageType)
         {
+            if (cacheClient == null)
+                throw new ArgumentNullException(nameof(cacheClient));
+            if (storageType == null)
+                throw new ArgumentNullException(nameof(storageType));
+
             _cacheClient = cacheClient;
+            _storageType = storageType;
         }
 
         public T Get<T>(string key)
@@ -50,6 +58,11 @@ namespace Mmogf.Servers.Storage
             if (string.IsNullOrEmpty(key))
                 throw new ArgumentNullException(nameof(key));
             return _cacheClient.Decrement(key, data);
+        }
+
+        public override string ToString()
+        {
+            return _storageType;
         }
     }
 }
