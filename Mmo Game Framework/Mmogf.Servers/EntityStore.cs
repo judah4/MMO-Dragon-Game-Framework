@@ -294,5 +294,10 @@ namespace MmoGameFramework
 
             return workerIds;
         }
+
+        public List<int> GetEntitiesInArea(Position position, float interestArea)
+        {
+            return GridLayers[0].GetEntitiesInArea(position, interestArea);
+        }
     }
 }

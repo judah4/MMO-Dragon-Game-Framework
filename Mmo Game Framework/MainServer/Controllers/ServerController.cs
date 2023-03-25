@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using MmoGameFramework.Models;
+using Mmogf.Core;
 using WebCommon.Factory;
 
 namespace MmoGameFramework.Controllers;
@@ -31,12 +32,13 @@ public class ServerController : ControllerBase
         }
 
         var entities = new List<EntityModel>();
-        //todo: reimplement this
-        //foreach (var entity in server.Entities.GetEntities())
-        //{
-        //    entities.Add(EntityWebFactory.Convert(entity));
-        //}
-        
+        var entityIds = server.Entities.GetEntitiesInArea(Position.Zero, 100);
+        foreach (var entityId in entityIds)
+        {
+            var entity = server.Entities.GetEntity(entityId);
+            entities.Add(EntityWebFactory.Convert(entity.Value));
+        }
+
         // Populate Model
         var model = new ServerStatusModel
         {

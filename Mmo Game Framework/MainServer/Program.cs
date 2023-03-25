@@ -24,8 +24,8 @@ namespace MmoGameFramework
 {
     class Program
     {
-        private static MmoServer server;
-        private static MmoServer workerServer;
+        private static MmoServer _server;
+        private static MmoServer _workerServer;
         private static EntityStore _entityStore;
         private static ILogger<Program> _logger;
         
@@ -103,21 +103,21 @@ namespace MmoGameFramework
                 _logger.LogInformation($"Setting Server Timeout To {timeout}");
             _logger.LogInformation("Starting Dragon-Client connections. Port 1337");
             // create and start the server
-            server = new MmoServer(orchestationService, _entityStore, new NetPeerConfiguration("Dragon-Client")
+            _server = new MmoServer(orchestationService, _entityStore, new NetPeerConfiguration("Dragon-Client")
             {
                 MaximumConnections = 100,
                 Port = 1337,
                 ConnectionTimeout = timeout,
             }, true, host.Services.GetRequiredService<ILogger<MmoServer>>(), configuration);
-            server.Start();
+            _server.Start();
             _logger.LogInformation("Starting Dragon-Worker connections. Port 1338.");
-            workerServer = new MmoServer(orchestationService, _entityStore, new NetPeerConfiguration("Dragon-Worker")
+            _workerServer = new MmoServer(orchestationService, _entityStore, new NetPeerConfiguration("Dragon-Worker")
             {
                 MaximumConnections = 100,
                 Port = 1338,
                 ConnectionTimeout = timeout,
             }, false, host.Services.GetRequiredService<ILogger<MmoServer>>(), configuration);
-            workerServer.Start();
+            _workerServer.Start();
 
             _logger.LogInformation("DragonGF is ready.");
 
@@ -125,8 +125,8 @@ namespace MmoGameFramework
             await host.RunAsync();
             
             await orchestationService.ShutdownAsync();
-            server.Stop();
-            workerServer.Stop();
+            _server.Stop();
+            _workerServer.Stop();
             metricServer.Stop();
         }
 
@@ -161,12 +161,12 @@ namespace MmoGameFramework
 
         public static MmoServer GetServer()
         {
-            return server;
+            return _server;
         }
         
         public static MmoServer GetWorker()
         {
-            return workerServer;
+            return _workerServer;
         }
     }
 }

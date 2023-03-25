@@ -31,6 +31,11 @@ namespace Mmogf.Servers.Worlds
             Layer = layer;
         }
 
+        /// <summary>
+        /// Convert an index to a Position.
+        /// </summary>
+        /// <param name="grid"></param>
+        /// <returns></returns>
         PositionInt GridIndexToPosition(GridInt grid)
         {
             return new PositionInt(grid.X * CellSize, grid.Y * CellSize, grid.Z * CellSize);
@@ -149,6 +154,18 @@ namespace Mmogf.Servers.Worlds
                 }
             }
             return cells;
+        }
+
+        public List<int> GetEntitiesInArea(Position position, float interestArea)
+        {
+            var entityIds = new List<int>(100);
+            var cells = GetCellsInArea(position, interestArea);
+
+            foreach(var cell in cells)
+            {
+                entityIds.AddRange(cell.Value.entities);
+            }
+            return entityIds;
         }
 
         public (List<int> addEntityIds, List<int> removeEntityIds, List<PositionInt> addCells, List<PositionInt> removeCells) UpdateWorkerInterestArea(WorkerConnection worker)
