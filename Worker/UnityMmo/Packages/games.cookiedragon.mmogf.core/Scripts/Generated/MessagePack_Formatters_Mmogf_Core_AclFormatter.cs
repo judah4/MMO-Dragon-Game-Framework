@@ -6,9 +6,9 @@
 #pragma warning disable 612
 #pragma warning disable 414
 #pragma warning disable 168
+#pragma warning disable CS1591 // document public APIs
 
 #pragma warning disable SA1129 // Do not use default value type constructor
-#pragma warning disable SA1200 // Using directives should be placed correctly
 #pragma warning disable SA1309 // Field names should not begin with underscore
 #pragma warning disable SA1312 // Variable names should begin with lower-case letter
 #pragma warning disable SA1403 // File may only contain a single namespace
@@ -16,9 +16,6 @@
 
 namespace MessagePack.Formatters.Mmogf.Core
 {
-    using global::System.Buffers;
-    using global::MessagePack;
-
     public sealed class AclFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Mmogf.Core.Acl>
     {
 
@@ -27,7 +24,7 @@ namespace MessagePack.Formatters.Mmogf.Core
             global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
             writer.WriteArrayHeader(3);
             writer.Write(value.ComponentId);
-            formatterResolver.GetFormatterWithVerify<string>().Serialize(ref writer, value.WorkerType, options);
+            global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Serialize(ref writer, value.WorkerType, options);
             writer.Write(value.WorkerId);
         }
 
@@ -51,7 +48,7 @@ namespace MessagePack.Formatters.Mmogf.Core
                         ____result.ComponentId = reader.ReadInt16();
                         break;
                     case 1:
-                        ____result.WorkerType = formatterResolver.GetFormatterWithVerify<string>().Deserialize(ref reader, options);
+                        ____result.WorkerType = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Deserialize(ref reader, options);
                         break;
                     case 2:
                         ____result.WorkerId = reader.ReadInt64();
@@ -66,6 +63,7 @@ namespace MessagePack.Formatters.Mmogf.Core
             return ____result;
         }
     }
+
 }
 
 #pragma warning restore 168
@@ -74,7 +72,6 @@ namespace MessagePack.Formatters.Mmogf.Core
 #pragma warning restore 612
 
 #pragma warning restore SA1129 // Do not use default value type constructor
-#pragma warning restore SA1200 // Using directives should be placed correctly
 #pragma warning restore SA1309 // Field names should not begin with underscore
 #pragma warning restore SA1312 // Variable names should begin with lower-case letter
 #pragma warning restore SA1403 // File may only contain a single namespace

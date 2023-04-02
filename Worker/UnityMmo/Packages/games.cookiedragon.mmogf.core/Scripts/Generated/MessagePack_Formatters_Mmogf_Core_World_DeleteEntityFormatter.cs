@@ -6,9 +6,9 @@
 #pragma warning disable 612
 #pragma warning disable 414
 #pragma warning disable 168
+#pragma warning disable CS1591 // document public APIs
 
 #pragma warning disable SA1129 // Do not use default value type constructor
-#pragma warning disable SA1200 // Using directives should be placed correctly
 #pragma warning disable SA1309 // Field names should not begin with underscore
 #pragma warning disable SA1312 // Variable names should begin with lower-case letter
 #pragma warning disable SA1403 // File may only contain a single namespace
@@ -16,9 +16,6 @@
 
 namespace MessagePack.Formatters.Mmogf.Core
 {
-    using global::System.Buffers;
-    using global::MessagePack;
-
     public sealed class World_DeleteEntityFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Mmogf.Core.World.DeleteEntity>
     {
 
@@ -26,8 +23,8 @@ namespace MessagePack.Formatters.Mmogf.Core
         {
             global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
             writer.WriteArrayHeader(2);
-            formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.DeleteEntityRequest?>().Serialize(ref writer, value.Request, options);
-            formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.NothingInternal?>().Serialize(ref writer, value.Response, options);
+            global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<global::Mmogf.Core.DeleteEntityRequest?>(formatterResolver).Serialize(ref writer, value.Request, options);
+            global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<global::Mmogf.Core.NothingInternal?>(formatterResolver).Serialize(ref writer, value.Response, options);
         }
 
         public global::Mmogf.Core.World.DeleteEntity Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
@@ -47,10 +44,10 @@ namespace MessagePack.Formatters.Mmogf.Core
                 switch (i)
                 {
                     case 0:
-                        ____result.Request = formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.DeleteEntityRequest?>().Deserialize(ref reader, options);
+                        ____result.Request = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<global::Mmogf.Core.DeleteEntityRequest?>(formatterResolver).Deserialize(ref reader, options);
                         break;
                     case 1:
-                        ____result.Response = formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.NothingInternal?>().Deserialize(ref reader, options);
+                        ____result.Response = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<global::Mmogf.Core.NothingInternal?>(formatterResolver).Deserialize(ref reader, options);
                         break;
                     default:
                         reader.Skip();
@@ -62,6 +59,7 @@ namespace MessagePack.Formatters.Mmogf.Core
             return ____result;
         }
     }
+
 }
 
 #pragma warning restore 168
@@ -70,7 +68,6 @@ namespace MessagePack.Formatters.Mmogf.Core
 #pragma warning restore 612
 
 #pragma warning restore SA1129 // Do not use default value type constructor
-#pragma warning restore SA1200 // Using directives should be placed correctly
 #pragma warning restore SA1309 // Field names should not begin with underscore
 #pragma warning restore SA1312 // Variable names should begin with lower-case letter
 #pragma warning restore SA1403 // File may only contain a single namespace

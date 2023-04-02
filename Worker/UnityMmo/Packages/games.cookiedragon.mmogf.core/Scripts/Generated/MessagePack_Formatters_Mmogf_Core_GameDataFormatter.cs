@@ -6,9 +6,9 @@
 #pragma warning disable 612
 #pragma warning disable 414
 #pragma warning disable 168
+#pragma warning disable CS1591 // document public APIs
 
 #pragma warning disable SA1129 // Do not use default value type constructor
-#pragma warning disable SA1200 // Using directives should be placed correctly
 #pragma warning disable SA1309 // Field names should not begin with underscore
 #pragma warning disable SA1312 // Variable names should begin with lower-case letter
 #pragma warning disable SA1403 // File may only contain a single namespace
@@ -16,9 +16,6 @@
 
 namespace MessagePack.Formatters.Mmogf.Core
 {
-    using global::System.Buffers;
-    using global::MessagePack;
-
     public sealed class GameDataFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Mmogf.Core.GameData>
     {
 
@@ -48,7 +45,7 @@ namespace MessagePack.Formatters.Mmogf.Core
                         ____result.EntityId = reader.ReadInt32();
                         break;
                     case 1:
-                        ____result.Info = reader.ReadBytes()?.ToArray();
+                        ____result.Info = global::MessagePack.Internal.CodeGenHelpers.GetArrayFromNullableSequence(reader.ReadBytes());
                         break;
                     default:
                         reader.Skip();
@@ -60,6 +57,7 @@ namespace MessagePack.Formatters.Mmogf.Core
             return ____result;
         }
     }
+
 }
 
 #pragma warning restore 168
@@ -68,7 +66,6 @@ namespace MessagePack.Formatters.Mmogf.Core
 #pragma warning restore 612
 
 #pragma warning restore SA1129 // Do not use default value type constructor
-#pragma warning restore SA1200 // Using directives should be placed correctly
 #pragma warning restore SA1309 // Field names should not begin with underscore
 #pragma warning restore SA1312 // Variable names should begin with lower-case letter
 #pragma warning restore SA1403 // File may only contain a single namespace

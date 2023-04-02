@@ -268,13 +268,13 @@ namespace Mmogf.Core
             return adjustedPos;
         }
 
-        public void UpdateEntity<T>(int entityId, short componentId, T component) where T : IEntityComponent
+        public void UpdateEntity<T>(EntityId entityId, short componentId, T component) where T : IEntityComponent
         {
             GameObjectRepresentation.UpdateEntity(entityId, componentId, component);
             Client.SendEntityUpdate(entityId, componentId, component);
         }
 
-        public void UpdateEntity<T>(int entityId, T component) where T : IEntityComponent
+        public void UpdateEntity<T>(EntityId entityId, T component) where T : IEntityComponent
         {
             GameObjectRepresentation.UpdateEntity(entityId, component.GetComponentId(), component);
             Client.SendEntityUpdate(entityId, component.GetComponentId(), component);
@@ -294,10 +294,10 @@ namespace Mmogf.Core
 
         public string SendWorldCommand<T, TRequest, TResponse>(TRequest request, System.Action<CommandResult<T, TRequest, TResponse>> callback = null, float timeout = 10f) where T : ICommandBase<TRequest, TResponse>, IWorldCommand, new() where TRequest : struct where TResponse : struct
         {
-            return SendCommand(0, 0, request, callback, timeout);
+            return SendCommand(new EntityId(), 0, request, callback, timeout);
         }
 
-        public string SendCommand<T, TRequest, TResponse>(int entityId, short componentId, TRequest request, System.Action<CommandResult<T, TRequest, TResponse>> callback = null, float timeout = 10f) where T : ICommandBase<TRequest, TResponse>, new () where TRequest : struct where TResponse : struct
+        public string SendCommand<T, TRequest, TResponse>(EntityId entityId, short componentId, TRequest request, System.Action<CommandResult<T, TRequest, TResponse>> callback = null, float timeout = 10f) where T : ICommandBase<TRequest, TResponse>, new () where TRequest : struct where TResponse : struct
         {
             var command = new T()
             {
@@ -316,7 +316,7 @@ namespace Mmogf.Core
 
             Client.SendCommandResponseFailure(request, CommandStatus.Failure, message);
         }
-        public void SendEvent<T>(int entityId, short componentId, T eventPayload) where T : IEvent
+        public void SendEvent<T>(EntityId entityId, short componentId, T eventPayload) where T : IEvent
         {
             Client.SendEvent(entityId, componentId, eventPayload);
         }

@@ -6,15 +6,13 @@
 #pragma warning disable 612
 #pragma warning disable 414
 #pragma warning disable 168
+#pragma warning disable CS1591 // document public APIs
 
-#pragma warning disable SA1200 // Using directives should be placed correctly
 #pragma warning disable SA1312 // Variable names should begin with lower-case letter
 #pragma warning disable SA1649 // File name should match first type name
 
 namespace MessagePack.Resolvers
 {
-    using System;
-
     public class MmogfCoreResolver : global::MessagePack.IFormatterResolver
     {
         public static readonly global::MessagePack.IFormatterResolver Instance = new MmogfCoreResolver();
@@ -45,11 +43,11 @@ namespace MessagePack.Resolvers
 
     internal static class MmogfCoreResolverGetFormatterHelper
     {
-        private static readonly global::System.Collections.Generic.Dictionary<Type, int> lookup;
+        private static readonly global::System.Collections.Generic.Dictionary<global::System.Type, int> lookup;
 
         static MmogfCoreResolverGetFormatterHelper()
         {
-            lookup = new global::System.Collections.Generic.Dictionary<Type, int>(42)
+            lookup = new global::System.Collections.Generic.Dictionary<global::System.Type, int>(43)
             {
                 { typeof(global::Mmogf.Core.ConnectPlayerRequest?), 0 },
                 { typeof(global::Mmogf.Core.CreateEntityRequest?), 1 },
@@ -57,8 +55,8 @@ namespace MessagePack.Resolvers
                 { typeof(global::Mmogf.Core.NothingInternal?), 3 },
                 { typeof(global::System.Collections.Generic.Dictionary<short, byte[]>), 4 },
                 { typeof(global::System.Collections.Generic.List<global::Mmogf.Core.Acl>), 5 },
-                { typeof(global::System.Collections.Generic.List<global::Mmogf.Core.EntityWorldConfig>), 6 },
-                { typeof(global::System.Collections.Generic.List<int>), 7 },
+                { typeof(global::System.Collections.Generic.List<global::Mmogf.Core.EntityId>), 6 },
+                { typeof(global::System.Collections.Generic.List<global::Mmogf.Core.EntityWorldConfig>), 7 },
                 { typeof(global::Mmogf.Core.CommandStatus), 8 },
                 { typeof(global::Mmogf.Core.ServerCodes), 9 },
                 { typeof(global::Mmogf.Core.Acl), 10 },
@@ -71,32 +69,33 @@ namespace MessagePack.Resolvers
                 { typeof(global::Mmogf.Core.CreateEntityRequest), 17 },
                 { typeof(global::Mmogf.Core.DeleteEntityRequest), 18 },
                 { typeof(global::Mmogf.Core.EntityCheckout), 19 },
-                { typeof(global::Mmogf.Core.EntityInfo), 20 },
-                { typeof(global::Mmogf.Core.EntityType), 21 },
-                { typeof(global::Mmogf.Core.EntityUpdate), 22 },
-                { typeof(global::Mmogf.Core.EntityWorldConfig), 23 },
-                { typeof(global::Mmogf.Core.EventData), 24 },
-                { typeof(global::Mmogf.Core.EventRequest), 25 },
-                { typeof(global::Mmogf.Core.FixedVector3), 26 },
-                { typeof(global::Mmogf.Core.GameData), 27 },
-                { typeof(global::Mmogf.Core.MmoMessage), 28 },
-                { typeof(global::Mmogf.Core.NothingInternal), 29 },
-                { typeof(global::Mmogf.Core.PlayerCreator), 30 },
-                { typeof(global::Mmogf.Core.PlayerCreator.ConnectPlayer), 31 },
-                { typeof(global::Mmogf.Core.PlayerHeartbeatClient), 32 },
-                { typeof(global::Mmogf.Core.PlayerHeartbeatClient.RequestHeartbeat), 33 },
-                { typeof(global::Mmogf.Core.PlayerHeartbeatServer), 34 },
-                { typeof(global::Mmogf.Core.Rotation), 35 },
-                { typeof(global::Mmogf.Core.ServerConnect), 36 },
-                { typeof(global::Mmogf.Core.World.ChangeInterestAreaCommand), 37 },
-                { typeof(global::Mmogf.Core.World.CreateEntity), 38 },
-                { typeof(global::Mmogf.Core.World.DeleteEntity), 39 },
-                { typeof(global::Mmogf.Core.World.PingCommand), 40 },
-                { typeof(global::Mmogf.Core.WorldConfig), 41 },
+                { typeof(global::Mmogf.Core.EntityId), 20 },
+                { typeof(global::Mmogf.Core.EntityInfo), 21 },
+                { typeof(global::Mmogf.Core.EntityType), 22 },
+                { typeof(global::Mmogf.Core.EntityUpdate), 23 },
+                { typeof(global::Mmogf.Core.EntityWorldConfig), 24 },
+                { typeof(global::Mmogf.Core.EventData), 25 },
+                { typeof(global::Mmogf.Core.EventRequest), 26 },
+                { typeof(global::Mmogf.Core.FixedVector3), 27 },
+                { typeof(global::Mmogf.Core.GameData), 28 },
+                { typeof(global::Mmogf.Core.MmoMessage), 29 },
+                { typeof(global::Mmogf.Core.NothingInternal), 30 },
+                { typeof(global::Mmogf.Core.PlayerCreator), 31 },
+                { typeof(global::Mmogf.Core.PlayerCreator.ConnectPlayer), 32 },
+                { typeof(global::Mmogf.Core.PlayerHeartbeatClient), 33 },
+                { typeof(global::Mmogf.Core.PlayerHeartbeatClient.RequestHeartbeat), 34 },
+                { typeof(global::Mmogf.Core.PlayerHeartbeatServer), 35 },
+                { typeof(global::Mmogf.Core.Rotation), 36 },
+                { typeof(global::Mmogf.Core.ServerConnect), 37 },
+                { typeof(global::Mmogf.Core.World.ChangeInterestAreaCommand), 38 },
+                { typeof(global::Mmogf.Core.World.CreateEntity), 39 },
+                { typeof(global::Mmogf.Core.World.DeleteEntity), 40 },
+                { typeof(global::Mmogf.Core.World.PingCommand), 41 },
+                { typeof(global::Mmogf.Core.WorldConfig), 42 },
             };
         }
 
-        internal static object GetFormatter(Type t)
+        internal static object GetFormatter(global::System.Type t)
         {
             int key;
             if (!lookup.TryGetValue(t, out key))
@@ -112,8 +111,8 @@ namespace MessagePack.Resolvers
                 case 3: return new global::MessagePack.Formatters.NullableFormatter<global::Mmogf.Core.NothingInternal>();
                 case 4: return new global::MessagePack.Formatters.DictionaryFormatter<short, byte[]>();
                 case 5: return new global::MessagePack.Formatters.ListFormatter<global::Mmogf.Core.Acl>();
-                case 6: return new global::MessagePack.Formatters.ListFormatter<global::Mmogf.Core.EntityWorldConfig>();
-                case 7: return new global::MessagePack.Formatters.ListFormatter<int>();
+                case 6: return new global::MessagePack.Formatters.ListFormatter<global::Mmogf.Core.EntityId>();
+                case 7: return new global::MessagePack.Formatters.ListFormatter<global::Mmogf.Core.EntityWorldConfig>();
                 case 8: return new MessagePack.Formatters.Mmogf.Core.CommandStatusFormatter();
                 case 9: return new MessagePack.Formatters.Mmogf.Core.ServerCodesFormatter();
                 case 10: return new MessagePack.Formatters.Mmogf.Core.AclFormatter();
@@ -126,28 +125,29 @@ namespace MessagePack.Resolvers
                 case 17: return new MessagePack.Formatters.Mmogf.Core.CreateEntityRequestFormatter();
                 case 18: return new MessagePack.Formatters.Mmogf.Core.DeleteEntityRequestFormatter();
                 case 19: return new MessagePack.Formatters.Mmogf.Core.EntityCheckoutFormatter();
-                case 20: return new MessagePack.Formatters.Mmogf.Core.EntityInfoFormatter();
-                case 21: return new MessagePack.Formatters.Mmogf.Core.EntityTypeFormatter();
-                case 22: return new MessagePack.Formatters.Mmogf.Core.EntityUpdateFormatter();
-                case 23: return new MessagePack.Formatters.Mmogf.Core.EntityWorldConfigFormatter();
-                case 24: return new MessagePack.Formatters.Mmogf.Core.EventDataFormatter();
-                case 25: return new MessagePack.Formatters.Mmogf.Core.EventRequestFormatter();
-                case 26: return new MessagePack.Formatters.Mmogf.Core.FixedVector3Formatter();
-                case 27: return new MessagePack.Formatters.Mmogf.Core.GameDataFormatter();
-                case 28: return new MessagePack.Formatters.Mmogf.Core.MmoMessageFormatter();
-                case 29: return new MessagePack.Formatters.Mmogf.Core.NothingInternalFormatter();
-                case 30: return new MessagePack.Formatters.Mmogf.Core.PlayerCreatorFormatter();
-                case 31: return new MessagePack.Formatters.Mmogf.Core.PlayerCreator_ConnectPlayerFormatter();
-                case 32: return new MessagePack.Formatters.Mmogf.Core.PlayerHeartbeatClientFormatter();
-                case 33: return new MessagePack.Formatters.Mmogf.Core.PlayerHeartbeatClient_RequestHeartbeatFormatter();
-                case 34: return new MessagePack.Formatters.Mmogf.Core.PlayerHeartbeatServerFormatter();
-                case 35: return new MessagePack.Formatters.Mmogf.Core.RotationFormatter();
-                case 36: return new MessagePack.Formatters.Mmogf.Core.ServerConnectFormatter();
-                case 37: return new MessagePack.Formatters.Mmogf.Core.World_ChangeInterestAreaCommandFormatter();
-                case 38: return new MessagePack.Formatters.Mmogf.Core.World_CreateEntityFormatter();
-                case 39: return new MessagePack.Formatters.Mmogf.Core.World_DeleteEntityFormatter();
-                case 40: return new MessagePack.Formatters.Mmogf.Core.World_PingCommandFormatter();
-                case 41: return new MessagePack.Formatters.Mmogf.Core.WorldConfigFormatter();
+                case 20: return new MessagePack.Formatters.Mmogf.Core.EntityIdFormatter();
+                case 21: return new MessagePack.Formatters.Mmogf.Core.EntityInfoFormatter();
+                case 22: return new MessagePack.Formatters.Mmogf.Core.EntityTypeFormatter();
+                case 23: return new MessagePack.Formatters.Mmogf.Core.EntityUpdateFormatter();
+                case 24: return new MessagePack.Formatters.Mmogf.Core.EntityWorldConfigFormatter();
+                case 25: return new MessagePack.Formatters.Mmogf.Core.EventDataFormatter();
+                case 26: return new MessagePack.Formatters.Mmogf.Core.EventRequestFormatter();
+                case 27: return new MessagePack.Formatters.Mmogf.Core.FixedVector3Formatter();
+                case 28: return new MessagePack.Formatters.Mmogf.Core.GameDataFormatter();
+                case 29: return new MessagePack.Formatters.Mmogf.Core.MmoMessageFormatter();
+                case 30: return new MessagePack.Formatters.Mmogf.Core.NothingInternalFormatter();
+                case 31: return new MessagePack.Formatters.Mmogf.Core.PlayerCreatorFormatter();
+                case 32: return new MessagePack.Formatters.Mmogf.Core.PlayerCreator_ConnectPlayerFormatter();
+                case 33: return new MessagePack.Formatters.Mmogf.Core.PlayerHeartbeatClientFormatter();
+                case 34: return new MessagePack.Formatters.Mmogf.Core.PlayerHeartbeatClient_RequestHeartbeatFormatter();
+                case 35: return new MessagePack.Formatters.Mmogf.Core.PlayerHeartbeatServerFormatter();
+                case 36: return new MessagePack.Formatters.Mmogf.Core.RotationFormatter();
+                case 37: return new MessagePack.Formatters.Mmogf.Core.ServerConnectFormatter();
+                case 38: return new MessagePack.Formatters.Mmogf.Core.World_ChangeInterestAreaCommandFormatter();
+                case 39: return new MessagePack.Formatters.Mmogf.Core.World_CreateEntityFormatter();
+                case 40: return new MessagePack.Formatters.Mmogf.Core.World_DeleteEntityFormatter();
+                case 41: return new MessagePack.Formatters.Mmogf.Core.World_PingCommandFormatter();
+                case 42: return new MessagePack.Formatters.Mmogf.Core.WorldConfigFormatter();
                 default: return null;
             }
         }
@@ -160,5 +160,4 @@ namespace MessagePack.Resolvers
 #pragma warning restore 612
 
 #pragma warning restore SA1312 // Variable names should begin with lower-case letter
-#pragma warning restore SA1200 // Using directives should be placed correctly
 #pragma warning restore SA1649 // File name should match first type name

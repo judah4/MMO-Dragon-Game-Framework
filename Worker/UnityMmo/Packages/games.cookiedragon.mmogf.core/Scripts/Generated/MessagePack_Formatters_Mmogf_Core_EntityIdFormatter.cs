@@ -16,23 +16,42 @@
 
 namespace MessagePack.Formatters.Mmogf.Core
 {
-    public sealed class NothingInternalFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Mmogf.Core.NothingInternal>
+    public sealed class EntityIdFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Mmogf.Core.EntityId>
     {
 
-        public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Mmogf.Core.NothingInternal value, global::MessagePack.MessagePackSerializerOptions options)
+        public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Mmogf.Core.EntityId value, global::MessagePack.MessagePackSerializerOptions options)
         {
-            writer.WriteArrayHeader(0);
+            writer.WriteArrayHeader(1);
+            writer.Write(value.Id);
         }
 
-        public global::Mmogf.Core.NothingInternal Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
+        public global::Mmogf.Core.EntityId Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
         {
             if (reader.TryReadNil())
             {
                 throw new global::System.InvalidOperationException("typecode is null, struct not supported");
             }
 
-            reader.Skip();
-            return new global::Mmogf.Core.NothingInternal();
+            options.Security.DepthStep(ref reader);
+            var length = reader.ReadArrayHeader();
+            var __Id__ = default(int);
+
+            for (int i = 0; i < length; i++)
+            {
+                switch (i)
+                {
+                    case 0:
+                        __Id__ = reader.ReadInt32();
+                        break;
+                    default:
+                        reader.Skip();
+                        break;
+                }
+            }
+
+            var ____result = new global::Mmogf.Core.EntityId(__Id__);
+            reader.Depth--;
+            return ____result;
         }
     }
 
