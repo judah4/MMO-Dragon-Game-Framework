@@ -7,7 +7,7 @@ namespace Mmogf.Core
     public struct EntityInfo : IMessage
     {
         [Key(0)]
-        public int EntityId { get; set; }
+        public EntityId EntityId { get; set; }
         [Key(1)]
         public Dictionary<short, byte[]> EntityData { get; set; }
 

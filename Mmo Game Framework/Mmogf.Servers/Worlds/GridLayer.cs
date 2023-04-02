@@ -13,15 +13,15 @@ namespace Mmogf.Servers.Worlds
 
     public sealed class GridLayer
     {
-        private ConcurrentDictionary<GridInt, List<int>> _cells = new ConcurrentDictionary<GridInt, List<int>>();
-        private ConcurrentDictionary<int, GridInt> _entityCells = new ConcurrentDictionary<int, GridInt>();
+        private ConcurrentDictionary<GridInt, List<EntityId>> _cells = new ConcurrentDictionary<GridInt, List<EntityId>>();
+        private ConcurrentDictionary<EntityId, GridInt> _entityCells = new ConcurrentDictionary<EntityId, GridInt>();
         private ConcurrentDictionary<PositionInt, List<long>> _workerSubscriptions = new ConcurrentDictionary<PositionInt, List<long>>();
         //indexed by position, not grid
 
-        public event Action<int, List<long>> OnEntityAdd;
-        public event Action<int, List<long>> OnEntityRemove;
+        public event Action<EntityId, List<long>> OnEntityAdd;
+        public event Action<EntityId, List<long>> OnEntityRemove;
 
-        public ConcurrentDictionary<GridInt, List<int>> Cells => _cells;
+        public ConcurrentDictionary<GridInt, List<EntityId>> Cells => _cells;
         public int CellSize { get; private set; }
         public int Layer { get; private set; }
 
@@ -36,7 +36,7 @@ namespace Mmogf.Servers.Worlds
             return new PositionInt(grid.X * CellSize, grid.Y * CellSize, grid.Z * CellSize);
         }
 
-        public (GridInt grid, PositionInt position, List<int> entities) AddEntity(Entity entity)
+        public (GridInt grid, PositionInt position, List<EntityId> entities) AddEntity(Entity entity)
         {
             var pos = entity.Position;
             var cell = GetCell(pos);
@@ -62,7 +62,7 @@ namespace Mmogf.Servers.Worlds
             return cell;
         }
 
-        public List<int> RemoveEntity(Entity entity)
+        public List<EntityId> RemoveEntity(Entity entity)
         {
             var id = entity.EntityId;
             GridInt grid;
@@ -87,7 +87,7 @@ namespace Mmogf.Servers.Worlds
             return cell.entities;
         }
 
-        public (GridInt grid, PositionInt position, List<int> entities) GetCell(Position position)
+        public (GridInt grid, PositionInt position, List<EntityId> entities) GetCell(Position position)
         {
             var cellHalf = CellSize / 2.0;
 
@@ -95,21 +95,21 @@ namespace Mmogf.Servers.Worlds
             var cellY = (int)((Math.Abs(position.Y) + cellHalf) / CellSize) * (position.Y > 0 ? 1 : -1);
             var cellZ = (int)((Math.Abs(position.Z) + cellHalf) / CellSize) * (position.Z > 0 ? 1 : -1);
             //add mutex
-            List<int> cell;
+            List<EntityId> cell;
             var grid = new GridInt(cellX, cellY, cellZ);
             if (!_cells.TryGetValue(grid, out cell))
             {
-                cell = new List<int>(100);
+                cell = new List<EntityId>(100);
                 _cells.TryAdd(grid, cell);
             }
             var pos = GridIndexToPosition(grid);
             return (grid, pos, cell);
         }
 
-        public Dictionary<PositionInt, (GridInt grid, List<int> entities)> GetCellsInArea(Position position, float interestArea)
+        public Dictionary<PositionInt, (GridInt grid, List<EntityId> entities)> GetCellsInArea(Position position, float interestArea)
         {
             var radius = interestArea / 2.0f;
-            var cells = new Dictionary<PositionInt, (GridInt grid, List<int> entities)>(10);
+            var cells = new Dictionary<PositionInt, (GridInt grid, List<EntityId> entities)>(10);
 
             //check cell half vs radius check out, whichever is bigger
             var checkoutBoundary = Math.Min(CellSize / 2.0f, radius);
@@ -151,10 +151,10 @@ namespace Mmogf.Servers.Worlds
             return cells;
         }
 
-        public (List<int> addEntityIds, List<int> removeEntityIds, List<PositionInt> addCells, List<PositionInt> removeCells) UpdateWorkerInterestArea(WorkerConnection worker)
+        public (List<EntityId> addEntityIds, List<EntityId> removeEntityIds, List<PositionInt> addCells, List<PositionInt> removeCells) UpdateWorkerInterestArea(WorkerConnection worker)
         {
-            List<int> addEntityIds = new List<int>();
-            List<int> removeEntityIds = new List<int>();
+            List<EntityId> addEntityIds = new List<EntityId>();
+            var removeEntityIds = new List<EntityId>();
             var addCells = new List<PositionInt>();
             var removeCells = new List<PositionInt>();
             var cells = GetCellsInArea(worker.InterestPosition, worker.InterestRange);

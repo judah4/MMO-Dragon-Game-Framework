@@ -1,8 +1,9 @@
+using MessagePack;
 using System;
 
 namespace Mmogf.Core
 {
-
+    [MessagePackObject]
     public struct EntityId
     {
 
@@ -11,6 +12,7 @@ namespace Mmogf.Core
            Id = id;
         }
 
+        [Key(0)]
         public int Id { get; }
 
         public bool IsValid()

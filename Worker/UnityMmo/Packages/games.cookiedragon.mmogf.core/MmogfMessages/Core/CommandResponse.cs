@@ -28,7 +28,7 @@ namespace Mmogf.Core
         public long RequesterId { get; set; }
 
         [Key(4)]
-        public int EntityId { get; set; }
+        public EntityId EntityId { get; set; }
         [Key(5)]
         public short ComponentId { get; set; }
         [Key(6)]

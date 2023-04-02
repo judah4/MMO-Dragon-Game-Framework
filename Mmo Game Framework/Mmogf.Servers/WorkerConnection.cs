@@ -16,15 +16,18 @@ namespace MmoGameFramework
         public Lidgren.Network.NetConnection Connection { get; set; }
 
         //the int value doesn't matter, we just want the concurrent set up.
+        /// <summary>
+        /// Key is layer, value is cell position.
+        /// </summary>
         public ConcurrentDictionary<int, ConcurrentDictionary<PositionInt, int>> CellSubs { get; set; }
         /// <summary>
         /// Used for sending entity for when moving cells
         /// </summary>
-        public ConcurrentDictionary<int,int> EntitiesToAdd { get; set; }
+        public ConcurrentDictionary<EntityId, EntityId> EntitiesToAdd { get; set; }
         /// <summary>
         /// Used for removing entity for when moving cells
         /// </summary>
-        public ConcurrentDictionary<int, int> EntitiesToRemove { get; set; }
+        public ConcurrentDictionary<EntityId, EntityId> EntitiesToRemove { get; set; }
 
         //figure out how to specify interest layers...
         /*
@@ -49,8 +52,8 @@ namespace MmoGameFramework
             InterestPosition = interestPosition;
             InterestRange = interestRange;
             Connection = senderConnection;
-            EntitiesToAdd = new ConcurrentDictionary<int, int> ();
-            EntitiesToRemove = new ConcurrentDictionary<int, int>();
+            EntitiesToAdd = new ConcurrentDictionary<EntityId, EntityId> ();
+            EntitiesToRemove = new ConcurrentDictionary<EntityId, EntityId>();
             CellSubs = new ConcurrentDictionary<int, ConcurrentDictionary<PositionInt, int>>();
         }
 
