@@ -31,8 +31,8 @@ namespace MmoGameFramework
         public event Action<EventRequest> OnEntityEvent;
         public event Action<Entity> OnEntityDelete;
 
-        public event Action<int, List<long>> OnEntityAddSubscription;
-        public event Action<int, List<long>> OnEntityRemoveSubscription;
+        public event Action<EntityId, List<long>> OnEntityAddSubscription;
+        public event Action<EntityId, List<long>> OnEntityRemoveSubscription;
 
         public EntityStore(ILogger<EntityStore> logger, IStorageService storageService, int cellSize)
         {
@@ -54,27 +54,27 @@ namespace MmoGameFramework
             GridLayers.Add(grid);
         }
 
-        private void ProcessOnEntityAdd(int entityId, List<long> workers)
+        private void ProcessOnEntityAdd(EntityId entityId, List<long> workers)
         {
             OnEntityAddSubscription?.Invoke(entityId, workers);
         }
 
-        private void ProcessOnEntityRemove(int entityId, List<long> workers)
+        private void ProcessOnEntityRemove(EntityId entityId, List<long> workers)
         {
             OnEntityRemoveSubscription?.Invoke(entityId, workers);
         }
 
 
-        public Entity Create(string entityType, Position position, Rotation rotation, List<Acl> acls, int? entityId = null, Dictionary<short, byte[]> additionalData = null)
+        public Entity Create(string entityType, Position position, Rotation rotation, List<Acl> acls, EntityId? entityId = null, Dictionary<short, byte[]> additionalData = null)
         {
             if(entityId.HasValue)
             {
-                if(lastId <= entityId.Value)
-                    lastId = entityId.Value + 1; 
+                if(lastId <= entityId.Value.Id)
+                    lastId = entityId.Value.Id + 1; 
             }
             else
             {
-                entityId = ++lastId;
+                entityId = new EntityId(++lastId);
             }
 
             //todo: Validate acl list for data passsed
@@ -216,7 +216,7 @@ namespace MmoGameFramework
             OnEntityEvent?.Invoke(eventRequest);
         }
 
-        public void Delete(int entityId)
+        public void Delete(EntityId entityId)
         {
             var entity = GetEntity(entityId);
             if(entity == null)
@@ -233,10 +233,10 @@ namespace MmoGameFramework
 
         }
 
-        public (List<int> addEntityIds, List<int> removeEntityIds) UpdateWorkerInterestArea(WorkerConnection worker)
+        public (List<EntityId> addEntityIds, List<EntityId> removeEntityIds) UpdateWorkerInterestArea(WorkerConnection worker)
         {
-            List<int> addEntityIds = new List<int>();
-            List<int> removeEntityIds = new List<int>();
+            var addEntityIds = new List<EntityId>();
+            var removeEntityIds = new List<EntityId>();
             foreach (var layer in GridLayers)
             {
                 var results = layer.UpdateWorkerInterestArea(worker);

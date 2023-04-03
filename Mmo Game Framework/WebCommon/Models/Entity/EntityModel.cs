@@ -4,6 +4,6 @@ namespace MmoGameFramework.Models;
 
 public class EntityModel
 {
-    public long Id { get; set; }
+    public EntityId Id { get; set; }
     public Position Position { get; set; }
 }

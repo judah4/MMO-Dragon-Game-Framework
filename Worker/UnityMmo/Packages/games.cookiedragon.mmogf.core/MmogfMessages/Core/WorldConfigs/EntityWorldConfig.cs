@@ -10,7 +10,7 @@ namespace Mmogf.Core
         public string Name { get; set; }
 
         [Key(1)]
-        public int EntityId { get; set; }
+        public EntityId EntityId { get; set; }
         [Key(2)]
         public Dictionary<short, byte[]> EntityData { get; set; }
 
@@ -54,7 +54,7 @@ namespace Mmogf.Core
             return createEntity;
         }
 
-        public static EntityWorldConfig Create(string name, int entityId, Position position, Rotation rotation, List<Acl> acls, Dictionary<short, IEntityComponent> additionalData)
+        public static EntityWorldConfig Create(string name, EntityId entityId, Position position, Rotation rotation, List<Acl> acls, Dictionary<short, IEntityComponent> additionalData)
         {
 
             var data = new Dictionary<short, byte[]>();

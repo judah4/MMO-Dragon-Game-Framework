@@ -16,7 +16,7 @@ namespace Mmogf.Core
         public string RequestorWorkerType { get; set; }
 
         [Key(3)]
-        public int EntityId { get; set; }
+        public EntityId EntityId { get; set; }
         [Key(4)]
         public short ComponentId { get; set; }
         [Key(5)]

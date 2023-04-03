@@ -6,11 +6,11 @@ using UnityEngine;
 namespace Mmogf.Core
 {
     [MessagePackObject]
-    public partial struct EntityCheckout
+    public struct EntityCheckout
     {
 
         [Key(0)]
-        public List<int> Checkouts { get; set; }
+        public List<EntityId> Checkouts { get; set; }
         [Key(1)]
         public bool Remove { get; set; }
     }

@@ -7,7 +7,7 @@ namespace Mmogf.Core
     public struct EventRequest : IMessage
     {
         [Key(0)]
-        public int EntityId { get; set; }
+        public EntityId EntityId { get; set; }
         [Key(1)]
         public short ComponentId { get; set; }
         [Key(2)]

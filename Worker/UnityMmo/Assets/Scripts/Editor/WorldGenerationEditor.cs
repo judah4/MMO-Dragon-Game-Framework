@@ -35,7 +35,7 @@ namespace Mmogf
                 }
             };
 
-            var playerCreatorEntity = EntityWorldConfig.Create("PlayerCreator", 1, new Position() { X = 0, Z = 0 }, Rotation.Zero, new List<Acl>()
+            var playerCreatorEntity = EntityWorldConfig.Create("PlayerCreator", new EntityId(1), new Position() { X = 0, Z = 0 }, Rotation.Zero, new List<Acl>()
             {
                 new Acl() { ComponentId = FixedVector3.ComponentId, WorkerType = "Dragon-Worker" },
                 new Acl() { ComponentId = Rotation.ComponentId, WorkerType = "Dragon-Worker" },
@@ -50,14 +50,14 @@ namespace Mmogf
             if(playerOnly == false)
             {
 
-                worldConfig.Entities.Add(EntityWorldConfig.Create("NpcSpawner", 2, new Position() { X = -3, Y = 0, Z = -25 }, Rotation.Zero, new List<Acl>()
+                worldConfig.Entities.Add(EntityWorldConfig.Create("NpcSpawner", new EntityId(2), new Position() { X = -3, Y = 0, Z = -25 }, Rotation.Zero, new List<Acl>()
                 {
                     new Acl() { ComponentId = FixedVector3.ComponentId, WorkerType = "Dragon-Worker" },
                     new Acl() { ComponentId = Rotation.ComponentId, WorkerType = "Dragon-Worker" },
                     new Acl() { ComponentId = Acls.ComponentId, WorkerType = "Dragon-Worker" },
                 }, new Dictionary<short, IEntityComponent>()));
 
-                worldConfig.Entities.Add(EntityWorldConfig.Create("Cube", 3, new Position() { X = 3, Z = 3 }, Rotation.Zero, new List<Acl>()
+                worldConfig.Entities.Add(EntityWorldConfig.Create("Cube", new EntityId(3), new Position() { X = 3, Z = 3 }, Rotation.Zero, new List<Acl>()
                 {
                     new Acl() { ComponentId = FixedVector3.ComponentId, WorkerType = "Dragon-Worker" },
                     new Acl() { ComponentId = Rotation.ComponentId, WorkerType = "Dragon-Worker" },
@@ -70,7 +70,7 @@ namespace Mmogf
                 {
                     for (int y = 0; y < 5; y++)
                     {
-                        worldConfig.Entities.Add(EntityWorldConfig.Create("Ship", entityId++, new Position() { X = x * 10 - 50, Z = y * 10 - 50 }, Quaternion.Euler(0, Random.Range(-90, 90), 0).ToRotation(), new List<Acl>()
+                        worldConfig.Entities.Add(EntityWorldConfig.Create("Ship", new EntityId(entityId++), new Position() { X = x * 10 - 50, Z = y * 10 - 50 }, Quaternion.Euler(0, Random.Range(-90, 90), 0).ToRotation(), new List<Acl>()
                         {
                             new Acl() { ComponentId = FixedVector3.ComponentId, WorkerType = "Dragon-Worker" },
                             new Acl() { ComponentId = Rotation.ComponentId, WorkerType = "Dragon-Worker" },

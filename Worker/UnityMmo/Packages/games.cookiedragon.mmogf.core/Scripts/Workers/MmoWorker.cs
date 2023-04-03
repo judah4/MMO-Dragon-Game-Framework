@@ -192,7 +192,7 @@ namespace Mmogf.Core
                                 //}
 
                                 OnEntityCreation?.Invoke(entityInfo);
-                                _dataStatisticsReceived.RecordMessage(entityInfo.EntityId, im.LengthBytes, DataStat.Entity);
+                                _dataStatisticsReceived.RecordMessage(entityInfo.EntityId.Id, im.LengthBytes, DataStat.Entity);
                                 break;
                             case ServerCodes.EntityCheckout:
                                 var entityCheckout = MessagePackSerializer.Deserialize<EntityCheckout>(simpleData.Info);
@@ -207,7 +207,7 @@ namespace Mmogf.Core
                             case ServerCodes.EntityDelete:
                                 var entityDelete = MessagePackSerializer.Deserialize<EntityInfo>(simpleData.Info);
                                 OnEntityDelete?.Invoke(entityDelete);
-                                _dataStatisticsReceived.RecordMessage(entityDelete.EntityId, im.LengthBytes, DataStat.Entity);
+                                _dataStatisticsReceived.RecordMessage(entityDelete.EntityId.Id, im.LengthBytes, DataStat.Entity);
                                 break;
                             case ServerCodes.EntityEvent:
                                 var eventRequest = MessagePackSerializer.Deserialize<EventRequest>(simpleData.Info);
@@ -281,7 +281,7 @@ namespace Mmogf.Core
             _dataStatisticsSent.RecordMessage(World.ChangeInterestAreaCommand.CommandId, byteLength, DataStat.Command);
         }
 
-        public void SendEntityUpdate<T>(int entityId, short componentId, T message) where T : IMessage
+        public void SendEntityUpdate<T>(EntityId entityId, short componentId, T message) where T : IMessage
         {
 
             var entityUpdate = new EntityUpdate()
@@ -331,7 +331,7 @@ namespace Mmogf.Core
             var timespan = DateTime.UtcNow - _pingRequestAt;
             Ping = (int)timespan.TotalMilliseconds;
         }
-        public string SendCommand<T,TRequest,TResponse>(int entityId, short componentId, T command, Action<CommandResult<T, TRequest, TResponse>> callback, float timeout = 10f) where T : ICommandBase<TRequest,TResponse> where TRequest : struct where TResponse : struct
+        public string SendCommand<T,TRequest,TResponse>(EntityId entityId, short componentId, T command, Action<CommandResult<T, TRequest, TResponse>> callback, float timeout = 10f) where T : ICommandBase<TRequest,TResponse> where TRequest : struct where TResponse : struct
         {
             var requestId = Guid.NewGuid().ToString();
 
@@ -384,7 +384,7 @@ namespace Mmogf.Core
             _dataStatisticsSent.RecordMessage(request.CommandId, byteLength, DataStat.Command);
         }
 
-        public void SendEvent<T>(int entityId, short componentId, T eventPayload) where T : IEvent
+        public void SendEvent<T>(EntityId entityId, short componentId, T eventPayload) where T : IEvent
         {
             var byteLength = Send(new MmoMessage()
             {

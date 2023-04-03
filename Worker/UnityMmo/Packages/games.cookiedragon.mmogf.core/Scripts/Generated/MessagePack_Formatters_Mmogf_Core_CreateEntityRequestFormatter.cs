@@ -6,9 +6,9 @@
 #pragma warning disable 612
 #pragma warning disable 414
 #pragma warning disable 168
+#pragma warning disable CS1591 // document public APIs
 
 #pragma warning disable SA1129 // Do not use default value type constructor
-#pragma warning disable SA1200 // Using directives should be placed correctly
 #pragma warning disable SA1309 // Field names should not begin with underscore
 #pragma warning disable SA1312 // Variable names should begin with lower-case letter
 #pragma warning disable SA1403 // File may only contain a single namespace
@@ -16,9 +16,6 @@
 
 namespace MessagePack.Formatters.Mmogf.Core
 {
-    using global::System.Buffers;
-    using global::MessagePack;
-
     public sealed class CreateEntityRequestFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Mmogf.Core.CreateEntityRequest>
     {
 
@@ -26,11 +23,11 @@ namespace MessagePack.Formatters.Mmogf.Core
         {
             global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
             writer.WriteArrayHeader(5);
-            formatterResolver.GetFormatterWithVerify<string>().Serialize(ref writer, value.EntityType, options);
-            formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.FixedVector3>().Serialize(ref writer, value.Position, options);
-            formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.Rotation>().Serialize(ref writer, value.Rotation, options);
-            formatterResolver.GetFormatterWithVerify<global::System.Collections.Generic.Dictionary<short, byte[]>>().Serialize(ref writer, value.Components, options);
-            formatterResolver.GetFormatterWithVerify<global::System.Collections.Generic.List<global::Mmogf.Core.Acl>>().Serialize(ref writer, value.Acls, options);
+            global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Serialize(ref writer, value.EntityType, options);
+            global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<global::Mmogf.Core.FixedVector3>(formatterResolver).Serialize(ref writer, value.Position, options);
+            global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<global::Mmogf.Core.Rotation>(formatterResolver).Serialize(ref writer, value.Rotation, options);
+            global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<global::System.Collections.Generic.Dictionary<short, byte[]>>(formatterResolver).Serialize(ref writer, value.Components, options);
+            global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<global::System.Collections.Generic.List<global::Mmogf.Core.Acl>>(formatterResolver).Serialize(ref writer, value.Acls, options);
         }
 
         public global::Mmogf.Core.CreateEntityRequest Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
@@ -54,19 +51,19 @@ namespace MessagePack.Formatters.Mmogf.Core
                 switch (i)
                 {
                     case 0:
-                        __EntityType__ = formatterResolver.GetFormatterWithVerify<string>().Deserialize(ref reader, options);
+                        __EntityType__ = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Deserialize(ref reader, options);
                         break;
                     case 1:
-                        __Position__ = formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.FixedVector3>().Deserialize(ref reader, options);
+                        __Position__ = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<global::Mmogf.Core.FixedVector3>(formatterResolver).Deserialize(ref reader, options);
                         break;
                     case 2:
-                        __Rotation__ = formatterResolver.GetFormatterWithVerify<global::Mmogf.Core.Rotation>().Deserialize(ref reader, options);
+                        __Rotation__ = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<global::Mmogf.Core.Rotation>(formatterResolver).Deserialize(ref reader, options);
                         break;
                     case 3:
-                        __Components__ = formatterResolver.GetFormatterWithVerify<global::System.Collections.Generic.Dictionary<short, byte[]>>().Deserialize(ref reader, options);
+                        __Components__ = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<global::System.Collections.Generic.Dictionary<short, byte[]>>(formatterResolver).Deserialize(ref reader, options);
                         break;
                     case 4:
-                        __Acls__ = formatterResolver.GetFormatterWithVerify<global::System.Collections.Generic.List<global::Mmogf.Core.Acl>>().Deserialize(ref reader, options);
+                        __Acls__ = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<global::System.Collections.Generic.List<global::Mmogf.Core.Acl>>(formatterResolver).Deserialize(ref reader, options);
                         break;
                     default:
                         reader.Skip();
@@ -79,6 +76,7 @@ namespace MessagePack.Formatters.Mmogf.Core
             return ____result;
         }
     }
+
 }
 
 #pragma warning restore 168
@@ -87,7 +85,6 @@ namespace MessagePack.Formatters.Mmogf.Core
 #pragma warning restore 612
 
 #pragma warning restore SA1129 // Do not use default value type constructor
-#pragma warning restore SA1200 // Using directives should be placed correctly
 #pragma warning restore SA1309 // Field names should not begin with underscore
 #pragma warning restore SA1312 // Variable names should begin with lower-case letter
 #pragma warning restore SA1403 // File may only contain a single namespace

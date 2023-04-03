@@ -33,9 +33,9 @@ namespace Mmogf.Core
     public struct DeleteEntityRequest
     {
         [Key(0)]
-        public int EntityId { get; set; }
+        public EntityId EntityId { get; set; }
 
-        public DeleteEntityRequest(int entityId)
+        public DeleteEntityRequest(EntityId entityId)
         {
             EntityId = entityId;
         }
