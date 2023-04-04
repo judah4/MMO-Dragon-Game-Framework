@@ -156,9 +156,9 @@ namespace Mmogf.Servers.Worlds
             return cells;
         }
 
-        public List<int> GetEntitiesInArea(Position position, float interestArea)
+        public List<EntityId> GetEntitiesInArea(Position position, float interestArea)
         {
-            var entityIds = new List<int>(100);
+            var entityIds = new List<EntityId>(100);
             var cells = GetCellsInArea(position, interestArea);
 
             foreach(var cell in cells)
@@ -168,7 +168,7 @@ namespace Mmogf.Servers.Worlds
             return entityIds;
         }
 
-        public (List<int> addEntityIds, List<int> removeEntityIds, List<PositionInt> addCells, List<PositionInt> removeCells) UpdateWorkerInterestArea(WorkerConnection worker)
+        public (List<EntityId> addEntityIds, List<EntityId> removeEntityIds, List<PositionInt> addCells, List<PositionInt> removeCells) UpdateWorkerInterestArea(WorkerConnection worker)
         {
             List<EntityId> addEntityIds = new List<EntityId>();
             var removeEntityIds = new List<EntityId>();

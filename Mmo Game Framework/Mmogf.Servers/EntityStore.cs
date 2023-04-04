@@ -129,7 +129,7 @@ namespace MmoGameFramework
 
         }
 
-        void RemoveEntity(int entityId)
+        void RemoveEntity(EntityId entityId)
         {
             _storageService.Remove($"Ent:{entityId}");
             var compIdKey = $"Ent:{entityId}:Comps";
@@ -148,7 +148,7 @@ namespace MmoGameFramework
 
         }
 
-        public Entity? GetEntity(int entityId)
+        public Entity? GetEntity(EntityId entityId)
         {
 
             //how do we create this entity info?
@@ -295,7 +295,7 @@ namespace MmoGameFramework
             return workerIds;
         }
 
-        public List<int> GetEntitiesInArea(Position position, float interestArea)
+        public List<EntityId> GetEntitiesInArea(Position position, float interestArea)
         {
             return GridLayers[0].GetEntitiesInArea(position, interestArea);
         }
