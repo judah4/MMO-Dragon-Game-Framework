@@ -17,6 +17,7 @@ namespace Mmogf.Servers.Worlds
         private ConcurrentDictionary<EntityId, GridInt> _entityCells = new ConcurrentDictionary<EntityId, GridInt>();
         private ConcurrentDictionary<PositionInt, List<long>> _workerSubscriptions = new ConcurrentDictionary<PositionInt, List<long>>();
         //indexed by position, not grid
+        private object _lock = new object();
 
         public event Action<EntityId, List<long>> OnEntityAdd;
         public event Action<EntityId, List<long>> OnEntityRemove;
@@ -70,19 +71,22 @@ namespace Mmogf.Servers.Worlds
                 return null;
             var cellPos = GridIndexToPosition(grid);
             var cell = GetCell(new Position(cellPos.X, cellPos.Y, cellPos.Z));
-            var ents = cell.entities;
-            ents.Remove(entity.EntityId);
-            //write back to _cells
-            if (_cells.TryUpdate(cell.grid, ents, cell.entities))
+            var ents = cell.entities; //todo: fix this list referecnce so we don't have to lock
+            lock(_lock)
             {
-                List<long> subs;
-                if (!_workerSubscriptions.TryGetValue(cell.position, out subs))
+                ents.Remove(entity.EntityId);
+                //write back to _cells
+                if (_cells.TryUpdate(cell.grid, ents, cell.entities))
                 {
-                    subs = new List<long>();
-                }
-                OnEntityRemove?.Invoke(entity.EntityId, subs);
-                _entityCells.TryRemove(entity.EntityId, out cell.grid);
+                    List<long> subs;
+                    if (!_workerSubscriptions.TryGetValue(cell.position, out subs))
+                    {
+                        subs = new List<long>();
+                    }
+                    OnEntityRemove?.Invoke(entity.EntityId, subs);
+                    _entityCells.TryRemove(entity.EntityId, out cell.grid);
 
+                }
             }
             return cell.entities;
         }
