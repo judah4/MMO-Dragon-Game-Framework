@@ -34,7 +34,7 @@ namespace Mmogf.Core
                 playerId = _testPlayerId;
             }
 
-            SendCommand<PlayerCreator.ConnectPlayer,ConnectPlayerRequest, NothingInternal>(1, PlayerCreator.ComponentId, 
+            SendCommand<PlayerCreator.ConnectPlayer,ConnectPlayerRequest, NothingInternal>(new EntityId(1), PlayerCreator.ComponentId, 
                 new ConnectPlayerRequest() { PlayerId = playerId }, response =>
             {
                 Debug.Log($"Player connect result! {response.CommandStatus} - {response.Message}");

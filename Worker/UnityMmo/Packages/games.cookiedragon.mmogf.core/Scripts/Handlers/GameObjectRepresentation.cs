@@ -10,13 +10,13 @@ using UnityEngine;
 public class GameObjectRepresentation
 {
 
-    public Dictionary<int, EntityGameObject> Entities => _entities;
+    public Dictionary<EntityId, EntityGameObject> Entities => _entities;
 
-    private Dictionary<int, EntityGameObject> _entities = new Dictionary<int, EntityGameObject>();
+    private Dictionary<EntityId, EntityGameObject> _entities = new Dictionary<EntityId, EntityGameObject>();
 
     private CommonHandler _server;
 
-    List<int> _cleanEntityIds = new List<int>();
+    List<EntityId> _cleanEntityIds = new List<EntityId>();
 
     public GameObjectRepresentation(CommonHandler commonHandler)
     {
@@ -124,7 +124,7 @@ public class GameObjectRepresentation
         DeleteEntity(entity.EntityId);
     }
 
-    public void DeleteEntity(int entityId)
+    public void DeleteEntity(EntityId entityId)
     {
         EntityGameObject entityGm;
 
@@ -135,7 +135,7 @@ public class GameObjectRepresentation
         _entities.Remove(entityId);
     }
 
-    public void UpdateEntity<T>(int entityId, int componentId, T message) where T : IEntityComponent
+    public void UpdateEntity<T>(EntityId entityId, int componentId, T message) where T : IEntityComponent
     {
         EntityGameObject entityGm;
         if (!_entities.TryGetValue(entityId, out entityGm))

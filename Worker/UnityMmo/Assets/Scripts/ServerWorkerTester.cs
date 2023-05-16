@@ -25,7 +25,7 @@ namespace Mmogf
             if (Input.GetKeyDown(KeyCode.Z))
             {
                 //create ship
-                _serverHandler.SendCommand< World.CreateEntity,CreateEntityRequest,NothingInternal> (0, 0, new CreateEntityRequest("Ship", new Position() { Y = 0, }.ToFixedVector3(), RandomHeading().ToRotation(), 
+                _serverHandler.SendWorldCommand<World.CreateEntity,CreateEntityRequest,NothingInternal> (new CreateEntityRequest("Ship", new Position() { Y = 0, }.ToFixedVector3(), RandomHeading().ToRotation(), 
                     new Dictionary<short, byte[]>() 
                     {
                         { Cannon.ComponentId, MessagePack.MessagePackSerializer.Serialize(new Cannon()) },
@@ -47,7 +47,7 @@ namespace Mmogf
             if (Input.GetKeyDown(KeyCode.X))
             {
                 //create shark
-                _serverHandler.SendCommand<World.CreateEntity,CreateEntityRequest,NothingInternal>(0, 0, new CreateEntityRequest("Shark", new Position() { Y = -5, }.ToFixedVector3(), RandomHeading().ToRotation(),
+                _serverHandler.SendWorldCommand<World.CreateEntity,CreateEntityRequest,NothingInternal>(new CreateEntityRequest("Shark", new Position() { Y = -5, }.ToFixedVector3(), RandomHeading().ToRotation(),
                     new Dictionary<short, byte[]>()
                     {
                         { Cannon.ComponentId, MessagePack.MessagePackSerializer.Serialize(new Cannon()) },
@@ -70,7 +70,7 @@ namespace Mmogf
                     if(((EntityType)entity.Value.Data[EntityType.ComponentId]).Name == "Ship")
                     {
                         Debug.Log($"Requesting delete: {entity.Key}");
-                        _serverHandler.SendCommand<World.DeleteEntity, DeleteEntityRequest, NothingInternal>(0, 0, new DeleteEntityRequest(entity.Key), response => {
+                        _serverHandler.SendWorldCommand<World.DeleteEntity, DeleteEntityRequest, NothingInternal>(new DeleteEntityRequest(entity.Key), response => {
                             Debug.Log($"Deleted Entity! {response.CommandStatus} - {response.Message}");
                         });
                         break;

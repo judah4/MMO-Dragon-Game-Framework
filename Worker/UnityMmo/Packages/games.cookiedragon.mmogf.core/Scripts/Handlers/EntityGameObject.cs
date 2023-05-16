@@ -9,7 +9,7 @@ using UnityEngine;
 
 public class EntityGameObject : MonoBehaviour
 {
-    public int EntityId;
+    public EntityId EntityId;
     public Dictionary<int, IEntityComponent> Data = new Dictionary<int, IEntityComponent>();
 
     public event Action<int> OnEntityUpdate;

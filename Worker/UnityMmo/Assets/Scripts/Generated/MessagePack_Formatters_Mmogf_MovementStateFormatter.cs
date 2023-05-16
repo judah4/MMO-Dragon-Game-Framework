@@ -6,9 +6,9 @@
 #pragma warning disable 612
 #pragma warning disable 414
 #pragma warning disable 168
+#pragma warning disable CS1591 // document public APIs
 
 #pragma warning disable SA1129 // Do not use default value type constructor
-#pragma warning disable SA1200 // Using directives should be placed correctly
 #pragma warning disable SA1309 // Field names should not begin with underscore
 #pragma warning disable SA1312 // Variable names should begin with lower-case letter
 #pragma warning disable SA1403 // File may only contain a single namespace
@@ -16,9 +16,6 @@
 
 namespace MessagePack.Formatters.Mmogf
 {
-    using global::System.Buffers;
-    using global::MessagePack;
-
     public sealed class MovementStateFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Mmogf.MovementState>
     {
 
@@ -28,7 +25,7 @@ namespace MessagePack.Formatters.Mmogf
             writer.WriteArrayHeader(3);
             writer.Write(value.Forward);
             writer.Write(value.Heading);
-            formatterResolver.GetFormatterWithVerify<global::Mmogf.Vector3d>().Serialize(ref writer, value.DesiredPosition, options);
+            global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<global::Mmogf.Vector3d>(formatterResolver).Serialize(ref writer, value.DesiredPosition, options);
         }
 
         public global::Mmogf.MovementState Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
@@ -54,7 +51,7 @@ namespace MessagePack.Formatters.Mmogf
                         ____result.Heading = reader.ReadSingle();
                         break;
                     case 2:
-                        ____result.DesiredPosition = formatterResolver.GetFormatterWithVerify<global::Mmogf.Vector3d>().Deserialize(ref reader, options);
+                        ____result.DesiredPosition = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<global::Mmogf.Vector3d>(formatterResolver).Deserialize(ref reader, options);
                         break;
                     default:
                         reader.Skip();
@@ -66,6 +63,7 @@ namespace MessagePack.Formatters.Mmogf
             return ____result;
         }
     }
+
 }
 
 #pragma warning restore 168
@@ -74,7 +72,6 @@ namespace MessagePack.Formatters.Mmogf
 #pragma warning restore 612
 
 #pragma warning restore SA1129 // Do not use default value type constructor
-#pragma warning restore SA1200 // Using directives should be placed correctly
 #pragma warning restore SA1309 // Field names should not begin with underscore
 #pragma warning restore SA1312 // Variable names should begin with lower-case letter
 #pragma warning restore SA1403 // File may only contain a single namespace

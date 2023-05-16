@@ -9,7 +9,7 @@ namespace MmoGameFramework
     public struct Entity
     {
 
-        public int EntityId { get; set; }
+        public EntityId EntityId { get; set; }
         public Dictionary<short, byte[]> EntityData { get; set; }
         public EntityType EntityType { get; private set; }
         public Position Position { get; private set; }
@@ -18,7 +18,7 @@ namespace MmoGameFramework
 
         public Acls Acls { get; private set; }
 
-        public Entity(int entityId, Dictionary<short, byte[]> data) : this()
+        public Entity(EntityId entityId, Dictionary<short, byte[]> data) : this()
         {
             EntityId = entityId;
             EntityData = data;

@@ -39,7 +39,7 @@ namespace Mmogf.Core
                         {
                             //Delete player
                             Debug.Log($"Deleting Player {Entity.EntityId} for missed Heartbeats.");
-                            Server.SendCommand<World.DeleteEntity,DeleteEntityRequest,NothingInternal>(0, 0, new DeleteEntityRequest(Entity.EntityId));
+                            Server.SendCommand<World.DeleteEntity,DeleteEntityRequest,NothingInternal>(new EntityId(), 0, new DeleteEntityRequest(Entity.EntityId));
                         }
                         else
                         {

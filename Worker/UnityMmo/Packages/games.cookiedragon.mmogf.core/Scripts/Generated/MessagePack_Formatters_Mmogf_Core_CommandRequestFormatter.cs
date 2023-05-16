@@ -6,9 +6,9 @@
 #pragma warning disable 612
 #pragma warning disable 414
 #pragma warning disable 168
+#pragma warning disable CS1591 // document public APIs
 
 #pragma warning disable SA1129 // Do not use default value type constructor
-#pragma warning disable SA1200 // Using directives should be placed correctly
 #pragma warning disable SA1309 // Field names should not begin with underscore
 #pragma warning disable SA1312 // Variable names should begin with lower-case letter
 #pragma warning disable SA1403 // File may only contain a single namespace
@@ -16,9 +16,6 @@
 
 namespace MessagePack.Formatters.Mmogf.Core
 {
-    using global::System.Buffers;
-    using global::MessagePack;
-
     public sealed class CommandRequestFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Mmogf.Core.CommandRequest>
     {
 
@@ -26,10 +23,10 @@ namespace MessagePack.Formatters.Mmogf.Core
         {
             global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
             writer.WriteArrayHeader(7);
-            formatterResolver.GetFormatterWithVerify<string>().Serialize(ref writer, value.RequestId, options);
+            global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Serialize(ref writer, value.RequestId, options);
             writer.Write(value.RequesterId);
-            formatterResolver.GetFormatterWithVerify<string>().Serialize(ref writer, value.RequestorWorkerType, options);
-            writer.Write(value.EntityId);
+            global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Serialize(ref writer, value.RequestorWorkerType, options);
+            global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<global::Mmogf.Core.EntityId>(formatterResolver).Serialize(ref writer, value.EntityId, options);
             writer.Write(value.ComponentId);
             writer.Write(value.CommandId);
             writer.Write(value.Payload);
@@ -52,16 +49,16 @@ namespace MessagePack.Formatters.Mmogf.Core
                 switch (i)
                 {
                     case 0:
-                        ____result.RequestId = formatterResolver.GetFormatterWithVerify<string>().Deserialize(ref reader, options);
+                        ____result.RequestId = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Deserialize(ref reader, options);
                         break;
                     case 1:
                         ____result.RequesterId = reader.ReadInt64();
                         break;
                     case 2:
-                        ____result.RequestorWorkerType = formatterResolver.GetFormatterWithVerify<string>().Deserialize(ref reader, options);
+                        ____result.RequestorWorkerType = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Deserialize(ref reader, options);
                         break;
                     case 3:
-                        ____result.EntityId = reader.ReadInt32();
+                        ____result.EntityId = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<global::Mmogf.Core.EntityId>(formatterResolver).Deserialize(ref reader, options);
                         break;
                     case 4:
                         ____result.ComponentId = reader.ReadInt16();
@@ -70,7 +67,7 @@ namespace MessagePack.Formatters.Mmogf.Core
                         ____result.CommandId = reader.ReadInt16();
                         break;
                     case 6:
-                        ____result.Payload = reader.ReadBytes()?.ToArray();
+                        ____result.Payload = global::MessagePack.Internal.CodeGenHelpers.GetArrayFromNullableSequence(reader.ReadBytes());
                         break;
                     default:
                         reader.Skip();
@@ -82,6 +79,7 @@ namespace MessagePack.Formatters.Mmogf.Core
             return ____result;
         }
     }
+
 }
 
 #pragma warning restore 168
@@ -90,7 +88,6 @@ namespace MessagePack.Formatters.Mmogf.Core
 #pragma warning restore 612
 
 #pragma warning restore SA1129 // Do not use default value type constructor
-#pragma warning restore SA1200 // Using directives should be placed correctly
 #pragma warning restore SA1309 // Field names should not begin with underscore
 #pragma warning restore SA1312 // Variable names should begin with lower-case letter
 #pragma warning restore SA1403 // File may only contain a single namespace

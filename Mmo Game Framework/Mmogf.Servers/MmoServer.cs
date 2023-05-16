@@ -159,7 +159,7 @@ namespace MmoGameFramework
                                     MessageId = ServerCodes.EntityCheckout,
                                     Info = MessagePackSerializer.Serialize(new EntityCheckout()
                                     {
-                                        Checkouts = new List<int>(),
+                                        Checkouts = new List<EntityId>(),
                                         Remove = false,
                                     }),
                                 }, NetDeliveryMethod.ReliableOrdered, 11);
@@ -330,7 +330,7 @@ namespace MmoGameFramework
             //get command info
             var commandRequest = MessagePackSerializer.Deserialize<CommandRequest>(simpleData.Info);
 
-            if(commandRequest.EntityId == 0 && commandRequest.ComponentId == 0)
+            if(!commandRequest.EntityId.IsValid() && commandRequest.ComponentId == 0)
             {
                 //world command
                 HandleWorldCommand(im, simpleData, commandRequest);
@@ -583,7 +583,7 @@ namespace MmoGameFramework
             //SendArea(entityInfo.Position, message, 0, NetDeliveryMethod.ReliableUnordered);
         }
 
-        private MmoMessage EntityDeleteMessage(int entityId)
+        private MmoMessage EntityDeleteMessage(EntityId entityId)
         {
             //find who has checked out
             var message = new MmoMessage()
@@ -715,7 +715,7 @@ namespace MmoGameFramework
             Send(worker.Connection, message, NetDeliveryMethod.ReliableUnordered);
         }
 
-        private void ProcessOnEntityAddSubscription(int entityId, List<long> workers)
+        private void ProcessOnEntityAddSubscription(EntityId entityId, List<long> workers)
         {
             //send as create
             //probably should be buffered for 1 tick
@@ -728,7 +728,7 @@ namespace MmoGameFramework
             }
         }
 
-        private void ProcessOnEntityRemoveSubscription(int entityId, List<long> workers)
+        private void ProcessOnEntityRemoveSubscription(EntityId entityId, List<long> workers)
         {
             //send as remove
             //probably should be buffered for 1 tick
@@ -740,13 +740,13 @@ namespace MmoGameFramework
             }
         }
 
-        void HandleEntitySubChange(WorkerConnection worker, bool add, int entityId)
+        void HandleEntitySubChange(WorkerConnection worker, bool add, EntityId entityId)
         {
             if(add)
             {
                 if (worker.EntitiesToRemove.ContainsKey(entityId))
                 {
-                    worker.EntitiesToRemove.TryRemove(entityId, out int val);
+                    worker.EntitiesToRemove.TryRemove(entityId, out EntityId val);
                     return;
                 }
                 if (!worker.EntitiesToAdd.ContainsKey(entityId))
@@ -756,7 +756,7 @@ namespace MmoGameFramework
             {
                 if (worker.EntitiesToAdd.ContainsKey(entityId))
                 {
-                    worker.EntitiesToAdd.TryRemove(entityId, out int val);
+                    worker.EntitiesToAdd.TryRemove(entityId, out EntityId val);
                     return;
                 }
                 if (!worker.EntitiesToRemove.ContainsKey(entityId))

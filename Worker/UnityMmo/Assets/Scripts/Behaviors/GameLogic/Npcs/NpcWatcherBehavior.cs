@@ -56,7 +56,7 @@ namespace Mmogf
             if(_sentDestroy)
                 return;
 
-            Server.SendCommand<World.DeleteEntity, DeleteEntityRequest, NothingInternal>(0, 0, new DeleteEntityRequest(Entity.EntityId), response => {
+            Server.SendWorldCommand<World.DeleteEntity, DeleteEntityRequest, NothingInternal>(new DeleteEntityRequest(Entity.EntityId), response => {
                 Debug.Log($"Deleted Npc! {response.CommandStatus} - {response.Message}");
             });
 

@@ -21,7 +21,7 @@ namespace Mmogf.Servers.Tests.Worlds
 
         Entity GetEntity(Position postion)
         {
-            var entity = new Entity(1, new Dictionary<short, byte[]>()
+            var entity = new Entity(new EntityId(1), new Dictionary<short, byte[]>()
             {
                 { EntityType.ComponentId, MessagePack.MessagePackSerializer.Serialize(new EntityType() { Name = "Npc" }) },
                 { FixedVector3.ComponentId, MessagePack.MessagePackSerializer.Serialize<FixedVector3>(postion.ToFixedVector3()) },
@@ -40,7 +40,7 @@ namespace Mmogf.Servers.Tests.Worlds
             Assert.IsNotNull(cell);
             Assert.AreEqual(new PositionInt(0, 0, 0), cell.position);
             Assert.AreEqual(1, grid.Cells.Count);
-            Assert.IsTrue(grid.Cells.TryGetValue(new GridInt(0,0,0), out List<int>? c));
+            Assert.IsTrue(grid.Cells.TryGetValue(new GridInt(0,0,0), out List<EntityId>? c));
         }
 
         [TestMethod]
@@ -53,7 +53,7 @@ namespace Mmogf.Servers.Tests.Worlds
             Assert.AreEqual(new GridInt(1, 0, 1), cell.grid);
             Assert.AreEqual(new PositionInt(50, 0, 50), cell.position);
             Assert.AreEqual(1, grid.Cells.Count);
-            Assert.IsTrue(grid.Cells.TryGetValue(new GridInt(1, 0, 1), out List<int>? c));
+            Assert.IsTrue(grid.Cells.TryGetValue(new GridInt(1, 0, 1), out List<EntityId>? c));
         }
 
         [TestMethod]
@@ -66,7 +66,7 @@ namespace Mmogf.Servers.Tests.Worlds
             Assert.AreEqual(new GridInt(1, 0, 1), cell.grid);
             Assert.AreEqual(new PositionInt(25, 0, 25), cell.position);
             Assert.AreEqual(1, grid.Cells.Count);
-            Assert.IsTrue(grid.Cells.TryGetValue(new GridInt(1, 0, 1), out List<int>? c));
+            Assert.IsTrue(grid.Cells.TryGetValue(new GridInt(1, 0, 1), out List<EntityId>? c));
         }
 
         [TestMethod]

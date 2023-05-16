@@ -6,9 +6,9 @@
 #pragma warning disable 612
 #pragma warning disable 414
 #pragma warning disable 168
+#pragma warning disable CS1591 // document public APIs
 
 #pragma warning disable SA1129 // Do not use default value type constructor
-#pragma warning disable SA1200 // Using directives should be placed correctly
 #pragma warning disable SA1309 // Field names should not begin with underscore
 #pragma warning disable SA1312 // Variable names should begin with lower-case letter
 #pragma warning disable SA1403 // File may only contain a single namespace
@@ -16,9 +16,6 @@
 
 namespace MessagePack.Formatters.Mmogf.Core
 {
-    using global::System.Buffers;
-    using global::MessagePack;
-
     public sealed class EntityInfoFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Mmogf.Core.EntityInfo>
     {
 
@@ -26,8 +23,8 @@ namespace MessagePack.Formatters.Mmogf.Core
         {
             global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
             writer.WriteArrayHeader(2);
-            writer.Write(value.EntityId);
-            formatterResolver.GetFormatterWithVerify<global::System.Collections.Generic.Dictionary<short, byte[]>>().Serialize(ref writer, value.EntityData, options);
+            global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<global::Mmogf.Core.EntityId>(formatterResolver).Serialize(ref writer, value.EntityId, options);
+            global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<global::System.Collections.Generic.Dictionary<short, byte[]>>(formatterResolver).Serialize(ref writer, value.EntityData, options);
         }
 
         public global::Mmogf.Core.EntityInfo Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
@@ -47,10 +44,10 @@ namespace MessagePack.Formatters.Mmogf.Core
                 switch (i)
                 {
                     case 0:
-                        ____result.EntityId = reader.ReadInt32();
+                        ____result.EntityId = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<global::Mmogf.Core.EntityId>(formatterResolver).Deserialize(ref reader, options);
                         break;
                     case 1:
-                        ____result.EntityData = formatterResolver.GetFormatterWithVerify<global::System.Collections.Generic.Dictionary<short, byte[]>>().Deserialize(ref reader, options);
+                        ____result.EntityData = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<global::System.Collections.Generic.Dictionary<short, byte[]>>(formatterResolver).Deserialize(ref reader, options);
                         break;
                     default:
                         reader.Skip();
@@ -62,6 +59,7 @@ namespace MessagePack.Formatters.Mmogf.Core
             return ____result;
         }
     }
+
 }
 
 #pragma warning restore 168
@@ -70,7 +68,6 @@ namespace MessagePack.Formatters.Mmogf.Core
 #pragma warning restore 612
 
 #pragma warning restore SA1129 // Do not use default value type constructor
-#pragma warning restore SA1200 // Using directives should be placed correctly
 #pragma warning restore SA1309 // Field names should not begin with underscore
 #pragma warning restore SA1312 // Variable names should begin with lower-case letter
 #pragma warning restore SA1403 // File may only contain a single namespace
