@@ -1,7 +1,4 @@
-﻿using Mmogf.Core;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Mmogf.Core
 {

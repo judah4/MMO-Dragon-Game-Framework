@@ -1,15 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Text;
-using System.Threading;
 using Lidgren.Network;
 using MessagePack;
 using Mmogf.Core.Behaviors;
 using Mmogf.Core.Networking;
 using UnityEngine;
 
-namespace Mmogf.Core 
+namespace Mmogf.Core
 {
 
     public enum LogLevel

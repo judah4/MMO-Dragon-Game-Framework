@@ -1,21 +1,36 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Text;
-using System.Threading.Tasks;
-using UnityEngine.PlayerLoop;
-using static UnityEngine.EventSystems.EventTrigger;
 
 namespace Mmogf.Core.Networking
 {
     public struct DataSpan
     {
-        public Dictionary<int, DataBucket> Commands { get; set; }
-        public Dictionary<int, DataBucket> Events { get; set; }
+        private Dictionary<DataStat, Dictionary<int, DataBucket>> _dataBuckets;
 
-        public Dictionary<int, DataBucket> Updates { get; set; }
+        public Dictionary<DataStat, Dictionary<int, DataBucket>> DataBuckets => _dataBuckets;
 
-        public Dictionary<int, DataBucket> Entities { get; set; }
+        public static DataSpan Create 
+        { 
+            get
+            {
+                var span = new DataSpan();
+                span._dataBuckets = new Dictionary<DataStat, Dictionary<int, DataBucket>>();
+                return span;
+            }
+        }
+
+        public void RecordMessage(DataStat dataStat, int id, int bytes)
+        {
+            var buckets = GetBuckets(dataStat);
+            DataBucket bucket;
+            if (!buckets.TryGetValue(id, out bucket))
+                bucket = new DataBucket();
+
+            bucket.Messages++;
+            bucket.Bytes += bytes;
+
+            buckets[id] = bucket;
+        }
 
         public void RecordMessage(int id, int bytes, Dictionary<int, DataBucket> buckets)
         {
@@ -29,32 +44,30 @@ namespace Mmogf.Core.Networking
             buckets[id] = bucket;
         }
 
+        public Dictionary<int, DataBucket> GetBuckets(DataStat dataStat)
+        {
+            if (!DataBuckets.TryGetValue(dataStat, out var buckets))
+            {
+                buckets = new Dictionary<int, DataBucket>();
+                DataBuckets.Add(dataStat, buckets);
+            }
+            return buckets;
+        }
+
         public override string ToString()
         {
             StringBuilder stringBuilder = new StringBuilder();
 
-            stringBuilder.AppendLine("Commands");
-            foreach (var command in Commands)
+            foreach(var spans in DataBuckets)
             {
-                stringBuilder.AppendLine($"{command.Key}: Messages {command.Value.Messages}, {(command.Value.Bytes / 1000f).ToString("F3")} KB");
+                foreach(var data in spans.Value)
+                {
+                    stringBuilder.AppendLine($"{data.Key}: Messages {data.Value.Messages}, {(data.Value.Bytes / 1000f).ToString("F3")} KB");
+                }
             }
-            stringBuilder.AppendLine("Events");
-            foreach (var evn in Events)
-            {
-                stringBuilder.AppendLine($"{evn.Key}: Messages {evn.Value.Messages}, {(evn.Value.Bytes / 1000f).ToString("F3")} KB");
-            }
-            stringBuilder.AppendLine("Updates");
-            foreach (var update in Updates)
-            {
-                stringBuilder.AppendLine($"{update.Key}: Messages {update.Value.Messages}, {(update.Value.Bytes / 1000f).ToString("F3")} KB");
-            }
-            stringBuilder.AppendLine("Entities");
-            var entitySum = Sum(Entities);
-            stringBuilder.AppendLine($"Messages {entitySum.Messages}, {(entitySum.Bytes / 1000f).ToString("F3")} KB");
 
             return stringBuilder.ToString();
         }
-
 
         public DataBucket Sum(Dictionary<int, DataBucket> buckets)
         {

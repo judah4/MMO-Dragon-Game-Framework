@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Mmogf.Core
+﻿namespace Mmogf.Core
 {
     public enum ServerCodes : byte
     {

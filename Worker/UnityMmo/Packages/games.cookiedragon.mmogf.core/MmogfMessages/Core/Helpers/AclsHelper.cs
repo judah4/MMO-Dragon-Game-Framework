@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Mmogf.Core
+﻿namespace Mmogf.Core
 {
     public partial struct Acls
     {

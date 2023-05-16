@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Mmogf.Core.Networking
+﻿namespace Mmogf.Core.Networking
 {
     public struct DataBucket
     {

@@ -1,24 +1,8 @@
-﻿using Lidgren.Network;
-using Mmogf.Core.Behaviors;
-using System;
+﻿using Mmogf.Core.Behaviors;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Mmogf.Core.Networking
 {
-    public enum DataStat
-    {
-        Command,
-        Event,
-        Update,
-        Entity,
-        Summary
-    }
-
-
     public class DataStatistics : IInternalBehavior
     {
 
@@ -39,32 +23,12 @@ namespace Mmogf.Core.Networking
         public void RecordMessage(int id, int bytes, DataStat stat)
         {
             var timeSlice = _timeSlices[0];
-            switch (stat)
-            {
-                case DataStat.Command:
-                    timeSlice.RecordMessage(id, bytes, timeSlice.Commands);
-                    break;
-                case DataStat.Event:
-                    timeSlice.RecordMessage(id, bytes, timeSlice.Events);
-                    break;
-                case DataStat.Update:
-                    timeSlice.RecordMessage(id, bytes, timeSlice.Updates);
-                    break;
-                case DataStat.Entity:
-                    timeSlice.RecordMessage(id, bytes, timeSlice.Entities);
-                    break;
-            }
+            timeSlice.RecordMessage(stat, id, bytes);
         }
 
         void SetupSlice()
         {
-            _timeSlices.Insert(0,new DataSpan()
-            {
-                Commands = new Dictionary<int, DataBucket>(),
-                Events = new Dictionary<int, DataBucket>(),
-                Updates = new Dictionary<int, DataBucket>(),
-                Entities = new Dictionary<int, DataBucket>(),
-            });
+            _timeSlices.Insert(0,DataSpan.Create);
         }
 
         public void Update()

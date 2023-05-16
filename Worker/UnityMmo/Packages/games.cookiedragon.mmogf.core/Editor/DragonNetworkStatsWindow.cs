@@ -5,13 +5,8 @@ using Mmogf.Core.Networking;
 using Mmogf.Core.Editor;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
-using UnityEditor.MemoryProfiler;
-using UnityEditor.TreeViewExamples;
 using UnityEngine;
 
 namespace MessagePack.Unity.Editor
@@ -157,7 +152,8 @@ namespace MessagePack.Unity.Editor
                 switch(_selectedStat)
                 {
                     case DataStat.Command:
-                        foreach (var stat in stats.CurrentTimeSlice.Commands)
+                        var commandData = stats.CurrentTimeSlice.GetBuckets(_selectedStat);
+                        foreach (var stat in commandData)
                         {
                             var command = ComponentMappings.GetCommandType(stat.Key);
                             var el = new CommandDataElement(command?.Name ?? "", 0, stat.Key, stat.Value);
@@ -165,7 +161,8 @@ namespace MessagePack.Unity.Editor
                         }
                         break;
                     case DataStat.Event:
-                        foreach (var stat in stats.CurrentTimeSlice.Events)
+                        var eventData = stats.CurrentTimeSlice.GetBuckets(_selectedStat);
+                        foreach (var stat in eventData)
                         {
                             var command = ComponentMappings.GetEventType(stat.Key);
                             var el = new CommandDataElement(command?.Name ?? "", 0, stat.Key, stat.Value);
@@ -173,33 +170,30 @@ namespace MessagePack.Unity.Editor
                         }
                         break;
                     case DataStat.Update:
-                        foreach (var update in stats.CurrentTimeSlice.Updates)
+                        var updateData = stats.CurrentTimeSlice.GetBuckets(_selectedStat);
+                        foreach (var stat in updateData)
                         {
-                            var component = ComponentMappings.GetComponentType(update.Key);
-                            var el = new CommandDataElement(component?.Name ?? "", 0, update.Key, update.Value);
+                            var component = ComponentMappings.GetComponentType(stat.Key);
+                            var el = new CommandDataElement(component?.Name ?? "", 0, stat.Key, stat.Value);
                             list.Add(el);
                         }
                         break;
                     case DataStat.Entity:
-                        var entitySum = stats.CurrentTimeSlice.Sum(stats.CurrentTimeSlice.Entities);
+                        var entityData = stats.CurrentTimeSlice.GetBuckets(_selectedStat);
+                        var entitySum = stats.CurrentTimeSlice.Sum(entityData);
 
                         var entitySumEl = new CommandDataElement("Entities", 0, 0, entitySum);
                         list.Add(entitySumEl);
 
                         break;
                     case DataStat.Summary:
-                        var updatesSummary = stats.CurrentTimeSlice.Sum(stats.CurrentTimeSlice.Updates);
-                        var uptSumEl = new CommandDataElement("Updates", 0, 0, updatesSummary);
-                        list.Add(uptSumEl);
-                        var commandsSummary = stats.CurrentTimeSlice.Sum(stats.CurrentTimeSlice.Commands);
-                        var comSumEl = new CommandDataElement("Commands", 0, 0, commandsSummary);
-                        list.Add(comSumEl);
-                        var eventsSummary = stats.CurrentTimeSlice.Sum(stats.CurrentTimeSlice.Events);
-                        var evnySumEl = new CommandDataElement("Events", 0, 0, eventsSummary);
-                        list.Add(evnySumEl);                        
-                        var entitySummary = stats.CurrentTimeSlice.Sum(stats.CurrentTimeSlice.Entities);
-                        var entSumEl = new CommandDataElement("Entities", 0, 0, entitySummary);
-                        list.Add(entSumEl);
+
+                        foreach(var buckets in stats.CurrentTimeSlice.DataBuckets)
+                        {
+                            var summary = stats.CurrentTimeSlice.Sum(buckets.Value);
+                            var sumElement = new CommandDataElement(buckets.Key.ToString(), 0, 0, summary);
+                            list.Add(sumElement);
+                        }
 
                         //var totalSummary = stats.CurrentTimeSlice.Sum(new[] { updatesSummary, commandsSummary, eventsSummary, entitySummary, });
                         //var totalSumEl = new CommandDataElement("Totals", 0, 0, totalSummary);
