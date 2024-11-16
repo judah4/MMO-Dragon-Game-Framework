@@ -6,7 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Mmogf.Core;
+using Mmogf.Servers.Contracts;
 using Prometheus;
 using System;
 using System.IO;

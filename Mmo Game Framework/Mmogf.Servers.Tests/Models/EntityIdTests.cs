@@ -1,6 +1,4 @@
-using MmoGameFramework;
-using Mmogf.Core;
-using Mmogf.Servers.Worlds;
+using Mmogf.Servers.Contracts;
 
 namespace Mmogf.Servers.Tests.Worlds
 {

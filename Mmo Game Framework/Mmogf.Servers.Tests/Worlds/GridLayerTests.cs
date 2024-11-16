@@ -1,5 +1,5 @@
 using MmoGameFramework;
-using Mmogf.Core;
+using Mmogf.Servers.Contracts;
 using Mmogf.Servers.Worlds;
 
 namespace Mmogf.Servers.Tests.Worlds
@@ -9,9 +9,9 @@ namespace Mmogf.Servers.Tests.Worlds
     {
         GridLayer GetWorldGrid(int cellSize, bool addEntity, int layer = 0)
         {
-            var grid =  new GridLayer(cellSize, layer);
+            var grid = new GridLayer(cellSize, layer);
 
-            if(addEntity)
+            if (addEntity)
             {
                 grid.AddEntity(GetEntity(new Position(1, 1, 1)));
             }
@@ -40,7 +40,7 @@ namespace Mmogf.Servers.Tests.Worlds
             Assert.IsNotNull(cell);
             Assert.AreEqual(new PositionInt(0, 0, 0), cell.position);
             Assert.AreEqual(1, grid.Cells.Count);
-            Assert.IsTrue(grid.Cells.TryGetValue(new GridInt(0,0,0), out List<EntityId>? c));
+            Assert.IsTrue(grid.Cells.TryGetValue(new GridInt(0, 0, 0), out List<EntityId>? c));
         }
 
         [TestMethod]
@@ -77,7 +77,7 @@ namespace Mmogf.Servers.Tests.Worlds
             var cell = grid.GetCell(new Position(-30, -50, -30));
             Assert.IsNotNull(cell);
             Assert.AreEqual(new GridInt(-1, -1, -1), cell.grid);
-            Assert.AreEqual(new PositionInt(-50,-50, -50), cell.position);
+            Assert.AreEqual(new PositionInt(-50, -50, -50), cell.position);
             Assert.AreEqual(1, grid.Cells.Count);
         }
 
@@ -102,7 +102,7 @@ namespace Mmogf.Servers.Tests.Worlds
             var cell = grid.AddEntity(entity);
             Assert.IsNotNull(cell);
             Assert.AreEqual(new GridInt(0, 0, 0), cell.grid);
-            Assert.AreEqual(new PositionInt(0,0,0), cell.position);
+            Assert.AreEqual(new PositionInt(0, 0, 0), cell.position);
             Assert.AreEqual(1, cell.entities.Count);
         }
 
@@ -133,7 +133,7 @@ namespace Mmogf.Servers.Tests.Worlds
             int zLower = -50;
 
             int cellCnt = 0;
-            for (int cntX = xLower; cntX <= 100; cntX+=cellSize)
+            for (int cntX = xLower; cntX <= 100; cntX += cellSize)
             {
                 for (int cntZ = zLower; cntZ <= 100; cntZ += cellSize)
                 {

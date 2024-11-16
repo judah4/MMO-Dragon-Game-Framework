@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Text;
-using Mmogf.Core;
+﻿using Mmogf.Servers.Contracts;
 using Mmogf.Servers.Worlds;
+using System.Collections.Concurrent;
 
 namespace MmoGameFramework
 {
@@ -15,10 +12,12 @@ namespace MmoGameFramework
         public float InterestRange { get; set; }
         public Lidgren.Network.NetConnection Connection { get; set; }
 
-        //the int value doesn't matter, we just want the concurrent set up.
         /// <summary>
         /// Key is layer, value is cell position.
         /// </summary>
+        /// <remarks>
+        /// The int value doesn't matter, we just want the concurrent set up.
+        /// </remarks>
         public ConcurrentDictionary<int, ConcurrentDictionary<PositionInt, int>> CellSubs { get; set; }
         /// <summary>
         /// Used for sending entity for when moving cells
@@ -45,25 +44,25 @@ namespace MmoGameFramework
 
         public WorkerConnection(string connectionType, Lidgren.Network.NetConnection senderConnection, Position interestPosition, int interestRange)
         {
-            if(interestRange < 1)
+            if (interestRange < 1)
                 interestRange = 10;
 
             ConnectionType = connectionType;
             InterestPosition = interestPosition;
             InterestRange = interestRange;
             Connection = senderConnection;
-            EntitiesToAdd = new ConcurrentDictionary<EntityId, EntityId> ();
+            EntitiesToAdd = new ConcurrentDictionary<EntityId, EntityId>();
             EntitiesToRemove = new ConcurrentDictionary<EntityId, EntityId>();
             CellSubs = new ConcurrentDictionary<int, ConcurrentDictionary<PositionInt, int>>();
         }
 
         public void AddCellSubscription(int layer, PositionInt cellPos)
         {
-            if(!CellSubs.ContainsKey(layer))
+            if (!CellSubs.ContainsKey(layer))
                 CellSubs.TryAdd(layer, new ConcurrentDictionary<PositionInt, int>());
 
             var subs = CellSubs[layer];
-            if(!subs.ContainsKey(cellPos))
+            if (!subs.ContainsKey(cellPos))
                 subs.TryAdd(cellPos, 0);
         }
 

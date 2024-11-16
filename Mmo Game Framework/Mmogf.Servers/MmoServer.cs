@@ -2,7 +2,7 @@ using Lidgren.Network;
 using MessagePack;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Mmogf.Core;
+using Mmogf.Servers.Contracts;
 using Prometheus;
 using System;
 using System.Collections.Concurrent;

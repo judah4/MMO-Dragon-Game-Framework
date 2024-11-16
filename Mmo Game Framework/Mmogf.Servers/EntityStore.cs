@@ -1,14 +1,12 @@
 using MessagePack;
 using Microsoft.Extensions.Logging;
-using Mmogf.Core;
+using Mmogf.Servers.Contracts;
 using Mmogf.Servers.Worlds;
 using Prometheus;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Text;
 
 namespace MmoGameFramework
 {
@@ -18,7 +16,7 @@ namespace MmoGameFramework
         private readonly Gauge EntitiesGauge = Metrics.CreateGauge($"dragongf_entities", "Number of entities in the world.");
 
         private ConcurrentDictionary<EntityId, Entity> _entities = new ConcurrentDictionary<EntityId, Entity>();
-        
+
         private List<GridLayer> GridLayers = new List<GridLayer>(2);
 
         ILogger _logger;
@@ -67,10 +65,10 @@ namespace MmoGameFramework
 
         public Entity Create(string entityType, Position position, Rotation rotation, List<Acl> acls, EntityId? entityId = null, Dictionary<short, byte[]> additionalData = null)
         {
-            if(entityId.HasValue)
+            if (entityId.HasValue)
             {
-                if(lastId <= entityId.Value.Id)
-                    lastId = entityId.Value.Id + 1; 
+                if (lastId <= entityId.Value.Id)
+                    lastId = entityId.Value.Id + 1;
             }
             else
             {
@@ -102,7 +100,7 @@ namespace MmoGameFramework
 
             //make this configurable in the future
             var gridIndex = 0;
-            if(data.ContainsKey(PlayerCreator.ComponentId))
+            if (data.ContainsKey(PlayerCreator.ComponentId))
             {
                 gridIndex = 1;
             }
@@ -118,10 +116,10 @@ namespace MmoGameFramework
         public Entity? GetEntity(EntityId entityId)
         {
             Entity entityInfo;
-            if(!_entities.TryGetValue(entityId, out entityInfo))
+            if (!_entities.TryGetValue(entityId, out entityInfo))
                 return null;
 
-            return entityInfo;        
+            return entityInfo;
         }
 
         public void UpdateEntity(Entity entity)
@@ -135,7 +133,7 @@ namespace MmoGameFramework
             _entities[entity.EntityId] = entity;
             OnUpdateEntityPartial?.Invoke(entityUpdate, workerId);
 
-            if(entityUpdate.ComponentId == FixedVector3.ComponentId)
+            if (entityUpdate.ComponentId == FixedVector3.ComponentId)
             {
                 //update regions
                 //make this configurable, figure out how to check the components later
@@ -146,7 +144,7 @@ namespace MmoGameFramework
                 }
                 var layer = GridLayers[gridIndex];
                 var cell = layer.GetCell(entity.Position);
-                if(cell.entities.Contains(entity.EntityId))
+                if (cell.entities.Contains(entity.EntityId))
                     return;
 
                 layer.RemoveEntity(entity);
@@ -176,10 +174,10 @@ namespace MmoGameFramework
         public void Delete(EntityId entityId)
         {
             Entity entity;
-            if(!_entities.Remove(entityId, out entity))
+            if (!_entities.Remove(entityId, out entity))
                 return;
 
-            foreach(var layer in GridLayers)
+            foreach (var layer in GridLayers)
             {
                 layer.RemoveEntity(entity);
             }
@@ -201,7 +199,7 @@ namespace MmoGameFramework
                 removeEntityIds.AddRange(results.removeEntityIds);
 
                 if (_logger.IsEnabled(LogLevel.Debug) && (results.addCells.Count > 0 || results.removeCells.Count > 0))
-                    _logger.LogDebug($"({worker.InterestPosition.ToString()}) Layer {layer.Layer} Cells Added ({string.Join(',', results.addCells.Select(x=>x.ToString()))}), Cells Removed ({string.Join(',', results.removeCells.Select(x => x.ToString()))}) from Worker {worker.ConnectionType}-{worker.WorkerId}");
+                    _logger.LogDebug($"({worker.InterestPosition.ToString()}) Layer {layer.Layer} Cells Added ({string.Join(',', results.addCells.Select(x => x.ToString()))}), Cells Removed ({string.Join(',', results.removeCells.Select(x => x.ToString()))}) from Worker {worker.ConnectionType}-{worker.WorkerId}");
 
 
             }
@@ -212,11 +210,11 @@ namespace MmoGameFramework
         public void RemoveWorker(WorkerConnection worker)
         {
             var subs = worker.CellSubs;
-            foreach(var sub in subs)
+            foreach (var sub in subs)
             {
-                foreach(var layer in GridLayers)
+                foreach (var layer in GridLayers)
                 {
-                    if(layer.Layer != sub.Key)
+                    if (layer.Layer != sub.Key)
                         continue;
 
                     var subCells = sub.Value.Keys.ToList(); //figure out how to do this better
@@ -227,7 +225,7 @@ namespace MmoGameFramework
                     }
                 }
             }
-            
+
         }
 
         public List<long> GetSubscribedWorkers(Entity entity)
@@ -241,10 +239,10 @@ namespace MmoGameFramework
             }
             var layer = GridLayers[gridIndex];
             var cell = layer.GetCell(entity.Position);
-            
+
             var workerSubs = layer.GetWorkerSubscriptions(cell.position);
 
-            foreach(var workerPair in workerSubs)
+            foreach (var workerPair in workerSubs)
             {
                 workerIds.Add(workerPair);
             }

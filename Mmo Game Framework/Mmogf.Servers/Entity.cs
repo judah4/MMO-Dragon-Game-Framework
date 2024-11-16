@@ -1,8 +1,6 @@
 using MessagePack;
-using Mmogf.Core;
-using System;
+using Mmogf.Servers.Contracts;
 using System.Collections.Generic;
-using System.Text;
 
 namespace MmoGameFramework
 {
@@ -40,7 +38,7 @@ namespace MmoGameFramework
                     break;
                 case FixedVector3.ComponentId:
                     Position = MessagePackSerializer.Deserialize<FixedVector3>(EntityData[FixedVector3.ComponentId]).ToPosition();
-                break;
+                    break;
                 case Rotation.ComponentId:
                     Rotation = MessagePackSerializer.Deserialize<Rotation>(EntityData[Rotation.ComponentId]);
                     break;

@@ -1,4 +1,4 @@
-﻿using Mmogf.Core;
+﻿using Mmogf.Servers.Contracts;
 
 namespace MmoGameFramework.Models;
 

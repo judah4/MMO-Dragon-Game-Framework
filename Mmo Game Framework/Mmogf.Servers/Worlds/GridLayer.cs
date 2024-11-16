@@ -1,5 +1,5 @@
 ﻿using MmoGameFramework;
-using Mmogf.Core;
+using Mmogf.Servers.Contracts;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
