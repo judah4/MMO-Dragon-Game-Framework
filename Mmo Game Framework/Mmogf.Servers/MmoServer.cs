@@ -1,17 +1,15 @@
+using Lidgren.Network;
+using MessagePack;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Mmogf.Core;
+using Prometheus;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using Lidgren.Network;
-using MessagePack;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using Mmogf.Core;
-using Mmogf.Servers.Services;
-using Mmogf.Servers.Worlds;
-using Prometheus;
 
 namespace MmoGameFramework
 {
@@ -23,7 +21,6 @@ namespace MmoGameFramework
         private readonly Gauge ConnectedWorkersGauge;
 
         private NetServer s_server;
-        OrchestrationService _orchestrationService;
         private EntityStore _entities;
         public EntityStore Entities => _entities;
         NetPeerConfiguration _config;
@@ -35,15 +32,13 @@ namespace MmoGameFramework
         int _tickRate;
         public int TickRate => _tickRate;
 
-        
+
 
         public Dictionary<long, WorkerConnection> _connections = new Dictionary<long, WorkerConnection>();
-        public ConcurrentDictionary<long, WorkerConnection> _workerWithSubChanges = new ConcurrentDictionary<long,WorkerConnection>();
+        public ConcurrentDictionary<long, WorkerConnection> _workerWithSubChanges = new ConcurrentDictionary<long, WorkerConnection>();
 
-        public MmoServer(OrchestrationService orchestrationService, EntityStore entities, NetPeerConfiguration config, bool clientWorker, ILogger<MmoServer> logger, IConfiguration configuration)
+        public MmoServer(EntityStore entities, NetPeerConfiguration config, bool clientWorker, ILogger<MmoServer> logger, IConfiguration configuration)
         {
-
-            _orchestrationService = orchestrationService;
             _entities = entities;
             _clientWorker = clientWorker;
             _configuration = configuration;
@@ -80,7 +75,7 @@ namespace MmoGameFramework
             var thread1 = new Thread(async () => await Loop());
             thread1.Priority = ThreadPriority.AboveNormal;
             thread1.Start();
-            
+
         }
 
         private void MessageCallback(object state)
@@ -199,7 +194,7 @@ namespace MmoGameFramework
             }
 
             s_server.Recycle(im);
-            
+
         }
 
         public void Stop()
@@ -212,33 +207,28 @@ namespace MmoGameFramework
         {
             // No idea what this does but Lidgren needs it to be happy
             SynchronizationContext.SetSynchronizationContext(new SynchronizationContext());
-            
+
             // Register a Callback for Testing
             s_server.RegisterReceivedCallback(MessageCallback, SynchronizationContext.Current);
-            
+
             while (s_server.Status != NetPeerStatus.NotRunning)
             {
                 _stopwatch.Restart();
                 try
                 {
-                    
+
                     HandleEntitySubChanges();
 
                     ConnectedWorkersGauge.Set(s_server.ConnectionsCount);
-
-                    if(s_server.ConnectionsCount > 0)
-                    {
-                        await _orchestrationService.ReadyAsync();
-                    }
 
                     var time = _stopwatch.ElapsedMilliseconds;
 
                     var tickMilliseconds = 1000.0 / _tickRate;
 
-                    if(time < tickMilliseconds)
+                    if (time < tickMilliseconds)
                     {
                         int delay = (int)(tickMilliseconds - time);
-                        if(delay > 0)
+                        if (delay > 0)
                         {
                             await Task.Delay(delay);
                         }
@@ -268,7 +258,7 @@ namespace MmoGameFramework
                         continue;
 
                     var message = EntityInfoMessage(entity.Value);
-                    
+
                     Send(worker.Connection, message, NetDeliveryMethod.ReliableUnordered);
                 }
                 if (_logger.IsEnabled(LogLevel.Debug) && worker.EntitiesToRemove.Count > 0)
@@ -286,7 +276,7 @@ namespace MmoGameFramework
 
         private void HandleWorkerDisconnect(NetIncomingMessage im, WorkerConnection worker)
         {
-            if(worker == null)
+            if (worker == null)
                 return;
 
             _entities.RemoveWorker(worker);
@@ -298,7 +288,7 @@ namespace MmoGameFramework
         private void HandleWorkerConnect(NetIncomingMessage im)
         {
             var interestRange = 2000;
-            if(_clientWorker)
+            if (_clientWorker)
             {
                 interestRange = 100;
             }
@@ -330,7 +320,7 @@ namespace MmoGameFramework
             //get command info
             var commandRequest = MessagePackSerializer.Deserialize<CommandRequest>(simpleData.Info);
 
-            if(!commandRequest.EntityId.IsValid() && commandRequest.ComponentId == 0)
+            if (!commandRequest.EntityId.IsValid() && commandRequest.ComponentId == 0)
             {
                 //world command
                 HandleWorldCommand(im, simpleData, commandRequest);
@@ -345,7 +335,8 @@ namespace MmoGameFramework
             if (!_connections.TryGetValue(im.SenderConnection.RemoteUniqueIdentifier, out worker))
             {
                 //send failure
-                Send(im.SenderConnection, new MmoMessage() {
+                Send(im.SenderConnection, new MmoMessage()
+                {
                     MessageId = ServerCodes.EntityCommandResponse,
                     Info = MessagePackSerializer.Serialize(CommandResponse.Create(commandRequest, CommandStatus.InvalidRequest, "No Worker Identified", null)),
                 });
@@ -387,7 +378,7 @@ namespace MmoGameFramework
                 return;
             }
 
-            switch(commandRequest.CommandId)
+            switch (commandRequest.CommandId)
             {
                 case World.CreateEntity.CommandId:
                     var createEntity = MessagePackSerializer.Deserialize<World.CreateEntity>(commandRequest.Payload);
@@ -448,7 +439,7 @@ namespace MmoGameFramework
                 return;
             }
             var acls = entity.Acls;
-            if(!acls.CanWrite(entityUpdate.ComponentId, worker.ConnectionType))
+            if (!acls.CanWrite(entityUpdate.ComponentId, worker.ConnectionType))
             {
                 //log
                 return;
@@ -526,7 +517,7 @@ namespace MmoGameFramework
             var connections = new List<NetConnection>(100);
             foreach (var workerConnection in _connections)
             {
-                if(workerConnection.Key == workerExcludeId)
+                if (workerConnection.Key == workerExcludeId)
                     continue;
 
                 if (Position.WithinArea(position, workerConnection.Value.InterestPosition,
@@ -537,7 +528,7 @@ namespace MmoGameFramework
                 }
             }
 
-            if(connections.Count < 1)
+            if (connections.Count < 1)
                 return;
 
             NetOutgoingMessage om = s_server.CreateMessage();
@@ -551,7 +542,7 @@ namespace MmoGameFramework
 
             NetOutgoingMessage om = s_server.CreateMessage();
             om.Write(MessagePackSerializer.Serialize(message));
-            if(workerId > 0 && _connections.TryGetValue(workerId, out var connection))
+            if (workerId > 0 && _connections.TryGetValue(workerId, out var connection))
             {
                 s_server.SendMessage(om, connection.Connection, NetDeliveryMethod.ReliableUnordered);
             }
@@ -577,7 +568,7 @@ namespace MmoGameFramework
         {
             var message = EntityInfoMessage(entityInfo);
             if (_logger.IsEnabled(LogLevel.Debug))
-                _logger.LogDebug($"Sending Entity Info {entityInfo.EntityId}" );
+                _logger.LogDebug($"Sending Entity Info {entityInfo.EntityId}");
             SendSubscribed(entityInfo, message, 0, NetDeliveryMethod.ReliableUnordered);
             //SendCheckedout(entityInfo.EntityId, message, NetDeliveryMethod.ReliableOrdered);
             //SendArea(entityInfo.Position, message, 0, NetDeliveryMethod.ReliableUnordered);
@@ -614,7 +605,7 @@ namespace MmoGameFramework
         {
 
             var entity = _entities.GetEntity(entityUpdate.EntityId);
-            if(entity == null)
+            if (entity == null)
                 return;
 
             var message = new MmoMessage()
@@ -659,16 +650,16 @@ namespace MmoGameFramework
             var acls = entity.Value.Acls;
             Acl? entityAcl = null;
             long workerId = 0;
-            foreach(var acl in acls.AclList)
+            foreach (var acl in acls.AclList)
             {
-                if(acl.ComponentId != commandRequest.ComponentId)
+                if (acl.ComponentId != commandRequest.ComponentId)
                     continue;
                 entityAcl = acl;
             }
             if (entityAcl == null)
                 return;
 
-            if(entityAcl.Value.WorkerType != WorkerType)
+            if (entityAcl.Value.WorkerType != WorkerType)
                 return;
 
             workerId = entityAcl.Value.WorkerId;
@@ -742,7 +733,7 @@ namespace MmoGameFramework
 
         void HandleEntitySubChange(WorkerConnection worker, bool add, EntityId entityId)
         {
-            if(add)
+            if (add)
             {
                 if (worker.EntitiesToRemove.ContainsKey(entityId))
                 {
@@ -762,8 +753,8 @@ namespace MmoGameFramework
                 if (!worker.EntitiesToRemove.ContainsKey(entityId))
                     worker.EntitiesToRemove.TryAdd(entityId, entityId);
             }
-            
-            if(!_workerWithSubChanges.ContainsKey(worker.WorkerId))
+
+            if (!_workerWithSubChanges.ContainsKey(worker.WorkerId))
                 _workerWithSubChanges.TryAdd(worker.WorkerId, worker);
         }
 

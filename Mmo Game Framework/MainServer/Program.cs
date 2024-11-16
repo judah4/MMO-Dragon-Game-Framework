@@ -1,22 +1,16 @@
-﻿using Agones;
-using Grpc.Core;
-using Lidgren.Network;
+﻿using Lidgren.Network;
 using MessagePack;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Mmogf.Core;
-using Mmogf.Servers.Services;
 using Prometheus;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 
 namespace MmoGameFramework
 {
@@ -26,7 +20,7 @@ namespace MmoGameFramework
         private static MmoServer workerServer;
         private static EntityStore _entityStore;
         private static ILogger<Program> _logger;
-        
+
         static async Task Main(string[] args)
         {
             var metricServer = new KestrelMetricServer(port: 1234);
@@ -37,7 +31,7 @@ namespace MmoGameFramework
 
             _logger = host.Services.GetRequiredService<ILogger<Program>>();
             var configuration = host.Services.GetRequiredService<IConfiguration>();
-                
+
             // Print Banner
             Console.WriteLine(Resources.Data.Banner);
 
@@ -56,7 +50,7 @@ namespace MmoGameFramework
             string worldFilePath = configuration.GetValue<string>("WorldFilePath") ?? "worlds/default.world";
             var updatedPath = Path.GetFullPath(worldFilePath);
             //Console.WriteLine($"{worldFilePath} {updatedPath}");
-            if(!File.Exists(updatedPath))
+            if (!File.Exists(updatedPath))
             {
                 _logger.LogError($"World file {updatedPath} does not exist!");
                 await Task.Delay(1000); //delay so we can actually see the error...
@@ -66,36 +60,33 @@ namespace MmoGameFramework
             var worldBytes = File.ReadAllBytes(updatedPath);
             var worldData = MessagePack.MessagePackSerializer.Deserialize<WorldConfig>(worldBytes);
 
-            foreach(var entity in worldData.Entities)
+            foreach (var entity in worldData.Entities)
             {
                 Rotation rotation = Rotation.Zero;
                 byte[] rotationBytes;
-                if(entity.EntityData.TryGetValue(Rotation.ComponentId, out rotationBytes))
+                if (entity.EntityData.TryGetValue(Rotation.ComponentId, out rotationBytes))
                 {
                     rotation = MessagePackSerializer.Deserialize<Rotation>(rotationBytes);
                 }
 
                 _entityStore.Create(entity.Name, MessagePackSerializer.Deserialize<FixedVector3>(entity.EntityData[FixedVector3.ComponentId]).ToPosition(),
-                    rotation, 
-                    MessagePackSerializer.Deserialize<Acls>(entity.EntityData[Acls.ComponentId]).AclList, 
+                    rotation,
+                    MessagePackSerializer.Deserialize<Acls>(entity.EntityData[Acls.ComponentId]).AclList,
                     entity.EntityId, entity.EntityData);
 
             }
             _logger.LogInformation($"Loaded {worldData.Entities.Count} Entities.");
 
-            var orchestationService = host.Services.GetRequiredService<OrchestrationService>();
-            await orchestationService.ConnectAsync();
-
             var tickRate = configuration.GetValue<int>("TickRate");
             var timeout = configuration.GetValue<int>("Timeout");
-            if(timeout == 0)
+            if (timeout == 0)
                 timeout = 25;
             _logger.LogInformation($"Setting Server Tick Rate {tickRate}");
-            if(timeout != 25)
+            if (timeout != 25)
                 _logger.LogInformation($"Setting Server Timeout To {timeout}");
             _logger.LogInformation("Starting Dragon-Client connections. Port 1337");
             // create and start the server
-            server = new MmoServer(orchestationService, _entityStore, new NetPeerConfiguration("Dragon-Client")
+            server = new MmoServer(_entityStore, new NetPeerConfiguration("Dragon-Client")
             {
                 MaximumConnections = 100,
                 Port = 1337,
@@ -103,7 +94,7 @@ namespace MmoGameFramework
             }, true, host.Services.GetRequiredService<ILogger<MmoServer>>(), configuration);
             server.Start();
             _logger.LogInformation("Starting Dragon-Worker connections. Port 1338.");
-            workerServer = new MmoServer(orchestationService, _entityStore, new NetPeerConfiguration("Dragon-Worker")
+            workerServer = new MmoServer(_entityStore, new NetPeerConfiguration("Dragon-Worker")
             {
                 MaximumConnections = 100,
                 Port = 1338,
@@ -113,20 +104,19 @@ namespace MmoGameFramework
 
             _logger.LogInformation("DragonGF is ready.");
 
-            
+
             await host.RunAsync();
-            
-            await orchestationService.ShutdownAsync();
+
             server.Stop();
             workerServer.Stop();
             metricServer.Stop();
         }
 
-        
+
 
         private static WebApplication BuildHost(string[] args)
         {
-            
+
             var builder = WebApplication.CreateBuilder(args);
             builder.WebHost.UseUrls("http://*:3000");
             builder.Logging.AddSimpleConsole(options =>
@@ -136,10 +126,8 @@ namespace MmoGameFramework
                     options.TimestampFormat = "hh:mm:ss ";
                 });
 
-            builder.Services.AddSingleton<OrchestrationService>();
-
             builder.Services.AddControllers();
-            
+
             var app = builder.Build();
 
             //app.UseHttpsRedirection();
@@ -152,7 +140,7 @@ namespace MmoGameFramework
         {
             return server;
         }
-        
+
         public static MmoServer GetWorker()
         {
             return workerServer;

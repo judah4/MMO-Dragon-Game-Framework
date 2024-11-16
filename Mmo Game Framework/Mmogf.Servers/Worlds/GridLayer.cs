@@ -1,12 +1,8 @@
-﻿using Grpc.Core;
-using MmoGameFramework;
+﻿using MmoGameFramework;
 using Mmogf.Core;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Mmogf.Servers.Worlds
 {
@@ -42,15 +38,15 @@ namespace Mmogf.Servers.Worlds
             var pos = entity.Position;
             var cell = GetCell(pos);
 
-            if(!cell.entities.Contains(entity.EntityId))
+            if (!cell.entities.Contains(entity.EntityId))
             {
                 var ents = cell.entities;
                 ents.Add(entity.EntityId);
                 //write back to _cells
-                if(_cells.TryUpdate(cell.grid, ents, cell.entities))
+                if (_cells.TryUpdate(cell.grid, ents, cell.entities))
                 {
                     List<long> subs;
-                    if(!_workerSubscriptions.TryGetValue(cell.position, out subs))
+                    if (!_workerSubscriptions.TryGetValue(cell.position, out subs))
                     {
                         subs = new List<long>();
                     }
@@ -72,7 +68,7 @@ namespace Mmogf.Servers.Worlds
             var cellPos = GridIndexToPosition(grid);
             var cell = GetCell(new Position(cellPos.X, cellPos.Y, cellPos.Z));
             var ents = cell.entities; //todo: fix this list referecnce so we don't have to lock
-            lock(_lock)
+            lock (_lock)
             {
                 ents.Remove(entity.EntityId);
                 //write back to _cells
@@ -148,7 +144,7 @@ namespace Mmogf.Servers.Worlds
                     {
                         var worldPos = new Position(cntX * CellSize, cntY * CellSize, cntZ * CellSize);
                         var cell = GetCell(worldPos);
-                        cells.Add(cell.position, (cell.grid,cell.entities));
+                        cells.Add(cell.position, (cell.grid, cell.entities));
                     }
                 }
             }
@@ -163,16 +159,16 @@ namespace Mmogf.Servers.Worlds
             var removeCells = new List<PositionInt>();
             var cells = GetCellsInArea(worker.InterestPosition, worker.InterestRange);
 
-            foreach(var cell in cells)
+            foreach (var cell in cells)
             {
-                if(AddWorkerSub(cell.Key, worker))
+                if (AddWorkerSub(cell.Key, worker))
                 {
                     addCells.Add(cell.Key);
                     addEntityIds.AddRange(cell.Value.entities);
                 }
             }
 
-            if(worker.CellSubs.ContainsKey(Layer))
+            if (worker.CellSubs.ContainsKey(Layer))
             {
                 var subs = worker.CellSubs[Layer];
                 foreach (var sub in subs)
@@ -185,9 +181,9 @@ namespace Mmogf.Servers.Worlds
                     }
 
                 }
-            }    
-            
-            for(int i = removeCells.Count - 1; i >= 0; i--)
+            }
+
+            for (int i = removeCells.Count - 1; i >= 0; i--)
             {
                 var cell = removeCells[i];
                 RemoveWorkerSub(cell, worker);
@@ -200,7 +196,7 @@ namespace Mmogf.Servers.Worlds
         public bool AddWorkerSub(PositionInt cellPos, WorkerConnection worker)
         {
             List<long> subs;
-            if(!_workerSubscriptions.TryGetValue(cellPos, out subs))
+            if (!_workerSubscriptions.TryGetValue(cellPos, out subs))
             {
                 subs = new List<long>();
                 _workerSubscriptions.TryAdd(cellPos, subs);

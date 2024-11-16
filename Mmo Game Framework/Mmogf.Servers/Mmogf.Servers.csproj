@@ -1,19 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <Version>0.1.0</Version>
-	  <DebugType>embedded</DebugType>
+    <TargetFramework>net8.0</TargetFramework>
+	<DebugType>embedded</DebugType>
 
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AgonesSDK" Version="1.29.0" />
-    <PackageReference Include="MessagePack" Version="2.4.59" />
-    <PackageReference Include="MessagePack.UnityShims" Version="2.4.59" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.2" />
-    <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="6.0.1" />
-    <PackageReference Include="prometheus-net.AspNetCore" Version="7.0.0" />
+    <PackageReference Include="MessagePack" Version="2.5.192" />
+    <PackageReference Include="MessagePack.UnityShims" Version="2.5.192" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.2" />
+    <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="8.0.1" />
+    <PackageReference Include="prometheus-net.AspNetCore" Version="8.2.1" />
   </ItemGroup>
 	<ItemGroup>
 		<Compile Include="..\..\Worker\UnityMmo\Packages\games.cookiedragon.mmogf.core\MmogfMessages\Core\**\*.cs" LinkBase="Shared" />

@@ -1,9 +1,9 @@
-using System;
-using System.Collections.Generic;
 using Lidgren.Network;
 using MessagePack;
 using Mmogf.Core.Behaviors;
 using Mmogf.Core.Networking;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Mmogf.Core
@@ -18,7 +18,7 @@ namespace Mmogf.Core
 
     public class MmoWorker
     {
-        
+
         public long ClientId => s_client.UniqueIdentifier;
         public string WorkerType { get; private set; }
         public int Ping { get; private set; }
@@ -82,7 +82,7 @@ namespace Mmogf.Core
 
         public void Update()
         {
-            if(!s_client.Configuration.AutoFlushSendQueue)
+            if (!s_client.Configuration.AutoFlushSendQueue)
                 s_client.FlushSendQueue();
 
             GotMessage(s_client);
@@ -96,7 +96,7 @@ namespace Mmogf.Core
 
         private void InternalBehaviors()
         {
-            for(int cnt = 0; cnt < _internalBehaviors.Count; cnt++)
+            for (int cnt = 0; cnt < _internalBehaviors.Count; cnt++)
             {
                 _internalBehaviors[cnt].Update();
             }
@@ -112,7 +112,7 @@ namespace Mmogf.Core
                 var holder = commandTimeout.Value;
                 holder.TimeoutTimer -= Time.deltaTime;
 
-                if(holder.TimeoutTimer <= 0)
+                if (holder.TimeoutTimer <= 0)
                 {
                     _commandTimeoutUpdates.Add(commandTimeout);
                 }
@@ -229,7 +229,7 @@ namespace Mmogf.Core
                                     {
                                         callback.SendResponse(commandResponse);
                                     }
-                                    catch(Exception e)
+                                    catch (Exception e)
                                     {
                                         OnLog?.Invoke(LogLevel.Error, e.ToString());
                                     }
@@ -291,7 +291,7 @@ namespace Mmogf.Core
             var deliveryMethod = NetDeliveryMethod.ReliableUnordered;
             var sequence = 0;
 
-            if(componentId == FixedVector3.ComponentId)
+            if (componentId == FixedVector3.ComponentId)
             {
                 //special
                 deliveryMethod = NetDeliveryMethod.UnreliableSequenced;
@@ -328,7 +328,7 @@ namespace Mmogf.Core
             var timespan = DateTime.UtcNow - _pingRequestAt;
             Ping = (int)timespan.TotalMilliseconds;
         }
-        public string SendCommand<T,TRequest,TResponse>(EntityId entityId, short componentId, T command, Action<CommandResult<T, TRequest, TResponse>> callback, float timeout = 10f) where T : ICommandBase<TRequest,TResponse> where TRequest : struct where TResponse : struct
+        public string SendCommand<T, TRequest, TResponse>(EntityId entityId, short componentId, T command, Action<CommandResult<T, TRequest, TResponse>> callback, float timeout = 10f) where T : ICommandBase<TRequest, TResponse> where TRequest : struct where TResponse : struct
         {
             var requestId = Guid.NewGuid().ToString();
 
@@ -370,7 +370,7 @@ namespace Mmogf.Core
 
         public void SendCommandResponseFailure(CommandRequest request, CommandStatus status, string message)
         {
-            if(message == null)
+            if (message == null)
                 message = "Something went wrong.";
 
             var byteLength = Send(new MmoMessage()
