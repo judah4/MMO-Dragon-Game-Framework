@@ -1,12 +1,13 @@
-﻿using Mmogf.Servers.Contracts;
+﻿using Mmogf.Servers.Shared;
 using Mmogf.Servers.Worlds;
+using System;
 using System.Collections.Concurrent;
 
 namespace MmoGameFramework
 {
     public sealed class WorkerConnection
     {
-        public long WorkerId => Connection.RemoteUniqueIdentifier;
+        public RemoteWorkerIdentifier WorkerId => new RemoteWorkerIdentifier(Connection.RemoteUniqueIdentifier);
         public string ConnectionType { get; set; }
         public Position InterestPosition { get; set; }
         public float InterestRange { get; set; }
@@ -18,7 +19,7 @@ namespace MmoGameFramework
         /// <remarks>
         /// The int value doesn't matter, we just want the concurrent set up.
         /// </remarks>
-        public ConcurrentDictionary<int, ConcurrentDictionary<PositionInt, int>> CellSubs { get; set; }
+        public ConcurrentDictionary<GridLayerIdentifier, ConcurrentDictionary<PositionInt, int>> CellSubs { get; set; }
         /// <summary>
         /// Used for sending entity for when moving cells
         /// </summary>
@@ -45,7 +46,9 @@ namespace MmoGameFramework
         public WorkerConnection(string connectionType, Lidgren.Network.NetConnection senderConnection, Position interestPosition, int interestRange)
         {
             if (interestRange < 1)
-                interestRange = 10;
+            {
+                throw new ArgumentException($"Interest range needs to be greater than 1.", nameof(interestRange));
+            }
 
             ConnectionType = connectionType;
             InterestPosition = interestPosition;
@@ -53,10 +56,10 @@ namespace MmoGameFramework
             Connection = senderConnection;
             EntitiesToAdd = new ConcurrentDictionary<EntityId, EntityId>();
             EntitiesToRemove = new ConcurrentDictionary<EntityId, EntityId>();
-            CellSubs = new ConcurrentDictionary<int, ConcurrentDictionary<PositionInt, int>>();
+            CellSubs = new ConcurrentDictionary<GridLayerIdentifier, ConcurrentDictionary<PositionInt, int>>();
         }
 
-        public void AddCellSubscription(int layer, PositionInt cellPos)
+        public void AddCellSubscription(GridLayerIdentifier layer, PositionInt cellPos)
         {
             if (!CellSubs.ContainsKey(layer))
                 CellSubs.TryAdd(layer, new ConcurrentDictionary<PositionInt, int>());
@@ -66,7 +69,7 @@ namespace MmoGameFramework
                 subs.TryAdd(cellPos, 0);
         }
 
-        public void RemoveCellSubscription(int layer, PositionInt cellPos)
+        public void RemoveCellSubscription(GridLayerIdentifier layer, PositionInt cellPos)
         {
             if (!CellSubs.ContainsKey(layer))
                 CellSubs.TryAdd(layer, new ConcurrentDictionary<PositionInt, int>());

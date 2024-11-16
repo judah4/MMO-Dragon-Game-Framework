@@ -1,4 +1,4 @@
-using Mmogf.Servers.Contracts;
+using Mmogf.Servers.Shared;
 
 namespace Mmogf.Servers.Tests.Worlds
 {

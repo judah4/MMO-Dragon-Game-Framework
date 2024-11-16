@@ -1,26 +1,21 @@
-using System.Runtime.Serialization;
-
-namespace Mmogf.Servers.Contracts
+namespace Mmogf.Servers.Shared
 {
-    [DataContract]
-    public struct EntityId
+    public struct RemoteWorkerIdentifier
     {
-
-        public EntityId(int id)
+        public RemoteWorkerIdentifier(long id)
         {
             Id = id;
         }
 
-        [DataMember(Order = 0)]
-        public int Id { get; }
+        public long Id { get; }
 
         public bool IsValid()
         {
             return Id != 0;
         }
 
-        public static bool operator ==(EntityId a, EntityId b) => a.Equals(b);
-        public static bool operator !=(EntityId a, EntityId b) => !a.Equals(b);
+        public static bool operator ==(RemoteWorkerIdentifier a, RemoteWorkerIdentifier b) => a.Equals(b);
+        public static bool operator !=(RemoteWorkerIdentifier a, RemoteWorkerIdentifier b) => !a.Equals(b);
 
         public override bool Equals(object obj)
         {
@@ -29,10 +24,10 @@ namespace Mmogf.Servers.Contracts
                 return false;
             }
 
-            return obj is EntityId other && Equals(other);
+            return obj is RemoteWorkerIdentifier other && Equals(other);
         }
 
-        public bool Equals(EntityId other)
+        public bool Equals(RemoteWorkerIdentifier other)
         {
             return Id == other.Id;
         }

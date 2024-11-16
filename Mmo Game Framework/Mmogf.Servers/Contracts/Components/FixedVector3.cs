@@ -1,3 +1,4 @@
+using Mmogf.Servers.Shared;
 using System.Runtime.Serialization;
 
 namespace Mmogf.Servers.Contracts
@@ -23,6 +24,5 @@ namespace Mmogf.Servers.Contracts
         {
             return Position.FromFixedVector3(this);
         }
-
     }
 }

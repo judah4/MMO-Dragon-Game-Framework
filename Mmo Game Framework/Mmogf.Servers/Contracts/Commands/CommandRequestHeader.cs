@@ -1,8 +1,9 @@
+using Mmogf.Servers.Shared;
 using System.Runtime.Serialization;
-namespace Mmogf.Servers.Contracts
+namespace Mmogf.Servers.Contracts.Commands
 {
     [DataContract]
-    public struct CommandRequest
+    public struct CommandRequestHeader
     {
         [DataMember(Order = 0)]
         public string RequestId { get; set; }
@@ -19,7 +20,5 @@ namespace Mmogf.Servers.Contracts
         public short ComponentId { get; set; }
         [DataMember(Order = 5)]
         public short CommandId { get; set; }
-        [DataMember(Order = 6)]
-        public byte[] Payload { get; set; }
     }
 }

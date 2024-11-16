@@ -1,3 +1,4 @@
+using Mmogf.Servers.Shared;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 

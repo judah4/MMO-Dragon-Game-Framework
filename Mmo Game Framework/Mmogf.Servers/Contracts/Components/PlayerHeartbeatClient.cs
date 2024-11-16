@@ -26,6 +26,5 @@ namespace Mmogf.Servers.Contracts
             public NothingInternal? Response { get; set; }
 
         }
-
     }
 }

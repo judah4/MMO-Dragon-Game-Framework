@@ -28,6 +28,5 @@ namespace Mmogf.Servers.Contracts
             [DataMember(Order = 1)]
             public NothingInternal? Response { get; set; }
         }
-
     }
 }

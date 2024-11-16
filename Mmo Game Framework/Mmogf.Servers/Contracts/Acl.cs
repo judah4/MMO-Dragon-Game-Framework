@@ -23,7 +23,5 @@ namespace Mmogf.Servers.Contracts
 
         [DataMember(Order = 2)]
         public long WorkerId { get; set; }
-
     }
-
 }

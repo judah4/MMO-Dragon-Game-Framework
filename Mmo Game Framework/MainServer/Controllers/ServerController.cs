@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using MmoGameFramework.Models;
+using System.Collections.Generic;
 using WebCommon.Factory;
 
 namespace MmoGameFramework.Controllers;
@@ -15,18 +13,18 @@ public class ServerController : ControllerBase
     public IActionResult GetServerStatus()
     {
         var server = Program.GetServer();
-        
+
         // Create a Connections List
         var connections = new List<ConnectionStatusModel>();
         foreach (var connection in server._connections)
         {
             var connectionStatusModel = new ConnectionStatusModel
             {
-                Id = connection.Key,
-                Worker = connection.Value.WorkerId,
+                Id = connection.Key.Id,
+                Worker = connection.Value.WorkerId.Id,
                 Position = connection.Value.InterestPosition
             };
-            
+
             connections.Add(connectionStatusModel);
         }
 
@@ -35,7 +33,7 @@ public class ServerController : ControllerBase
         {
             entities.Add(EntityWebFactory.Convert(entity));
         }
-        
+
         // Populate Model
         var model = new ServerStatusModel
         {
@@ -45,7 +43,7 @@ public class ServerController : ControllerBase
             Entities = entities
         };
 
-        
+
         return Ok(model);
     }
 }

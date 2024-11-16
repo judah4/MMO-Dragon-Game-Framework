@@ -1,5 +1,6 @@
 using MmoGameFramework;
 using Mmogf.Servers.Contracts;
+using Mmogf.Servers.Shared;
 using Mmogf.Servers.Worlds;
 
 namespace Mmogf.Servers.Tests.Worlds
@@ -7,7 +8,12 @@ namespace Mmogf.Servers.Tests.Worlds
     [TestClass]
     public class GridLayerTests
     {
-        GridLayer GetWorldGrid(int cellSize, bool addEntity, int layer = 0)
+        GridLayer GetWorldGridWithDefaultLayer(int cellSize, bool addEntity)
+        {
+            return GetWorldGrid(cellSize, addEntity, new GridLayerIdentifier(0));
+        }
+
+        GridLayer GetWorldGrid(int cellSize, bool addEntity, GridLayerIdentifier layer)
         {
             var grid = new GridLayer(cellSize, layer);
 
@@ -35,7 +41,7 @@ namespace Mmogf.Servers.Tests.Worlds
         public void GetCell_Test()
         {
             var cellSize = 50;
-            var grid = GetWorldGrid(cellSize, false);
+            var grid = GetWorldGridWithDefaultLayer(cellSize, false);
             var cell = grid.GetCell(new Position(1, 1, 1));
             Assert.IsNotNull(cell);
             Assert.AreEqual(new PositionInt(0, 0, 0), cell.position);
@@ -47,7 +53,7 @@ namespace Mmogf.Servers.Tests.Worlds
         public void GetCell_Test2()
         {
             var cellSize = 50;
-            var grid = GetWorldGrid(cellSize, false);
+            var grid = GetWorldGridWithDefaultLayer(cellSize, false);
             var cell = grid.GetCell(new Position(25, 1, 25));
             Assert.IsNotNull(cell);
             Assert.AreEqual(new GridInt(1, 0, 1), cell.grid);
@@ -60,7 +66,7 @@ namespace Mmogf.Servers.Tests.Worlds
         public void GetCell_Test3()
         {
             var cellSize = 25;
-            var grid = GetWorldGrid(cellSize, false);
+            var grid = GetWorldGridWithDefaultLayer(cellSize, false);
             var cell = grid.GetCell(new Position(15, 1, 15));
             Assert.IsNotNull(cell);
             Assert.AreEqual(new GridInt(1, 0, 1), cell.grid);
@@ -73,7 +79,7 @@ namespace Mmogf.Servers.Tests.Worlds
         public void GetCell_Test4()
         {
             var cellSize = 50;
-            var grid = GetWorldGrid(cellSize, false);
+            var grid = GetWorldGridWithDefaultLayer(cellSize, false);
             var cell = grid.GetCell(new Position(-30, -50, -30));
             Assert.IsNotNull(cell);
             Assert.AreEqual(new GridInt(-1, -1, -1), cell.grid);
@@ -85,7 +91,7 @@ namespace Mmogf.Servers.Tests.Worlds
         public void GetCell_Test5()
         {
             var cellSize = 50;
-            var grid = GetWorldGrid(cellSize, false);
+            var grid = GetWorldGridWithDefaultLayer(cellSize, false);
             var cell = grid.GetCell(new Position(-130, 99, -260));
             Assert.IsNotNull(cell);
             Assert.AreEqual(new GridInt(-3, 2, -5), cell.grid);
@@ -97,7 +103,7 @@ namespace Mmogf.Servers.Tests.Worlds
         public void AddEntity_Test()
         {
             var cellSize = 50;
-            var grid = GetWorldGrid(cellSize, false);
+            var grid = GetWorldGridWithDefaultLayer(cellSize, false);
             var entity = GetEntity(new Position(1, 1, 1));
             var cell = grid.AddEntity(entity);
             Assert.IsNotNull(cell);
@@ -110,7 +116,7 @@ namespace Mmogf.Servers.Tests.Worlds
         public void AddEntity_Test2()
         {
             var cellSize = 50;
-            var grid = GetWorldGrid(cellSize, false);
+            var grid = GetWorldGridWithDefaultLayer(cellSize, false);
             var entity = GetEntity(new Position(85, 5, 74));
             var cell = grid.AddEntity(entity);
             Assert.IsNotNull(cell);
@@ -123,7 +129,7 @@ namespace Mmogf.Servers.Tests.Worlds
         public void GetCellsInArea_Test()
         {
             var cellSize = 50;
-            var grid = GetWorldGrid(cellSize, true);
+            var grid = GetWorldGridWithDefaultLayer(cellSize, true);
             var interestRange = 100f;
             var cells = grid.GetCellsInArea(new Position(10, 1, 10), interestRange);
             //max edge is  (-90, -99, -90) to (110, 101, 110) which is (-100, -100, -100) to (100, 100, 100);
@@ -153,7 +159,7 @@ namespace Mmogf.Servers.Tests.Worlds
         public void GetCellsInArea_Test2()
         {
             var cellSize = 50;
-            var grid = GetWorldGrid(cellSize, false);
+            var grid = GetWorldGridWithDefaultLayer(cellSize, false);
             grid.AddEntity(GetEntity(new Position(1, 1, 1)));
             grid.AddEntity(GetEntity(new Position(5, 5, 5)));
             grid.AddEntity(GetEntity(new Position(85, 5, 74)));
@@ -185,7 +191,7 @@ namespace Mmogf.Servers.Tests.Worlds
         public void GetCellsInArea_Test3()
         {
             var cellSize = 50;
-            var grid = GetWorldGrid(cellSize, false);
+            var grid = GetWorldGridWithDefaultLayer(cellSize, false);
             grid.AddEntity(GetEntity(new Position(1, 1, 1)));
             grid.AddEntity(GetEntity(new Position(5, 5, 5)));
             grid.AddEntity(GetEntity(new Position(126, 5, 100))); //(150, 0, 100)
@@ -216,7 +222,7 @@ namespace Mmogf.Servers.Tests.Worlds
         public void GetCellsInArea_Test4()
         {
             var cellSize = 50;
-            var grid = GetWorldGrid(cellSize, false);
+            var grid = GetWorldGridWithDefaultLayer(cellSize, false);
             grid.AddEntity(GetEntity(new Position(156, 5, 160))); //(150, 0, 150)
             var cells = grid.GetCellsInArea(new Position(220, 1, 220), 100); //(200, 0, 200)
             //lower range, 220 - 50 = 170. 150?
@@ -250,7 +256,7 @@ namespace Mmogf.Servers.Tests.Worlds
         public void GetCellsInArea_Test5()
         {
             var cellSize = 50;
-            var grid = GetWorldGrid(cellSize, false);
+            var grid = GetWorldGridWithDefaultLayer(cellSize, false);
             grid.AddEntity(GetEntity(new Position(51.53, 1, 72.39003)));
             var cells = grid.GetCellsInArea(new Position(51.33, 1, 72.29003), 50);
 
@@ -283,7 +289,7 @@ namespace Mmogf.Servers.Tests.Worlds
         public void GetCellsInArea_Test6()
         {
             var cellSize = 50;
-            var grid = GetWorldGrid(cellSize, false);
+            var grid = GetWorldGridWithDefaultLayer(cellSize, false);
             grid.AddEntity(GetEntity(new Position(-30, 1, -30)));
             var cells = grid.GetCellsInArea(new Position(-49, 1, -49), 100);
 
@@ -316,7 +322,7 @@ namespace Mmogf.Servers.Tests.Worlds
         public void GetCellsInArea_Test7()
         {
             var cellSize = 100;
-            var grid = GetWorldGrid(cellSize, false);
+            var grid = GetWorldGridWithDefaultLayer(cellSize, false);
             grid.AddEntity(GetEntity(new Position(-30, 1, -30)));
             var cells = grid.GetCellsInArea(new Position(-49, 1, -49), 100);
 
@@ -349,7 +355,7 @@ namespace Mmogf.Servers.Tests.Worlds
         public void GetCellsInArea_Test8()
         {
             var cellSize = 1000000;
-            var grid = GetWorldGrid(cellSize, false);
+            var grid = GetWorldGridWithDefaultLayer(cellSize, false);
             grid.AddEntity(GetEntity(new Position(-30, 1, -30)));
             var cells = grid.GetCellsInArea(new Position(-49, 1, -49), 100);
 
@@ -382,7 +388,7 @@ namespace Mmogf.Servers.Tests.Worlds
         public void GetCellsInArea_Test9()
         {
             var cellSize = 1000000;
-            var grid = GetWorldGrid(cellSize, false);
+            var grid = GetWorldGridWithDefaultLayer(cellSize, false);
             grid.AddEntity(GetEntity(new Position(-30, 1, -30)));
             var cells = grid.GetCellsInArea(new Position(-499999, 1, -50), 100);
 

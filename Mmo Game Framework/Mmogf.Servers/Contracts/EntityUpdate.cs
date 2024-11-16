@@ -1,3 +1,4 @@
+using Mmogf.Servers.Shared;
 using System.Runtime.Serialization;
 namespace Mmogf.Servers.Contracts
 {

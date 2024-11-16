@@ -1,5 +1,6 @@
 using MessagePack;
 using Mmogf.Servers.Contracts;
+using Mmogf.Servers.Shared;
 using System.Collections.Generic;
 
 namespace MmoGameFramework

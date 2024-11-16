@@ -1,10 +1,13 @@
+using Mmogf.Servers.Contracts;
 using System;
 
-namespace Mmogf.Servers.Contracts
+namespace Mmogf.Servers.Shared
 {
-
     public struct Position
     {
+        public double X { get; set; }
+        public double Y { get; set; }
+        public double Z { get; set; }
 
         public Position(double x, double y, double z)
         {
@@ -12,10 +15,6 @@ namespace Mmogf.Servers.Contracts
             Y = y;
             Z = z;
         }
-
-        public double X { get; set; }
-        public double Y { get; set; }
-        public double Z { get; set; }
 
         public static double DistanceSquared(Position position1, Position position2)
         {
@@ -29,7 +28,6 @@ namespace Mmogf.Servers.Contracts
         {
             return Math.Sqrt(DistanceSquared(position1, position2));
         }
-
 
         public static bool WithinArea(Position position, Position point, float radius)
         {
@@ -64,8 +62,8 @@ namespace Mmogf.Servers.Contracts
             unchecked
             {
                 var hashCode = X.GetHashCode();
-                hashCode = (hashCode * 397) ^ Y.GetHashCode();
-                hashCode = (hashCode * 397) ^ Z.GetHashCode();
+                hashCode = hashCode * 397 ^ Y.GetHashCode();
+                hashCode = hashCode * 397 ^ Z.GetHashCode();
                 return hashCode;
             }
         }

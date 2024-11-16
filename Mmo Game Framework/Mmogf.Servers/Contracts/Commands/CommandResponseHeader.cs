@@ -1,5 +1,6 @@
+using Mmogf.Servers.Shared;
 using System.Runtime.Serialization;
-namespace Mmogf.Servers.Contracts
+namespace Mmogf.Servers.Contracts.Commands
 {
     public enum CommandStatus
     {
@@ -10,7 +11,7 @@ namespace Mmogf.Servers.Contracts
     }
 
     [DataContract]
-    public struct CommandResponse
+    public struct CommandResponseHeader
     {
 
         [DataMember(Order = 0)]
@@ -31,12 +32,10 @@ namespace Mmogf.Servers.Contracts
         public short ComponentId { get; set; }
         [DataMember(Order = 6)]
         public short CommandId { get; set; }
-        [DataMember(Order = 7)]
-        public byte[] Payload { get; set; }
 
-        public static CommandResponse Create(CommandRequest request, CommandStatus commandStatus = CommandStatus.Success, string message = "", byte[] payload = null)
+        public static CommandResponseHeader Create(CommandRequestHeader request, CommandStatus commandStatus, string message = "")
         {
-            return new CommandResponse()
+            return new CommandResponseHeader()
             {
                 RequestId = request.RequestId,
                 CommandStatus = commandStatus,
@@ -45,7 +44,20 @@ namespace Mmogf.Servers.Contracts
                 EntityId = request.EntityId,
                 ComponentId = request.ComponentId,
                 CommandId = request.CommandId,
-                Payload = payload,
+            };
+        }
+
+        public static CommandResponseHeader CreateError(CommandRequestHeader request, CommandStatus commandStatus, string message)
+        {
+            return new CommandResponseHeader()
+            {
+                RequestId = request.RequestId,
+                CommandStatus = commandStatus,
+                Message = message,
+                RequesterId = request.RequesterId,
+                EntityId = request.EntityId,
+                ComponentId = request.ComponentId,
+                CommandId = request.CommandId,
             };
         }
 

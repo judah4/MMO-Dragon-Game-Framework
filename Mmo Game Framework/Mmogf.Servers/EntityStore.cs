@@ -1,6 +1,9 @@
 using MessagePack;
 using Microsoft.Extensions.Logging;
 using Mmogf.Servers.Contracts;
+using Mmogf.Servers.Contracts.Commands;
+using Mmogf.Servers.Contracts.Events;
+using Mmogf.Servers.Shared;
 using Mmogf.Servers.Worlds;
 using Prometheus;
 using System;
@@ -26,20 +29,20 @@ namespace MmoGameFramework
         public event Action<Entity> OnUpdateEntityFull;
         public event Action<CommandRequest> OnEntityCommand;
         public event Action<CommandResponse> OnEntityCommandResponse;
-        public event Action<EntityUpdate, long> OnUpdateEntityPartial;
+        public event Action<EntityUpdate, RemoteWorkerIdentifier> OnUpdateEntityPartial;
         public event Action<EventRequest> OnEntityEvent;
         public event Action<Entity> OnEntityDelete;
 
-        public event Action<EntityId, List<long>> OnEntityAddSubscription;
-        public event Action<EntityId, List<long>> OnEntityRemoveSubscription;
+        public event Action<EntityId, IEnumerable<RemoteWorkerIdentifier>> OnEntityAddSubscription;
+        public event Action<EntityId, IEnumerable<RemoteWorkerIdentifier>> OnEntityRemoveSubscription;
 
         public EntityStore(ILogger<EntityStore> logger, int cellSize)
         {
             _logger = logger;
 
-            var grid1 = new GridLayer(cellSize, 0);
+            var grid1 = new GridLayer(cellSize, new GridLayerIdentifier(0));
             //default 2 layers. regular checkout and infinite size
-            var grid2 = new GridLayer(1000000, 1);
+            var grid2 = new GridLayer(1000000, new GridLayerIdentifier(1));
             AddGrid(grid1); //make sure we set the right layer indexes later
             AddGrid(grid2);
 
@@ -52,12 +55,12 @@ namespace MmoGameFramework
             GridLayers.Add(grid);
         }
 
-        private void ProcessOnEntityAdd(EntityId entityId, List<long> workers)
+        private void ProcessOnEntityAdd(EntityId entityId, IEnumerable<RemoteWorkerIdentifier> workers)
         {
             OnEntityAddSubscription?.Invoke(entityId, workers);
         }
 
-        private void ProcessOnEntityRemove(EntityId entityId, List<long> workers)
+        private void ProcessOnEntityRemove(EntityId entityId, IEnumerable<RemoteWorkerIdentifier> workers)
         {
             OnEntityRemoveSubscription?.Invoke(entityId, workers);
         }
@@ -128,7 +131,7 @@ namespace MmoGameFramework
             OnUpdateEntityFull?.Invoke(entity);
         }
 
-        public void UpdateEntityPartial(Entity entity, EntityUpdate entityUpdate, long workerId)
+        public void UpdateEntityPartial(Entity entity, EntityUpdate entityUpdate, RemoteWorkerIdentifier workerId)
         {
             _entities[entity.EntityId] = entity;
             OnUpdateEntityPartial?.Invoke(entityUpdate, workerId);
@@ -228,9 +231,9 @@ namespace MmoGameFramework
 
         }
 
-        public List<long> GetSubscribedWorkers(Entity entity)
+        public List<RemoteWorkerIdentifier> GetSubscribedWorkers(Entity entity)
         {
-            var workerIds = new List<long>();
+            var workerIds = new List<RemoteWorkerIdentifier>();
             //make this configurable, figure out how to check the components later
             int gridIndex = 0;
             if (entity.EntityData.ContainsKey(PlayerCreator.ComponentId))
