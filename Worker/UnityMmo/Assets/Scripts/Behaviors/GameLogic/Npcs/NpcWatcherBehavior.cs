@@ -1,7 +1,6 @@
 using Mmogf.Core;
-using System;
-using System.Collections;
-using System.Collections.Generic;
+using Mmogf.Core.Contracts;
+using Mmogf.Servers.Shared;
 using UnityEngine;
 
 namespace Mmogf
@@ -27,7 +26,7 @@ namespace Mmogf
         void Update()
         {
 
-            if(!HasAuthority(FixedVector3.ComponentId))
+            if (!HasAuthority(FixedVector3.ComponentId))
                 return;
 
             var pos = GetEntityComponent<FixedVector3>().Value.ToPosition();
@@ -36,27 +35,28 @@ namespace Mmogf
 
             var health = GetEntityComponent<Health>();
 
-            if(health.Value.Current < 1)
+            if (health.Value.Current < 1)
             {
                 _deadTimer += Time.deltaTime;
-                if(_deadTimer > 30)
+                if (_deadTimer > 30)
                     SendDestroy();
             }
 
 
-            if(System.Math.Abs(pos.X) > _maxRange)
+            if (System.Math.Abs(pos.X) > _maxRange)
                 SendDestroy();
-            if(System.Math.Abs(pos.Z) > _maxRange)
+            if (System.Math.Abs(pos.Z) > _maxRange)
                 SendDestroy();
 
         }
 
         void SendDestroy()
         {
-            if(_sentDestroy)
+            if (_sentDestroy)
                 return;
 
-            Server.SendWorldCommand<World.DeleteEntity, DeleteEntityRequest, NothingInternal>(new DeleteEntityRequest(Entity.EntityId), response => {
+            Server.SendWorldCommand<World.DeleteEntity, DeleteEntityRequest, NothingInternal>(new DeleteEntityRequest(Entity.EntityId), response =>
+            {
                 Debug.Log($"Deleted Npc! {response.CommandStatus} - {response.Message}");
             });
 
@@ -67,21 +67,21 @@ namespace Mmogf
         {
             _playerCheckTimer -= Time.deltaTime;
 
-            if(_playerCheckTimer > 0)
+            if (_playerCheckTimer > 0)
                 return;
 
             float playerDistance = 9999;
 
-            foreach(var entityPair in Server.GameObjectRepresentation.Entities)
+            foreach (var entityPair in Server.GameObjectRepresentation.Entities)
             {
                 var entType = entityPair.Value.GetEntityComponent<EntityType>(EntityType.ComponentId);
 
-                if(entType.Value.Name == _playerEntityName)
+                if (entType.Value.Name == _playerEntityName)
                 {
                     var playerPos = entityPair.Value.GetEntityComponent<FixedVector3>(FixedVector3.ComponentId).Value.ToPosition();
 
                     var dist = (float)Position.Distance(position, playerPos);
-                    if(dist < playerDistance)
+                    if (dist < playerDistance)
                         playerDistance = dist;
 
                 }
@@ -91,7 +91,7 @@ namespace Mmogf
             float tickRate = 1f;
             float rotationTickRate = 1f;
             bool reset = false;
-            if(playerDistance > 50f ) //50m+
+            if (playerDistance > 50f) //50m+
             {
                 tickRate = 1f;
             }
@@ -105,7 +105,7 @@ namespace Mmogf
                 tickRate = 0.2f;
                 rotationTickRate = .3f;
             }
-            else if(playerDistance > 15f) //15m-20m
+            else if (playerDistance > 15f) //15m-20m
             {
                 tickRate = 0.15f;
                 rotationTickRate = .3f;
@@ -116,7 +116,7 @@ namespace Mmogf
                 reset = true;
             }
 
-            if(!reset)
+            if (!reset)
             {
                 _postionSender.SetUpdateRate(tickRate);
                 _postionSender.SetRotationUpdateRate(rotationTickRate);

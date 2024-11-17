@@ -1,11 +1,5 @@
 ﻿using MessagePack;
-using Mmogf;
-using Mmogf.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Mmogf.Core.Contracts;
 
 namespace Mmogf
 {

@@ -1,4 +1,6 @@
 ﻿using MessagePack;
+using Mmogf.Core.Contracts;
+using Mmogf.Core.Contracts.Commands;
 using System;
 using System.Collections.Generic;
 
@@ -90,10 +92,10 @@ namespace Mmogf.Core
 
         public CommandHolderTyped<TCommand, TRequest, TResponse> Get<TCommand, TRequest, TResponse>(CommandRequest request, ICommandBase<TRequest, TResponse> command, Action<CommandResult<TCommand, TRequest, TResponse>> response, float timeoutTimer) where TCommand : ICommandBase<TRequest, TResponse> where TRequest : struct where TResponse : struct
         {
-            var commandKey = (request.ComponentId, request.CommandId);
+            var commandKey = (request.Header.ComponentId, request.Header.CommandId);
 
             List<CommandHolder> list;
-            if(!_commandsCache.TryGetValue(commandKey, out list))
+            if (!_commandsCache.TryGetValue(commandKey, out list))
             {
                 list = new List<CommandHolder>();
                 _commandsCache.Add(commandKey, list);
@@ -117,7 +119,7 @@ namespace Mmogf.Core
 
         public void Release(CommandHolder commandHolder)
         {
-            var commandKey = (commandHolder.Request.ComponentId, commandHolder.Request.CommandId);
+            var commandKey = (commandHolder.Request.Header.ComponentId, commandHolder.Request.Header.CommandId);
             List<CommandHolder> list;
             if (!_commandsCache.TryGetValue(commandKey, out list))
             {

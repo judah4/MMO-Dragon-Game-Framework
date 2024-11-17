@@ -1,8 +1,6 @@
 using MessagePack;
 using Mmogf.Core;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+using Mmogf.Core.Contracts.Commands;
 
 namespace Mmogf
 {
@@ -10,19 +8,20 @@ namespace Mmogf
     {
         private void Update()
         {
-            if(!HasAuthority(Health.ComponentId))
+            if (!HasAuthority(Health.ComponentId))
                 return;
 
             for (int cnt = 0; cnt < Server.CommandRequests.Count; cnt++)
             {
-                if (Server.CommandRequests[cnt].ComponentId != Health.ComponentId)
-                    continue;
-                if (Server.CommandRequests[cnt].EntityId != Entity.EntityId)
-                    continue;
                 var request = Server.CommandRequests[cnt];
+
+                if (request.Header.ComponentId != Health.ComponentId)
+                    continue;
+                if (request.Header.EntityId != Entity.EntityId)
+                    continue;
                 //we need a way to identify what command this is... Components will be able to have more commands
                 //use ids!
-                switch (request.CommandId)
+                switch (request.Header.CommandId)
                 {
                     case Health.TakeDamageCommand.CommandId:
                         var payload = MessagePackSerializer.Deserialize<Health.TakeDamageCommand>(request.Payload);
@@ -36,7 +35,7 @@ namespace Mmogf
 
         void HandleTakeDamage(CommandRequest request, Health.TakeDamageCommand payload)
         {
-            if(payload.Request.HasValue == false)
+            if (payload.Request.HasValue == false)
             {
                 Server.SendCommandResponseFailure(request, "No request payload!");
                 return;

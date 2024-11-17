@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using Mmogf.Core.Contracts;
+using Mmogf.Servers.Shared;
+using UnityEngine;
 
 namespace Mmogf.Core
 {
@@ -27,7 +29,7 @@ namespace Mmogf.Core
 
         void Update()
         {
-            if(LocalControl)
+            if (LocalControl)
                 return;
 
             var position = GetEntityComponent<FixedVector3>().Value.ToPosition();
@@ -35,7 +37,7 @@ namespace Mmogf.Core
 
             var updatedRot = rotation.ToQuaternion();
 
-            if(_targetPostion != position)
+            if (_targetPostion != position)
             {
                 _lastVectorPostion = transform.position;
 
@@ -68,6 +70,6 @@ namespace Mmogf.Core
         public static float Damp(float source, float target, float lambda, float dt)
         {
             return Mathf.Lerp(source, target, 1 - Mathf.Exp(-lambda * dt));
-}
+        }
     }
 }

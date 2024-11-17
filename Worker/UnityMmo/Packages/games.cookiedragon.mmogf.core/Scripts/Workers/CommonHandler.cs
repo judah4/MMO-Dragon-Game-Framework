@@ -1,5 +1,9 @@
 ﻿using Lidgren.Network;
+using Mmogf.Core.Contracts;
+using Mmogf.Core.Contracts.Commands;
+using Mmogf.Core.Contracts.Events;
 using Mmogf.Core.Networking;
+using Mmogf.Servers.Shared;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -31,7 +35,7 @@ namespace Mmogf.Core
         [SerializeField]
         private Vector3 _interestCenter = Vector3.zero;
         [SerializeField]
-        private bool  _updateInterestFromPosition;
+        private bool _updateInterestFromPosition;
 
 
 
@@ -68,7 +72,7 @@ namespace Mmogf.Core
         }
 
         IEnumerator ConnectGame()
-        {      
+        {
             yield return new WaitForSeconds(ConnectDelay);
 
             if (Application.isEditor == false)
@@ -106,8 +110,9 @@ namespace Mmogf.Core
 #endif
 
             Client = new MmoWorker(config);
-            Client.OnLog += (logLevel, message) => {
-                switch(logLevel)
+            Client.OnLog += (logLevel, message) =>
+            {
+                switch (logLevel)
                 {
                     case LogLevel.Debug:
                     default:
@@ -139,9 +144,9 @@ namespace Mmogf.Core
         {
             //save checkout list where?
 
-            if(checkout.Remove)
+            if (checkout.Remove)
             {
-                for(int cnt = 0; cnt < checkout.Checkouts.Count; cnt++)
+                for (int cnt = 0; cnt < checkout.Checkouts.Count; cnt++)
                 {
                     GameObjectRepresentation.DeleteEntity(checkout.Checkouts[cnt]);
                 }
@@ -168,14 +173,14 @@ namespace Mmogf.Core
 
             //        }
             //    }
-                
+
             //}
         }
 
         void OnConnectHandle()
         {
             var pos = Vector3.zero;
-            if(_updateInterestFromPosition)
+            if (_updateInterestFromPosition)
             {
                 pos = transform.position;
             }
@@ -192,7 +197,7 @@ namespace Mmogf.Core
         // Update is called once per frame
         void Update()
         {
-            if(Client == null)
+            if (Client == null)
                 return;
 
             CommandRequests.Clear(); //reset every tick
@@ -224,13 +229,13 @@ namespace Mmogf.Core
             Debug.Log(string.Join(",", args));
             for (int i = 0; i < args.Length; i++)
             {
-                if(args[i] == null)
+                if (args[i] == null)
                     continue;
                 if (args[i].StartsWith(name, System.StringComparison.InvariantCultureIgnoreCase) && args.Length > i)
                 {
                     var splits = args[i].Split('=');
 
-                    return splits[splits.Length-1];
+                    return splits[splits.Length - 1];
                 }
             }
             return null;
@@ -240,7 +245,7 @@ namespace Mmogf.Core
         {
             var dif = _interestCenter - position;
 
-            if(dif.sqrMagnitude > 5f * 5f || force)
+            if (dif.sqrMagnitude > 5f * 5f || force)
             {
                 _interestCenter = position;
                 //adjust position this way to not lose precision
@@ -249,7 +254,7 @@ namespace Mmogf.Core
                 Client.SendInterestChange(sendPos);
             }
 
-            
+
         }
 
         public Position PositionToServer(Vector3 position)
@@ -283,7 +288,7 @@ namespace Mmogf.Core
         private void OnEntityCommand(CommandRequest request)
         {
             //add to list to be handled
-            CommandRequests.Add(request); 
+            CommandRequests.Add(request);
         }
 
         private void OnEntityEvent(EventRequest eventRequest)
@@ -297,7 +302,7 @@ namespace Mmogf.Core
             return SendCommand(new EntityId(), 0, request, callback, timeout);
         }
 
-        public string SendCommand<T, TRequest, TResponse>(EntityId entityId, short componentId, TRequest request, System.Action<CommandResult<T, TRequest, TResponse>> callback = null, float timeout = 10f) where T : ICommandBase<TRequest, TResponse>, new () where TRequest : struct where TResponse : struct
+        public string SendCommand<T, TRequest, TResponse>(EntityId entityId, short componentId, TRequest request, System.Action<CommandResult<T, TRequest, TResponse>> callback = null, float timeout = 10f) where T : ICommandBase<TRequest, TResponse>, new() where TRequest : struct where TResponse : struct
         {
             var command = new T()
             {
@@ -305,11 +310,11 @@ namespace Mmogf.Core
             };
             return Client.SendCommand<T, TRequest, TResponse>(entityId, componentId, command, callback, timeout);
         }
-        public void SendCommandResponse<T, TRequest, TResponse>(CommandRequest request, T command, TResponse responsePayload) where T : ICommandBase<TRequest,TResponse> where TRequest : struct where TResponse : struct
+        public void SendCommandResponse<T, TRequest, TResponse>(CommandRequest request, T command, TResponse responsePayload) where T : ICommandBase<TRequest, TResponse> where TRequest : struct where TResponse : struct
         {
             command.Response = responsePayload;
 
-            Client.SendCommandResponse<T,TRequest, TResponse>(request, command);
+            Client.SendCommandResponse<T, TRequest, TResponse>(request, command);
         }
         public void SendCommandResponseFailure(CommandRequest request, string message)
         {

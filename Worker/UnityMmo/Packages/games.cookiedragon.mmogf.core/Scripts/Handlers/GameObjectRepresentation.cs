@@ -1,5 +1,7 @@
 ﻿using MessagePack;
 using Mmogf.Core;
+using Mmogf.Core.Contracts;
+using Mmogf.Servers.Shared;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -39,7 +41,7 @@ public class GameObjectRepresentation
             {
                 prefab = Resources.Load<GameObject>($"Prefabs/common/{entityType.Name}");
             }
-            if(prefab == null)
+            if (prefab == null)
                 return;
 
             var gm = Object.Instantiate(prefab, adjustedPos,
@@ -65,24 +67,24 @@ public class GameObjectRepresentation
             entityGm.Data.Remove(pair.Key);
             var type = ComponentMappings.GetComponentType(pair.Key);
 
-            if(type == null)
+            if (type == null)
             {
                 Debug.LogWarning($"Type mapping not found! ComponentId:{pair.Key}");
                 continue;
             }
-            
+
             try
             {
                 entityGm.Data.Add(pair.Key, (IEntityComponent)MessagePackSerializer.Deserialize(type, pair.Value));
             }
-            catch(System.Exception e)
+            catch (System.Exception e)
             {
                 Debug.LogError($"Error deserializing during create! Type:{type}");
                 Debug.LogException(e);
             }
         }
 
-        if(entityBehaviors != null) 
+        if (entityBehaviors != null)
         {
             for (int cnt = 0; cnt < entityBehaviors.Length; cnt++)
             {

@@ -1,4 +1,6 @@
 ﻿using Mmogf.Core;
+using Mmogf.Core.Contracts;
+using Mmogf.Servers.Shared;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -51,6 +53,6 @@ public class EntityGameObject : MonoBehaviour
         OnEntityUpdate?.Invoke(componentId);
 
     }
- 
+
 }
 

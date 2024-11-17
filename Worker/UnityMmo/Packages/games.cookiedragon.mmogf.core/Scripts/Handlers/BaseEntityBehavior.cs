@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Mmogf.Core.Contracts;
+using UnityEngine;
 namespace Mmogf.Core
 {
     public class BaseEntityBehavior : MonoBehaviour
@@ -34,13 +35,13 @@ namespace Mmogf.Core
         {
             var acls = GetEntityComponent<Acls>(Acls.ComponentId);
 
-            if(acls.HasValue == false)
+            if (acls.HasValue == false)
                 return false;
 
-            for(int cnt = 0; cnt <  acls.Value.AclList.Count; cnt++)
+            for (int cnt = 0; cnt < acls.Value.AclList.Count; cnt++)
             {
                 var acl = acls.Value.AclList[cnt];
-                if(acl.ComponentId != componentId)
+                if (acl.ComponentId != componentId)
                     continue;
 
                 return acl.WorkerType == Server.WorkerType && (acl.WorkerId == 0 || acl.WorkerId == Server.ClientId);

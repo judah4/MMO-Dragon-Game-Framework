@@ -1,6 +1,9 @@
 using MessagePack;
 using MessagePack.Resolvers;
 using Mmogf.Core;
+using Mmogf.Core.Contracts;
+using Mmogf.Core.Contracts.Commands;
+using Mmogf.Servers.Shared;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,7 +15,7 @@ namespace Mmogf
         static bool setupRun = false;
         public static void RegisterSerializers()
         {
-            if(serializerRegistered)
+            if (serializerRegistered)
                 return;
 
             StaticCompositeResolver.Instance.Register(
@@ -68,12 +71,12 @@ namespace Mmogf
             {
                 var assembly = assemblies[cnt];
                 var typesList = assembly.GetTypes();
-                for(int i = 0; i < typesList.Length; i++)
+                for (int i = 0; i < typesList.Length; i++)
                 {
                     var t = typesList[i];
-                    if(t.IsInterface)
+                    if (t.IsInterface)
                         continue;
-                    if(type.IsAssignableFrom(t))
+                    if (type.IsAssignableFrom(t))
                     {
                         var component = (IEntityComponent)System.Activator.CreateInstance(t);
                         types.Add(component.GetComponentId(), t);
@@ -96,7 +99,7 @@ namespace Mmogf
 
         static CreateEntityRequest CreatePlayer(PlayerCreator.ConnectPlayer connect, CommandRequest request)
         {
-            var clientId = request.RequesterId;
+            var clientId = request.Header.RequesterId;
 
             //pass in player id and load data at some point
             //connect.PlayerId;
@@ -125,20 +128,20 @@ namespace Mmogf
                     new Acl() { ComponentId = PlayerHeartbeatServer.ComponentId, WorkerType = "Dragon-Worker" },
                     new Acl() { ComponentId = PlayerHeartbeatClient.ComponentId, WorkerType = $"Dragon-Client", WorkerId = clientId, },
 
-                } );
+                });
 
             return createEntity;
         }
 
-    //#if UNITY_EDITOR
+        //#if UNITY_EDITOR
 
 
-    //    [UnityEditor.InitializeOnLoadMethod]
-    //    static void EditorInitialize()
-    //    {
-    //        Initialize();
-    //    }
+        //    [UnityEditor.InitializeOnLoadMethod]
+        //    static void EditorInitialize()
+        //    {
+        //        Initialize();
+        //    }
 
-    //#endif
+        //#endif
     }
 }

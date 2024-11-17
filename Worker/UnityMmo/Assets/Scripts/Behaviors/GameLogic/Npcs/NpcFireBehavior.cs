@@ -1,6 +1,5 @@
 using Mmogf.Core;
-using System.Collections;
-using System.Collections.Generic;
+using Mmogf.Core.Contracts.Commands;
 using UnityEngine;
 
 namespace Mmogf
@@ -19,7 +18,7 @@ namespace Mmogf
 
         void Update()
         {
-            if(!HasAuthority(Cannon.ComponentId))
+            if (!HasAuthority(Cannon.ComponentId))
                 return;
 
             if (Entity.Data.ContainsKey(Health.ComponentId))
@@ -33,12 +32,13 @@ namespace Mmogf
 
             _fireTimer -= Time.deltaTime;
 
-            if(_fireTimer >= 0)
+            if (_fireTimer >= 0)
                 return;
 
             _fireTimer = Random.Range(2f, 3f);
 
-            Server.SendCommand<Cannon.FireCommand, FireCommandRequest, Nothing>(Entity.EntityId, Cannon.ComponentId, new FireCommandRequest() { Left = left }, result => {
+            Server.SendCommand<Cannon.FireCommand, FireCommandRequest, Nothing>(Entity.EntityId, Cannon.ComponentId, new FireCommandRequest() { Left = left }, result =>
+            {
                 if (result.CommandStatus != CommandStatus.Success)
                 {
                     Debug.LogError($"{result.CommandId}: {result.CommandStatus} - {result.Message}");

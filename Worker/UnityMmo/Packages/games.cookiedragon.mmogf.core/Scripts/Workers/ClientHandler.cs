@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Mmogf.Core.Contracts;
+using Mmogf.Servers.Shared;
+using System;
 using UnityEngine;
 
 namespace Mmogf.Core
@@ -15,24 +17,24 @@ namespace Mmogf.Core
 
         protected override void Init()
         {
-            #if UNITY_EDITOR
+#if UNITY_EDITOR
             ConnectDelay = 2.5f;
-            #endif
+#endif
         }
 
         protected override void OnConnect()
         {
-            #if !UNITY_EDITOR
+#if !UNITY_EDITOR
             _useTestId = false;
-            #endif
+#endif
 
             var playerId = Guid.NewGuid().ToString();
-            if(_useTestId)
+            if (_useTestId)
             {
                 playerId = _testPlayerId;
             }
 
-            SendCommand<PlayerCreator.ConnectPlayer,ConnectPlayerRequest, NothingInternal>(new EntityId(1), PlayerCreator.ComponentId, 
+            SendCommand<PlayerCreator.ConnectPlayer, ConnectPlayerRequest, NothingInternal>(new EntityId(1), PlayerCreator.ComponentId,
                 new ConnectPlayerRequest() { PlayerId = playerId }, response =>
             {
                 Debug.Log($"Player connect result! {response.CommandStatus} - {response.Message}");

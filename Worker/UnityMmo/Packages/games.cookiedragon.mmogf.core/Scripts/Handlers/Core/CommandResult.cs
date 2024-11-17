@@ -1,6 +1,10 @@
-﻿namespace Mmogf.Core
+﻿using Mmogf.Core.Contracts;
+using Mmogf.Core.Contracts.Commands;
+using Mmogf.Servers.Shared;
+
+namespace Mmogf.Core
 {
-    public struct CommandResult<TCommand, TRequest, TResponse> where TCommand : ICommandBase<TRequest,TResponse> where TRequest : struct where TResponse : struct
+    public struct CommandResult<TCommand, TRequest, TResponse> where TCommand : ICommandBase<TRequest, TResponse> where TRequest : struct where TResponse : struct
     {
         public string RequestId { get; set; }
 
@@ -21,13 +25,13 @@
         {
             return new CommandResult<TCommand, TRequest, TResponse>()
             {
-                RequestId = response.RequestId,
-                CommandStatus = response.CommandStatus,
-                Message = response.Message,
-                RequesterId = response.RequesterId,
-                EntityId = response.EntityId,
-                ComponentId = response.ComponentId,
-                CommandId = response.CommandId,
+                RequestId = response.Header.RequestId,
+                CommandStatus = response.Header.CommandStatus,
+                Message = response.Header.Message,
+                RequesterId = response.Header.RequesterId,
+                EntityId = response.Header.EntityId,
+                ComponentId = response.Header.ComponentId,
+                CommandId = response.Header.CommandId,
                 Request = requestPayload,
                 Response = responsePayload,
             };

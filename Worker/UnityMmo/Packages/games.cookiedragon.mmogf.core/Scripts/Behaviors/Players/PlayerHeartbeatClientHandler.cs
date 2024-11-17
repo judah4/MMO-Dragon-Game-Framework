@@ -1,4 +1,6 @@
 using MessagePack;
+using Mmogf.Core.Contracts;
+using Mmogf.Core.Contracts.Commands;
 using UnityEngine;
 
 namespace Mmogf.Core
@@ -15,14 +17,15 @@ namespace Mmogf.Core
 
             for (int cnt = 0; cnt < Server.CommandRequests.Count; cnt++)
             {
-                if (Server.CommandRequests[cnt].ComponentId != PlayerHeartbeatClient.ComponentId)
-                    continue;
-                if (Server.CommandRequests[cnt].EntityId != Entity.EntityId)
-                    continue;
                 var request = Server.CommandRequests[cnt];
+
+                if (request.Header.ComponentId != PlayerHeartbeatClient.ComponentId)
+                    continue;
+                if (request.Header.EntityId != Entity.EntityId)
+                    continue;
                 //we need a way to identify what command this is... Components will be able to have more commands
                 //use ids!
-                switch (request.CommandId)
+                switch (request.Header.CommandId)
                 {
                     case PlayerHeartbeatClient.RequestHeartbeat.CommandId:
                         HandleHeartbeat(request);
@@ -38,7 +41,7 @@ namespace Mmogf.Core
             var payload = MessagePackSerializer.Deserialize<PlayerHeartbeatClient.RequestHeartbeat>(request.Payload);
 
             //make empty response object
-            Server.SendCommandResponse<PlayerHeartbeatClient.RequestHeartbeat,NothingInternal,NothingInternal>(request, payload, new NothingInternal());
+            Server.SendCommandResponse<PlayerHeartbeatClient.RequestHeartbeat, NothingInternal, NothingInternal>(request, payload, new NothingInternal());
         }
     }
 }

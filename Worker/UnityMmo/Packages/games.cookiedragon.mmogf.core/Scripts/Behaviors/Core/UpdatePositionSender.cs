@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Mmogf.Core.Contracts;
+using UnityEngine;
 
 namespace Mmogf.Core
 {
@@ -24,13 +25,13 @@ namespace Mmogf.Core
 
         void Update()
         {
-            if(!HasAuthority(FixedVector3.ComponentId))
+            if (!HasAuthority(FixedVector3.ComponentId))
                 return;
 
             updateTime -= Time.deltaTime;
             updateTimeRotation -= Time.deltaTime;
 
-            if(updateTimeRotation <= 0)
+            if (updateTimeRotation <= 0)
             {
                 var rot = GetEntityComponent<Rotation>(Rotation.ComponentId).Value;
                 if (UpdateRotation)
@@ -57,7 +58,7 @@ namespace Mmogf.Core
                 if (rigidbody != null)
                 {
                     rigidbody.isKinematic = true;
-                
+
                 }
 
                 pos.Y = -100;

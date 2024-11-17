@@ -1,6 +1,4 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
+using Mmogf.Core.Contracts.Commands;
 using UnityEngine;
 
 namespace Mmogf
@@ -20,13 +18,13 @@ namespace Mmogf
         // Update is called once per frame
         void Update()
         {
-            if(transform.position.y < -10)
+            if (transform.position.y < -10)
                 _destroy = true;
 
-            if(_destroy)
+            if (_destroy)
             {
                 _destroyTimer -= Time.deltaTime;
-                if(_destroyTimer < 0)
+                if (_destroyTimer < 0)
                 {
                     Destroy(gameObject);
                 }
@@ -36,15 +34,15 @@ namespace Mmogf
         private void OnCollisionEnter(Collision collision)
         {
             _destroy = true;
-            if(_fireBehavior != null)
+            if (_fireBehavior != null)
             {
                 var healthBehavior = collision.collider.GetComponent<HealthBehavior>();
 
-                if(healthBehavior != null)
+                if (healthBehavior != null)
                 {
                     _fireBehavior.Server.SendCommand<Health.TakeDamageCommand, TakeDamageRequest, TakeDamageResponse>(healthBehavior.Entity.EntityId, Health.ComponentId, new TakeDamageRequest() { Amount = 10 }, result =>
                     {
-                        if(result.CommandStatus != Core.CommandStatus.Success)
+                        if (result.CommandStatus != CommandStatus.Success)
                         {
 #if UNITY_EDITOR
                             Debug.LogError($"Take Damage: {result.CommandStatus}: {result.Message}");

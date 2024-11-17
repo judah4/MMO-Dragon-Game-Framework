@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Mmogf.Servers.Shared;
+using UnityEngine;
 
 namespace Mmogf.Core
 {

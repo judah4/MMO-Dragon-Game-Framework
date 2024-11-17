@@ -1,5 +1,5 @@
 using Mmogf.Core;
-using System.Collections;
+using Mmogf.Core.Contracts;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -16,7 +16,7 @@ namespace Mmogf
         // Update is called once per frame
         void Update()
         {
-            if(!HasAuthority(FixedVector3.ComponentId))
+            if (!HasAuthority(FixedVector3.ComponentId))
                 return;
 
             _timer -= Time.deltaTime;
@@ -68,7 +68,8 @@ namespace Mmogf
                     new Acl() { ComponentId = Cannon.ComponentId, WorkerType = "Dragon-Worker" },
                     new Acl() { ComponentId = Health.ComponentId, WorkerType = "Dragon-Worker" },
                 }),
-                response => {
+                response =>
+                {
                     Debug.Log($"Create Entity! {response.CommandStatus} - {response.Message}");
                 });
         }
@@ -90,10 +91,11 @@ namespace Mmogf
                     new Acl() { ComponentId = Rotation.ComponentId, WorkerType = "Dragon-Worker" },
                     new Acl() { ComponentId = Acls.ComponentId, WorkerType = "Dragon-Worker" },
                 }),
-                response => {
+                response =>
+                {
                     Debug.Log($"Create Entity! {response.CommandStatus} - {response.Message}");
                 });
-            
+
         }
 
         Quaternion RandomHeading()

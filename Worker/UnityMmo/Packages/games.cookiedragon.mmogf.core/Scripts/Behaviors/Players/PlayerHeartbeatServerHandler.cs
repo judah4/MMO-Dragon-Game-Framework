@@ -1,3 +1,6 @@
+using Mmogf.Core.Contracts;
+using Mmogf.Core.Contracts.Commands;
+using Mmogf.Servers.Shared;
 using UnityEngine;
 
 namespace Mmogf.Core
@@ -14,15 +17,16 @@ namespace Mmogf.Core
         {
             _heartbeatTimer -= Time.deltaTime;
 
-            if(_heartbeatTimer < 0)
+            if (_heartbeatTimer < 0)
             {
                 Debug.Log($"Player {Entity.EntityId} Sending Heartbeat Request.");
 
-                Server.SendCommand<PlayerHeartbeatClient.RequestHeartbeat, NothingInternal, NothingInternal>(Entity.EntityId, PlayerHeartbeatClient.ComponentId, new NothingInternal(), response => {
+                Server.SendCommand<PlayerHeartbeatClient.RequestHeartbeat, NothingInternal, NothingInternal>(Entity.EntityId, PlayerHeartbeatClient.ComponentId, new NothingInternal(), response =>
+                {
                     var heartbeat = (PlayerHeartbeatServer)Entity.Data[PlayerHeartbeatServer.ComponentId];
-                    if(response.CommandStatus == CommandStatus.Success)
+                    if (response.CommandStatus == CommandStatus.Success)
                     {
-                        if(heartbeat.MissedHeartbeats > 0)
+                        if (heartbeat.MissedHeartbeats > 0)
                         {
                             heartbeat.MissedHeartbeats = 0;
                             Server.UpdateEntity(Entity.EntityId, heartbeat.GetComponentId(), heartbeat);
@@ -37,7 +41,7 @@ namespace Mmogf.Core
                         {
                             //Delete player
                             Debug.Log($"Deleting Player {Entity.EntityId} for missed Heartbeats.");
-                            Server.SendCommand<World.DeleteEntity,DeleteEntityRequest,NothingInternal>(new EntityId(), 0, new DeleteEntityRequest(Entity.EntityId));
+                            Server.SendCommand<World.DeleteEntity, DeleteEntityRequest, NothingInternal>(new EntityId(), 0, new DeleteEntityRequest(Entity.EntityId));
                         }
                         else
                         {
@@ -45,7 +49,7 @@ namespace Mmogf.Core
                         }
 
                     }
-                    
+
                 });
 
                 _heartbeatTimer = HeartbeatInterval;

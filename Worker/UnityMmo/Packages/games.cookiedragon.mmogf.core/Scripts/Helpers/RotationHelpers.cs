@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Mmogf.Core.Contracts;
+using UnityEngine;
 
 namespace Mmogf.Core
 {
@@ -21,7 +22,7 @@ namespace Mmogf.Core
             float yNormed = y / 360f;
             short heading = (short)(yNormed * short.MaxValue);
 
-            return new Rotation() 
+            return new Rotation()
             {
                 Heading = heading,
             };

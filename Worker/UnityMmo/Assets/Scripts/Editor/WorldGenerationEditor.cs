@@ -1,5 +1,6 @@
 using Mmogf.Core;
-using System.Collections;
+using Mmogf.Core.Contracts;
+using Mmogf.Servers.Shared;
 using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
@@ -35,7 +36,7 @@ namespace Mmogf
                 }
             };
 
-            var playerCreatorEntity = EntityWorldConfig.Create("PlayerCreator", new EntityId(1), new Position() { X = 0, Z = 0 }, Rotation.Zero, new List<Acl>()
+            var playerCreatorEntity = CreateEntityWorldConfig("PlayerCreator", new EntityId(1), new Position() { X = 0, Z = 0 }, Rotation.Zero, new List<Acl>()
             {
                 new Acl() { ComponentId = FixedVector3.ComponentId, WorkerType = "Dragon-Worker" },
                 new Acl() { ComponentId = Rotation.ComponentId, WorkerType = "Dragon-Worker" },
@@ -47,17 +48,17 @@ namespace Mmogf
             });
             worldConfig.Entities.Add(playerCreatorEntity);
 
-            if(playerOnly == false)
+            if (playerOnly == false)
             {
 
-                worldConfig.Entities.Add(EntityWorldConfig.Create("NpcSpawner", new EntityId(2), new Position() { X = -3, Y = 0, Z = -25 }, Rotation.Zero, new List<Acl>()
+                worldConfig.Entities.Add(CreateEntityWorldConfig("NpcSpawner", new EntityId(2), new Position() { X = -3, Y = 0, Z = -25 }, Rotation.Zero, new List<Acl>()
                 {
                     new Acl() { ComponentId = FixedVector3.ComponentId, WorkerType = "Dragon-Worker" },
                     new Acl() { ComponentId = Rotation.ComponentId, WorkerType = "Dragon-Worker" },
                     new Acl() { ComponentId = Acls.ComponentId, WorkerType = "Dragon-Worker" },
                 }, new Dictionary<short, IEntityComponent>()));
 
-                worldConfig.Entities.Add(EntityWorldConfig.Create("Cube", new EntityId(3), new Position() { X = 3, Z = 3 }, Rotation.Zero, new List<Acl>()
+                worldConfig.Entities.Add(CreateEntityWorldConfig("Cube", new EntityId(3), new Position() { X = 3, Z = 3 }, Rotation.Zero, new List<Acl>()
                 {
                     new Acl() { ComponentId = FixedVector3.ComponentId, WorkerType = "Dragon-Worker" },
                     new Acl() { ComponentId = Rotation.ComponentId, WorkerType = "Dragon-Worker" },
@@ -70,7 +71,7 @@ namespace Mmogf
                 {
                     for (int y = 0; y < 5; y++)
                     {
-                        worldConfig.Entities.Add(EntityWorldConfig.Create("Ship", new EntityId(entityId++), new Position() { X = x * 10 - 50, Z = y * 10 - 50 }, Quaternion.Euler(0, Random.Range(-90, 90), 0).ToRotation(), new List<Acl>()
+                        worldConfig.Entities.Add(CreateEntityWorldConfig("Ship", new EntityId(entityId++), new Position() { X = x * 10 - 50, Z = y * 10 - 50 }, Quaternion.Euler(0, Random.Range(-90, 90), 0).ToRotation(), new List<Acl>()
                         {
                             new Acl() { ComponentId = FixedVector3.ComponentId, WorkerType = "Dragon-Worker" },
                             new Acl() { ComponentId = Rotation.ComponentId, WorkerType = "Dragon-Worker" },
@@ -90,7 +91,7 @@ namespace Mmogf
             Directory.CreateDirectory(path);
             File.Delete(WorldGenPath);
 
-            using(var writer =  File.Create(WorldGenPath))
+            using (var writer = File.Create(WorldGenPath))
             {
 
                 MessagePack.MessagePackSerializer.Serialize(writer, worldConfig);
@@ -102,5 +103,33 @@ namespace Mmogf
 
 
         }
+
+        private static EntityWorldConfig CreateEntityWorldConfig(string name, EntityId entityId, Position position, Rotation rotation, List<Acl> acls, Dictionary<short, IEntityComponent> additionalData)
+        {
+
+            var data = new Dictionary<short, byte[]>();
+
+            data[FixedVector3.ComponentId] = MessagePack.MessagePackSerializer.Serialize(position.ToFixedVector3());
+            data[Rotation.ComponentId] = MessagePack.MessagePackSerializer.Serialize(rotation);
+            data[Acls.ComponentId] = MessagePack.MessagePackSerializer.Serialize(new Acls() { AclList = acls });
+
+            if (additionalData != null)
+            {
+                foreach (var dat in additionalData)
+                {
+                    data[dat.Key] = MessagePack.MessagePackSerializer.Serialize(dat.Value.GetType(), dat.Value);
+                }
+            }
+
+            var entityData = new EntityWorldConfig()
+            {
+                Name = name,
+                EntityId = entityId,
+                EntityData = data,
+            };
+
+            return entityData;
+        }
+
     }
 }

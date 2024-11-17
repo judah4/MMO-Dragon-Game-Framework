@@ -1,11 +1,11 @@
 ﻿using MessagePack;
 using Mmogf;
 using Mmogf.Core;
-using System.Collections;
-using System.Collections.Generic;
+using Mmogf.Core.Contracts.Commands;
+using Mmogf.Core.Contracts.Events;
 using UnityEngine;
 
-public class FireBehavior: BaseEntityBehavior
+public class FireBehavior : BaseEntityBehavior
 {
 
     [SerializeField]
@@ -22,19 +22,19 @@ public class FireBehavior: BaseEntityBehavior
 
     private void Update()
     {
-        if(!Entity.HasAuthority(Cannon.ComponentId))
+        if (!Entity.HasAuthority(Cannon.ComponentId))
             return;
 
         for (int cnt = 0; cnt < Server.CommandRequests.Count; cnt++)
         {
-            if (Server.CommandRequests[cnt].ComponentId != Cannon.ComponentId)
-                continue;
-            if (Server.CommandRequests[cnt].EntityId != Entity.EntityId)
-                continue;
             var request = Server.CommandRequests[cnt];
+            if (request.Header.ComponentId != Cannon.ComponentId)
+                continue;
+            if (request.Header.EntityId != Entity.EntityId)
+                continue;
             //we need a way to identify what command this is... Components will be able to have more commands
             //use ids!
-            switch (request.CommandId)
+            switch (request.Header.CommandId)
             {
                 case Cannon.FireCommand.CommandId:
                     var payload = MessagePackSerializer.Deserialize<Cannon.FireCommand>(request.Payload);
@@ -49,7 +49,7 @@ public class FireBehavior: BaseEntityBehavior
 
     void HandleFire(CommandRequest request, Cannon.FireCommand payload)
     {
-        Server.SendEvent(request.EntityId, Cannon.ComponentId, new Cannon.FireEvent() { Left = payload.Request?.Left ?? false });
+        Server.SendEvent(request.Header.EntityId, Cannon.ComponentId, new Cannon.FireEvent() { Left = payload.Request?.Left ?? false });
         //make empty response object
         Server.SendCommandResponse<Cannon.FireCommand, FireCommandRequest, Nothing>(request, payload, new Nothing());
     }
@@ -58,13 +58,14 @@ public class FireBehavior: BaseEntityBehavior
     {
         for (int cnt = 0; cnt < Server.EventRequests.Count; cnt++)
         {
-            if (Server.EventRequests[cnt].ComponentId != Cannon.ComponentId)
+            var request = Server.EventRequests[cnt];
+
+            if (request.Header.ComponentId != Cannon.ComponentId)
                 continue;
-            if (Server.EventRequests[cnt].EntityId != Entity.EntityId)
+            if (request.Header.EntityId != Entity.EntityId)
                 continue;
 
-            var request = Server.EventRequests[cnt];
-            switch (request.EventId)
+            switch (request.Header.EventId)
             {
                 case Cannon.FireEvent.EventId:
                     var payload = MessagePackSerializer.Deserialize<Cannon.FireEvent>(request.Payload);

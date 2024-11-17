@@ -1,9 +1,8 @@
 ﻿using MessagePack;
 using Mmogf;
 using Mmogf.Core;
-using System;
-using System.Collections;
-using System.Collections.Generic;
+using Mmogf.Core.Contracts.Commands;
+using Mmogf.Core.Contracts.Events;
 using UnityEngine;
 
 public class FireVisualizer : BaseEntityBehavior
@@ -24,13 +23,14 @@ public class FireVisualizer : BaseEntityBehavior
             return;
 
         var health = GetEntityComponent<Health>();
-        if(health.HasValue && health.Value.Current < 1)
+        if (health.HasValue && health.Value.Current < 1)
             return;
 
         if (Input.GetKeyDown(KeyCode.Q))
         {
-            Server.SendCommand<Cannon.FireCommand,FireCommandRequest,Nothing>(Entity.EntityId, Cannon.ComponentId, new FireCommandRequest() { Left = true }, result => {
-                if(result.CommandStatus != CommandStatus.Success)
+            Server.SendCommand<Cannon.FireCommand, FireCommandRequest, Nothing>(Entity.EntityId, Cannon.ComponentId, new FireCommandRequest() { Left = true }, result =>
+            {
+                if (result.CommandStatus != CommandStatus.Success)
                 {
                     Debug.LogError($"{result.CommandId}: {result.CommandStatus} - {result.Message}");
                     return;
@@ -41,7 +41,8 @@ public class FireVisualizer : BaseEntityBehavior
         }
         if (Input.GetKeyDown(KeyCode.E))
         {
-            Server.SendCommand<Cannon.FireCommand, FireCommandRequest, Nothing>(Entity.EntityId, Cannon.ComponentId,  new FireCommandRequest() { Left = false }, result => {
+            Server.SendCommand<Cannon.FireCommand, FireCommandRequest, Nothing>(Entity.EntityId, Cannon.ComponentId, new FireCommandRequest() { Left = false }, result =>
+            {
                 if (result.CommandStatus != CommandStatus.Success)
                 {
                     Debug.LogError($"{result.CommandId}: {result.CommandStatus} - {result.Message}");
@@ -56,15 +57,16 @@ public class FireVisualizer : BaseEntityBehavior
     {
         for (int cnt = 0; cnt < Server.EventRequests.Count; cnt++)
         {
-            if (Server.EventRequests[cnt].ComponentId != Cannon.ComponentId)
+            var request = Server.EventRequests[cnt];
+
+            if (request.Header.ComponentId != Cannon.ComponentId)
                 continue;
-            if(Server.EventRequests[cnt].EntityId != Entity.EntityId)
+            if (request.Header.EntityId != Entity.EntityId)
                 continue;
 
-            var request = Server.EventRequests[cnt];
             //we need a way to identify what command this is... Components will be able to have more commands
             //use ids!
-            switch (request.EventId)
+            switch (request.Header.EventId)
             {
                 case Cannon.FireEvent.EventId:
                     var payload = MessagePackSerializer.Deserialize<Cannon.FireEvent>(request.Payload);
