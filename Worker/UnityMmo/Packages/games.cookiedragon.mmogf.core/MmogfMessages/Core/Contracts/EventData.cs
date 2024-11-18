@@ -1,14 +1,14 @@
-using System.Runtime.Serialization;
+using MessagePack;
 namespace Mmogf.Core.Contracts
 {
-    [DataContract]
+    [MessagePackObject]
     public struct EventData
     {
-        [DataMember(Order = 1)]
+        [Key(1)]
         public int EntityId { get; set; }
-        [DataMember(Order = 2)]
+        [Key(2)]
         public short ComponentId { get; set; }
-        [DataMember(Order = 3)]
+        [Key(3)]
         public byte[] Payload { get; set; }
     }
 }

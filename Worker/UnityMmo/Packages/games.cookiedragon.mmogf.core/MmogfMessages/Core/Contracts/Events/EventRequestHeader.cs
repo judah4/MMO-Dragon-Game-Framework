@@ -1,15 +1,15 @@
 using Mmogf.Servers.Shared;
-using System.Runtime.Serialization;
+using MessagePack;
 namespace Mmogf.Core.Contracts.Events
 {
-    [DataContract]
+    [MessagePackObject]
     public struct EventRequestHeader
     {
-        [DataMember(Order = 0)]
+        [Key(0)]
         public EntityId EntityId { get; set; }
-        [DataMember(Order = 1)]
+        [Key(1)]
         public short ComponentId { get; set; }
-        [DataMember(Order = 2)]
+        [Key(2)]
         public short EventId { get; set; }
 
         public EventRequestHeader(EntityId entityId, short componentId, short eventId)

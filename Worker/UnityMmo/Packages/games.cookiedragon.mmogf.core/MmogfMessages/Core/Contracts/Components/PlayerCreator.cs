@@ -1,31 +1,31 @@
-using System.Runtime.Serialization;
+using MessagePack;
 
 namespace Mmogf.Core.Contracts
 {
-    [DataContract]
+    [MessagePackObject]
     public struct ConnectPlayerRequest
     {
-        [DataMember(Order = 0)]
+        [Key(0)]
         public string PlayerId { get; set; }
     }
 
-    [DataContract]
+    [MessagePackObject]
     public struct PlayerCreator : IEntityComponent
     {
 
         public const short ComponentId = 7;
         public short GetComponentId() => ComponentId;
 
-        [DataContract]
+        [MessagePackObject]
         public struct ConnectPlayer : ICommandBase<ConnectPlayerRequest, NothingInternal>
         {
             public const short CommandId = 103;
             public short GetCommandId() => CommandId;
 
-            [DataMember(Order = 0)]
+            [Key(0)]
             public ConnectPlayerRequest? Request { get; set; }
 
-            [DataMember(Order = 1)]
+            [Key(1)]
             public NothingInternal? Response { get; set; }
         }
     }

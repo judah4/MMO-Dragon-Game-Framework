@@ -1,24 +1,24 @@
+using MessagePack;
 using Mmogf.Servers.Shared;
-using System.Runtime.Serialization;
 namespace Mmogf.Core.Contracts.Commands
 {
-    [DataContract]
+    [MessagePackObject]
     public struct CommandRequestHeader
     {
-        [DataMember(Order = 0)]
+        [Key(0)]
         public string RequestId { get; set; }
 
-        [DataMember(Order = 2)]
+        [Key(1)]
         public long RequesterId { get; set; }
 
-        [DataMember(Order = 3)]
+        [Key(2)]
         public string RequestorWorkerType { get; set; }
 
-        [DataMember(Order = 3)]
+        [Key(3)]
         public EntityId EntityId { get; set; }
-        [DataMember(Order = 4)]
+        [Key(4)]
         public short ComponentId { get; set; }
-        [DataMember(Order = 5)]
+        [Key(5)]
         public short CommandId { get; set; }
     }
 }

@@ -1,7 +1,7 @@
-using System.Runtime.Serialization;
+using MessagePack;
 namespace Mmogf.Core.Contracts
 {
-    [DataContract]
+    [MessagePackObject]
     public struct PlayerHeartbeatServer : IEntityComponent
     {
 
@@ -11,7 +11,7 @@ namespace Mmogf.Core.Contracts
         /// <summary>
         /// Once this has 3 missed we delete the player
         /// </summary>
-        [DataMember(Order = 0)]
+        [Key(0)]
         public short MissedHeartbeats { get; set; }
 
     }

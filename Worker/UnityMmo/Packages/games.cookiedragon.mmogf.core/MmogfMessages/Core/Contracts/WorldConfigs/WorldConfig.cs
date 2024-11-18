@@ -1,14 +1,14 @@
 using System.Collections.Generic;
-using System.Runtime.Serialization;
+using MessagePack;
 namespace Mmogf.Core.Contracts
 {
-    [DataContract]
+    [MessagePackObject]
     public struct WorldConfig
     {
-        [DataMember(Order = 0)]
+        [Key(0)]
         public string Version { get; set; }
 
-        [DataMember(Order = 1)]
+        [Key(1)]
         public List<EntityWorldConfig> Entities { get; set; }
 
 

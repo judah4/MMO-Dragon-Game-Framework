@@ -1,16 +1,16 @@
 using Mmogf.Servers.Shared;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
+using MessagePack;
 
 namespace Mmogf.Core.Contracts
 {
-    [DataContract]
+    [MessagePackObject]
     public struct EntityCheckout
     {
 
-        [DataMember(Order = 0)]
+        [Key(0)]
         public List<EntityId> Checkouts { get; set; }
-        [DataMember(Order = 1)]
+        [Key(1)]
         public bool Remove { get; set; }
     }
 }

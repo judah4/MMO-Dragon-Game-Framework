@@ -1,7 +1,7 @@
-using System.Runtime.Serialization;
+using MessagePack;
 namespace Mmogf.Core.Contracts
 {
-    [DataContract]
+    [MessagePackObject]
     public struct Rotation : IEntityComponent
     {
 
@@ -13,7 +13,7 @@ namespace Mmogf.Core.Contracts
         public const short ComponentId = 3;
         public short GetComponentId() => ComponentId;
 
-        [DataMember(Order = 0)]
+        [Key(0)]
         public short Heading { get; set; }
     }
 }

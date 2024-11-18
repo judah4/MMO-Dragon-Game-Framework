@@ -1,4 +1,4 @@
-using System.Runtime.Serialization;
+using MessagePack;
 
 namespace Mmogf.Core.Contracts
 {
@@ -12,16 +12,16 @@ namespace Mmogf.Core.Contracts
     /// <summary>
     /// Access Control List
     /// </summary>
-    [DataContract]
+    [MessagePackObject]
     public struct Acl
     {
-        [DataMember(Order = 0)]
+        [Key(0)]
         public short ComponentId { get; set; }
 
-        [DataMember(Order = 1)]
+        [Key(1)]
         public string WorkerType { get; set; }
 
-        [DataMember(Order = 2)]
+        [Key(2)]
         public long WorkerId { get; set; }
     }
 }

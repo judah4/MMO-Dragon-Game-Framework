@@ -1,28 +1,28 @@
-using System.Runtime.Serialization;
+using MessagePack;
 namespace Mmogf.Core.Contracts
 {
-    [DataContract]
+    [MessagePackObject]
     public struct NothingInternal
     {
     }
 
-    [DataContract]
+    [MessagePackObject]
     public struct PlayerHeartbeatClient : IEntityComponent
     {
 
         public const short ComponentId = 6;
         public short GetComponentId() => ComponentId;
 
-        [DataContract]
+        [MessagePackObject]
         public struct RequestHeartbeat : ICommandBase<NothingInternal, NothingInternal>
         {
             public const short CommandId = 102;
             public short GetCommandId() => CommandId;
 
 
-            [DataMember(Order = 0)]
+            [Key(0)]
             public NothingInternal? Request { get; set; }
-            [DataMember(Order = 1)]
+            [Key(1)]
             public NothingInternal? Response { get; set; }
 
         }

@@ -1,8 +1,8 @@
-using System.Runtime.Serialization;
+using MessagePack;
 
 namespace Mmogf.Servers.Shared
 {
-    [DataContract]
+    [MessagePackObject]
     public struct EntityId
     {
 
@@ -11,7 +11,7 @@ namespace Mmogf.Servers.Shared
             Id = id;
         }
 
-        [DataMember(Order = 0)]
+        [Key(0)]
         public int Id { get; }
 
         public bool IsValid()
