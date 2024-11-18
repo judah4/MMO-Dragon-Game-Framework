@@ -1,5 +1,5 @@
 using MmoGameFramework;
-using Mmogf.Servers.Contracts;
+using Mmogf.Core.Contracts;
 using Mmogf.Servers.Shared;
 using Mmogf.Servers.Worlds;
 

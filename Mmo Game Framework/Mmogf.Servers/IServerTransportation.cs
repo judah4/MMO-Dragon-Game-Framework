@@ -1,5 +1,5 @@
 ﻿using Lidgren.Network;
-using Mmogf.Servers.Contracts;
+using Mmogf.Core.Contracts;
 using Mmogf.Servers.Shared;
 
 namespace MmoGameFramework

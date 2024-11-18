@@ -1,8 +1,8 @@
 using MessagePack;
 using Microsoft.Extensions.Logging;
-using Mmogf.Servers.Contracts;
-using Mmogf.Servers.Contracts.Commands;
-using Mmogf.Servers.Contracts.Events;
+using Mmogf.Core.Contracts;
+using Mmogf.Core.Contracts.Commands;
+using Mmogf.Core.Contracts.Events;
 using Mmogf.Servers.Shared;
 using Mmogf.Servers.Worlds;
 using Prometheus;

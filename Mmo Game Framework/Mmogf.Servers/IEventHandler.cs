@@ -1,4 +1,4 @@
-﻿using Mmogf.Servers.Contracts.Events;
+﻿using Mmogf.Core.Contracts.Events;
 using Mmogf.Servers.Shared;
 using System.Threading.Tasks;
 

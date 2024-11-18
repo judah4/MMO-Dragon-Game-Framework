@@ -2,9 +2,9 @@ using Lidgren.Network;
 using MessagePack;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Mmogf.Servers.Contracts;
-using Mmogf.Servers.Contracts.Commands;
-using Mmogf.Servers.Contracts.Events;
+using Mmogf.Core.Contracts;
+using Mmogf.Core.Contracts.Commands;
+using Mmogf.Core.Contracts.Events;
 using Mmogf.Servers.Shared;
 using Prometheus;
 using System;
@@ -34,8 +34,6 @@ namespace MmoGameFramework
         Stopwatch _stopwatch;
         int _tickRate;
         public int TickRate => _tickRate;
-
-
 
         public Dictionary<RemoteWorkerIdentifier, WorkerConnection> _connections = new Dictionary<RemoteWorkerIdentifier, WorkerConnection>();
         public ConcurrentDictionary<RemoteWorkerIdentifier, WorkerConnection> _workerWithSubChanges = new ConcurrentDictionary<RemoteWorkerIdentifier, WorkerConnection>();
@@ -500,6 +498,14 @@ namespace MmoGameFramework
             s_server.SendMessage(om, worker.Connection, deliveryMethod);
         }
 
+        private void SendToAll(MmoMessage message, NetDeliveryMethod deliveryMethod)
+        {
+            var bytes = MessagePackSerializer.Serialize(message);
+            NetOutgoingMessage om = s_server.CreateMessage(bytes.Length);
+            om.Write(bytes);
+            s_server.SendToAll(om, deliveryMethod);
+        }
+
         public void SendSubscribed(Entity entity, MmoMessage message, RemoteWorkerIdentifier workerIdToExclude, NetDeliveryMethod deliveryMethod = NetDeliveryMethod.Unreliable)
         {
             var connections = new List<NetConnection>(10);
@@ -644,14 +650,26 @@ namespace MmoGameFramework
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"Sending Command Request {commandRequest.Header.RequestId} {commandRequest.Header.ComponentId}-{commandRequest.Header.CommandId}");
 
-            if (_connections.TryGetValue(workerId, out var connection))
+            if (workerId.IsValid())
             {
-                SendToWorker(connection, message, NetDeliveryMethod.ReliableUnordered);
+                if (_connections.TryGetValue(workerId, out var connection))
+                {
+                    SendToWorker(connection, message, NetDeliveryMethod.ReliableUnordered);
+                }
+                else
+                {
+                    _logger.LogError($"Could not find worker {workerId}");
+                }
             }
             else
             {
-                _logger.LogError($"Could not find worker {workerId}");
+                // Initial login so the authority is not set. Broadcast
+                NetOutgoingMessage om = s_server.CreateMessage();
+                om.Write(MessagePackSerializer.Serialize(message));
+                SendToAll(message, NetDeliveryMethod.ReliableUnordered);
             }
+
+
         }
 
         private void OnEntityCommandResponse(CommandResponse commandResponse)

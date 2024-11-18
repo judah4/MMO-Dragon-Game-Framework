@@ -1,5 +1,5 @@
 using MessagePack;
-using Mmogf.Servers.Contracts;
+using Mmogf.Core.Contracts;
 using Mmogf.Servers.Shared;
 using System.Collections.Generic;
 
