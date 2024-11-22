@@ -1,14 +1,14 @@
 using Mmogf.Servers.Shared;
 using System.Collections.Generic;
-using MessagePack;
+using System.Runtime.Serialization;
 namespace Mmogf.Core.Contracts
 {
-    [MessagePackObject]
+    [DataContract]
     public struct EntityInfo
     {
-        [Key(0)]
+        [DataMember(Order = 1)]
         public EntityId EntityId { get; set; }
-        [Key(1)]
+        [DataMember(Order = 2)]
         public Dictionary<short, byte[]> EntityData { get; set; }
 
     }

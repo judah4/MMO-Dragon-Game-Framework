@@ -1,11 +1,11 @@
-using MessagePack;
+using System.Runtime.Serialization;
 
 namespace Mmogf.Core.Contracts
 {
-    [MessagePackObject]
+    [DataContract]
     public struct ClientConnect
     {
-        [Key(0)]
+        [DataMember(Order = 1)]
         public long ClientId { get; set; }
 
     }

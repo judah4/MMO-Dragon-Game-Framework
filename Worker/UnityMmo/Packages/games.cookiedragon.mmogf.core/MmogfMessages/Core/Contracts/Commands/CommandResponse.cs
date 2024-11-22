@@ -1,14 +1,14 @@
-﻿using MessagePack;
+﻿using System.Runtime.Serialization;
 
 namespace Mmogf.Core.Contracts.Commands
 {
-    [MessagePackObject]
+    [DataContract]
     public struct CommandResponse
     {
-        [Key(0)]
+        [DataMember(Order = 1)]
         public CommandResponseHeader Header { get; set; }
 
-        [Key(1)]
+        [DataMember(Order = 2)]
         public byte[] Payload { get; set; }
 
         public CommandResponse(CommandResponseHeader header, byte[] payload)

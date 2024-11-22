@@ -1,12 +1,12 @@
-using MessagePack;
+using System.Runtime.Serialization;
 namespace Mmogf.Core.Contracts
 {
-    [MessagePackObject]
+    [DataContract]
     public struct GameData
     {
-        [Key(0)]
+        [DataMember(Order = 1)]
         public int EntityId { get; set; }
-        [Key(1)]
+        [DataMember(Order = 2)]
         public byte[] Info { get; set; }
 
     }

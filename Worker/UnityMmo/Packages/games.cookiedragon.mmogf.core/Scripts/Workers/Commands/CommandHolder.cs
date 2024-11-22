@@ -1,4 +1,4 @@
-﻿using MessagePack;
+﻿using System.Runtime.Serialization;
 using Mmogf.Core.Contracts;
 using Mmogf.Core.Contracts.Commands;
 using System;

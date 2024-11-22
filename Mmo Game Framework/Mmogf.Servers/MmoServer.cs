@@ -1,10 +1,10 @@
 using Lidgren.Network;
-using MessagePack;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Mmogf.Core.Contracts;
 using Mmogf.Core.Contracts.Commands;
 using Mmogf.Core.Contracts.Events;
+using Mmogf.Servers.Serializers;
 using Mmogf.Servers.Shared;
 using Prometheus;
 using System;
@@ -29,6 +29,7 @@ namespace MmoGameFramework
         NetPeerConfiguration _config;
         ILogger _logger;
         IConfiguration _configuration;
+        private ISerializer _serializer;
 
         bool _clientWorker = false;
         Stopwatch _stopwatch;
@@ -38,10 +39,11 @@ namespace MmoGameFramework
         public Dictionary<RemoteWorkerIdentifier, WorkerConnection> _connections = new Dictionary<RemoteWorkerIdentifier, WorkerConnection>();
         public ConcurrentDictionary<RemoteWorkerIdentifier, WorkerConnection> _workerWithSubChanges = new ConcurrentDictionary<RemoteWorkerIdentifier, WorkerConnection>();
 
-        public MmoServer(EntityStore entities, NetPeerConfiguration config, bool clientWorker, ILogger<MmoServer> logger, IConfiguration configuration)
+        public MmoServer(EntityStore entities, NetPeerConfiguration config, bool clientWorker, ISerializer serializer, ILogger<MmoServer> logger, IConfiguration configuration)
         {
             _entities = entities;
             _clientWorker = clientWorker;
+            _serializer = serializer;
             _configuration = configuration;
             _tickRate = _configuration.GetValue<int?>(key: "TickRate") ?? 60;
             var description = "Number of connected workers.";
@@ -134,13 +136,13 @@ namespace MmoGameFramework
                 case NetIncomingMessageType.Data:
                     //if(_logger.IsEnabled(LogLevel.Debug))
                     //    _logger.LogDebug(im.SenderConnection.RemoteUniqueIdentifier +" - '" + BitConverter.ToString(im.Data) + "'");
-                    var simpleData = MessagePackSerializer.Deserialize<MmoMessage>(im.Data);
+                    var simpleData = _serializer.Deserialize<MmoMessage>(im.Data);
                     //if (_logger.IsEnabled(LogLevel.Debug))
                     //    _logger.LogDebug($"Serve Codes {simpleData.MessageId}");
                     switch (simpleData.MessageId)
                     {
                         case ServerCodes.ChangeInterestArea:
-                            var interestArea = MessagePackSerializer.Deserialize<ChangeInterestArea>(simpleData.Info);
+                            var interestArea = _serializer.Deserialize<ChangeInterestArea>(simpleData.Info);
                             WorkerConnection worker;
                             if (_connections.TryGetValue(workerId, out worker))
                             {
@@ -154,7 +156,7 @@ namespace MmoGameFramework
                                 SendToWorker(worker, new MmoMessage()
                                 {
                                     MessageId = ServerCodes.EntityCheckout,
-                                    Info = MessagePackSerializer.Serialize(new EntityCheckout()
+                                    Info = _serializer.Serialize(new EntityCheckout()
                                     {
                                         Checkouts = new List<EntityId>(),
                                         Remove = false,
@@ -309,20 +311,20 @@ namespace MmoGameFramework
             var message = new MmoMessage()
             {
                 MessageId = ServerCodes.ClientConnect,
-                Info = MessagePackSerializer.Serialize(new ClientConnect()
+                Info = _serializer.Serialize(new ClientConnect()
                 {
                     ClientId = im.SenderConnection.RemoteUniqueIdentifier,
                 }),
             };
             NetOutgoingMessage om = s_server.CreateMessage();
-            om.Write(MessagePackSerializer.Serialize(message));
+            om.Write(_serializer.Serialize(message));
             s_server.SendMessage(om, im.SenderConnection, NetDeliveryMethod.ReliableUnordered);
         }
 
         private void HandleEntityCommand(NetIncomingMessage im, MmoMessage simpleData)
         {
             //get command info
-            var commandRequest = MessagePackSerializer.Deserialize<CommandRequest>(simpleData.Info);
+            var commandRequest = _serializer.Deserialize<CommandRequest>(simpleData.Info);
 
             if (!commandRequest.Header.EntityId.IsValid() && commandRequest.Header.ComponentId == 0)
             {
@@ -344,7 +346,7 @@ namespace MmoGameFramework
                 SendToWorker(worker, new MmoMessage()
                 {
                     MessageId = ServerCodes.EntityCommandResponse,
-                    Info = MessagePackSerializer.Serialize(new CommandResponse(CommandResponseHeader.Create(commandRequest.Header, CommandStatus.InvalidRequest, "No Worker Identified"), null)),
+                    Info = _serializer.Serialize(new CommandResponse(CommandResponseHeader.Create(commandRequest.Header, CommandStatus.InvalidRequest, "No Worker Identified"), null)),
                 });
                 return;
             }
@@ -370,7 +372,7 @@ namespace MmoGameFramework
                 SendToWorker(worker, new MmoMessage()
                 {
                     MessageId = ServerCodes.EntityCommandResponse,
-                    Info = MessagePackSerializer.Serialize(new CommandResponse(CommandResponseHeader.Create(commandRequest.Header, CommandStatus.InvalidRequest, "No Worker Identified"), null)),
+                    Info = _serializer.Serialize(new CommandResponse(CommandResponseHeader.Create(commandRequest.Header, CommandStatus.InvalidRequest, "No Worker Identified"), null)),
                 });
                 return;
             }
@@ -382,7 +384,7 @@ namespace MmoGameFramework
                 SendToWorker(worker, new MmoMessage()
                 {
                     MessageId = ServerCodes.EntityCommandResponse,
-                    Info = MessagePackSerializer.Serialize(new CommandResponse(CommandResponseHeader.Create(commandRequest.Header, CommandStatus.InvalidRequest, "No permission to create entities."), null)),
+                    Info = _serializer.Serialize(new CommandResponse(CommandResponseHeader.Create(commandRequest.Header, CommandStatus.InvalidRequest, "No permission to create entities."), null)),
                 });
                 return;
             }
@@ -390,7 +392,7 @@ namespace MmoGameFramework
             switch (commandRequest.Header.CommandId)
             {
                 case World.CreateEntity.CommandId:
-                    var createEntity = MessagePackSerializer.Deserialize<World.CreateEntity>(commandRequest.Payload);
+                    var createEntity = _serializer.Deserialize<World.CreateEntity>(commandRequest.Payload);
 
                     var requestPayload = createEntity.Request.Value;
                     var entityInfo = _entities.Create(requestPayload.EntityType, requestPayload.Position.ToPosition(), requestPayload.Rotation, requestPayload.Acls, null, requestPayload.Components);
@@ -399,18 +401,18 @@ namespace MmoGameFramework
                     SendToWorker(worker, new MmoMessage()
                     {
                         MessageId = ServerCodes.EntityCommandResponse,
-                        Info = MessagePackSerializer.Serialize(new CommandResponse(CommandResponseHeader.Create(commandRequest.Header, CommandStatus.Success, ""), MessagePackSerializer.Serialize(createEntity))),
+                        Info = _serializer.Serialize(new CommandResponse(CommandResponseHeader.Create(commandRequest.Header, CommandStatus.Success, ""), _serializer.Serialize(createEntity))),
                     }, NetDeliveryMethod.ReliableUnordered);
                     break;
                 case World.DeleteEntity.CommandId:
-                    var deleteEntity = MessagePackSerializer.Deserialize<World.DeleteEntity>(commandRequest.Payload);
+                    var deleteEntity = _serializer.Deserialize<World.DeleteEntity>(commandRequest.Payload);
                     var deleteRequestPayload = deleteEntity.Request.Value;
                     _entities.Delete(deleteRequestPayload.EntityId);
                     deleteEntity.Response = new NothingInternal();
                     SendToWorker(worker, new MmoMessage()
                     {
                         MessageId = ServerCodes.EntityCommandResponse,
-                        Info = MessagePackSerializer.Serialize(new CommandResponse(CommandResponseHeader.Create(commandRequest.Header, CommandStatus.Success, ""), MessagePackSerializer.Serialize(deleteEntity))),
+                        Info = _serializer.Serialize(new CommandResponse(CommandResponseHeader.Create(commandRequest.Header, CommandStatus.Success, ""), _serializer.Serialize(deleteEntity))),
                     }, NetDeliveryMethod.ReliableUnordered);
                     break;
             }
@@ -419,7 +421,7 @@ namespace MmoGameFramework
         private void HandleEntityCommandResponse(NetIncomingMessage im, MmoMessage simpleData)
         {
             //get command info
-            var commandResponse = MessagePackSerializer.Deserialize<CommandResponse>(simpleData.Info);
+            var commandResponse = _serializer.Deserialize<CommandResponse>(simpleData.Info);
             var entityInfo = _entities.GetEntity(commandResponse.Header.EntityId);
 
             if (entityInfo == null)
@@ -433,7 +435,7 @@ namespace MmoGameFramework
 
         private void HandleEntityUpdate(NetIncomingMessage im, MmoMessage simpleData)
         {
-            var entityUpdate = MessagePackSerializer.Deserialize<EntityUpdate>(simpleData.Info);
+            var entityUpdate = _serializer.Deserialize<EntityUpdate>(simpleData.Info);
             var entityVal = _entities.GetEntity(entityUpdate.EntityId);
 
             if (entityVal == null)
@@ -458,7 +460,7 @@ namespace MmoGameFramework
             entity.UpdateComponent(entityUpdate.ComponentId, entityUpdate.Info);
             //if (_logger.IsEnabled(LogLevel.Debug) && entityUpdate.ComponentId == Position.ComponentId)
             //{
-            //    var position = MessagePackSerializer.Deserialize<Position>(entityUpdate.Info);
+            //    var position = _serializer.Deserialize<Position>(entityUpdate.Info);
             //    _logger.LogDebug($"Entity: {entityInfo.Value.EntityId} position to {position.ToString()}");
             //}
 
@@ -468,7 +470,7 @@ namespace MmoGameFramework
 
         private void HandleEntityEvent(NetIncomingMessage im, MmoMessage simpleData)
         {
-            var eventRequest = MessagePackSerializer.Deserialize<EventRequest>(simpleData.Info);
+            var eventRequest = _serializer.Deserialize<EventRequest>(simpleData.Info);
             var entityInfo = _entities.GetEntity(eventRequest.Header.EntityId);
 
             if (entityInfo == null)
@@ -492,7 +494,7 @@ namespace MmoGameFramework
 
         public void SendToWorker(WorkerConnection worker, MmoMessage message, NetDeliveryMethod deliveryMethod = NetDeliveryMethod.Unreliable)
         {
-            var bytes = MessagePackSerializer.Serialize(message);
+            var bytes = _serializer.Serialize(message);
             NetOutgoingMessage om = s_server.CreateMessage(bytes.Length);
             om.Write(bytes);
             s_server.SendMessage(om, worker.Connection, deliveryMethod);
@@ -500,7 +502,7 @@ namespace MmoGameFramework
 
         private void SendToAll(MmoMessage message, NetDeliveryMethod deliveryMethod)
         {
-            var bytes = MessagePackSerializer.Serialize(message);
+            var bytes = _serializer.Serialize(message);
             NetOutgoingMessage om = s_server.CreateMessage(bytes.Length);
             om.Write(bytes);
             s_server.SendToAll(om, deliveryMethod);
@@ -525,7 +527,7 @@ namespace MmoGameFramework
             }
 
             NetOutgoingMessage om = s_server.CreateMessage();
-            om.Write(MessagePackSerializer.Serialize(message));
+            om.Write(_serializer.Serialize(message));
             s_server.SendMessage(om, connections, deliveryMethod, 0);
         }
 
@@ -535,7 +537,7 @@ namespace MmoGameFramework
             var message = new MmoMessage()
             {
                 MessageId = ServerCodes.EntityInfo,
-                Info = MessagePackSerializer.Serialize(entityInfo.ToEntityInfo()),
+                Info = _serializer.Serialize(entityInfo.ToEntityInfo()),
             };
 
             return message;
@@ -557,7 +559,7 @@ namespace MmoGameFramework
             var message = new MmoMessage()
             {
                 MessageId = ServerCodes.EntityDelete,
-                Info = MessagePackSerializer.Serialize(new EntityInfo()
+                Info = _serializer.Serialize(new EntityInfo()
                 {
                     EntityId = entityId,
                     EntityData = new Dictionary<short, byte[]>(),
@@ -589,7 +591,7 @@ namespace MmoGameFramework
             {
                 MessageId = ServerCodes.EntityUpdate,
 
-                Info = MessagePackSerializer.Serialize(entityUpdate),
+                Info = _serializer.Serialize(entityUpdate),
             };
             //if (_logger.IsEnabled(LogLevel.Debug))
             //    _logger.LogDebug("Sending Entity Update");
@@ -607,7 +609,7 @@ namespace MmoGameFramework
             {
                 MessageId = ServerCodes.EntityEvent,
 
-                Info = MessagePackSerializer.Serialize(eventRequest),
+                Info = _serializer.Serialize(eventRequest),
             };
 
             if (_logger.IsEnabled(LogLevel.Debug))
@@ -644,7 +646,7 @@ namespace MmoGameFramework
             {
                 MessageId = ServerCodes.EntityCommandRequest,
 
-                Info = MessagePackSerializer.Serialize(commandRequest),
+                Info = _serializer.Serialize(commandRequest),
             };
 
             if (_logger.IsEnabled(LogLevel.Debug))
@@ -665,7 +667,7 @@ namespace MmoGameFramework
             {
                 // Initial login so the authority is not set. Broadcast
                 NetOutgoingMessage om = s_server.CreateMessage();
-                om.Write(MessagePackSerializer.Serialize(message));
+                om.Write(_serializer.Serialize(message));
                 SendToAll(message, NetDeliveryMethod.ReliableUnordered);
             }
 
@@ -697,7 +699,7 @@ namespace MmoGameFramework
             {
                 MessageId = ServerCodes.EntityCommandResponse,
 
-                Info = MessagePackSerializer.Serialize(commandResponse),
+                Info = _serializer.Serialize(commandResponse),
             };
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"Sending Command Response {commandResponse.Header.RequestId} {commandResponse.Header.ComponentId}-{commandResponse.Header.CommandId}");

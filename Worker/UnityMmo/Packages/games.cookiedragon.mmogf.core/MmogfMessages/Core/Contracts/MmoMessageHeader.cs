@@ -1,10 +1,10 @@
-using MessagePack;
+using System.Runtime.Serialization;
 namespace Mmogf.Core.Contracts
 {
-    [MessagePackObject]
+    [DataContract]
     public struct MmoMessageHeader
     {
-        [Key(0)]
+        [DataMember(Order = 1)]
         public ServerCodes MessageId { get; set; }
     }
 }

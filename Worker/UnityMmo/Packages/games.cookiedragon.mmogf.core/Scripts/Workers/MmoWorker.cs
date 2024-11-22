@@ -1,5 +1,5 @@
 using Lidgren.Network;
-using MessagePack;
+using System.Runtime.Serialization;
 using Mmogf.Core.Behaviors;
 using Mmogf.Core.Contracts;
 using Mmogf.Core.Contracts.Commands;

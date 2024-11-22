@@ -1,13 +1,13 @@
-﻿using MessagePack;
+﻿using System.Runtime.Serialization;
 
 namespace Mmogf.Core.Contracts.Events
 {
-    [MessagePackObject]
+    [DataContract]
     public struct EventRequest
     {
-        [Key(0)]
+        [DataMember(Order = 1)]
         public EventRequestHeader Header { get; set; }
-        [Key(1)]
+        [DataMember(Order = 2)]
         public byte[] Payload { get; set; }
     }
 }

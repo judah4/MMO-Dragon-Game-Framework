@@ -1,5 +1,4 @@
 ﻿using Lidgren.Network;
-using MessagePack;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -7,7 +6,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Mmogf.Core.Contracts;
+using Mmogf.Servers.Serializers;
 using Prometheus;
+using ProtoBuf;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -28,9 +29,10 @@ namespace MmoGameFramework
 
             IHost host = BuildHost(args);
 
-
             _logger = host.Services.GetRequiredService<ILogger<Program>>();
             var configuration = host.Services.GetRequiredService<IConfiguration>();
+
+            var serializer = new ProtobufSerializer();
 
             // Print Banner
             Console.WriteLine(Resources.Data.Banner);
@@ -39,7 +41,7 @@ namespace MmoGameFramework
             _logger.LogInformation($"Dragon Game Framework MMO Networking Version {version}");
             int cellSize = configuration.GetValue<int?>("ChunkSize") ?? 50;
             _logger.LogInformation($"Attaching Entity Storage. Cell Size {cellSize}.");
-            _entityStore = new EntityStore(host.Services.GetRequiredService<ILogger<EntityStore>>(), cellSize);
+            _entityStore = new EntityStore(host.Services.GetRequiredService<ILogger<EntityStore>>(), cellSize, serializer);
 
             //var lz4Options = MessagePackSerializerOptions.Standard.WithCompression(MessagePackCompression.Lz4BlockArray);
             //MessagePackSerializer.DefaultOptions = lz4Options;
@@ -58,7 +60,7 @@ namespace MmoGameFramework
             }
 
             var worldBytes = File.ReadAllBytes(updatedPath);
-            var worldData = MessagePack.MessagePackSerializer.Deserialize<WorldConfig>(worldBytes);
+            var worldData = serializer.Deserialize<WorldConfig>(worldBytes);
 
             foreach (var entity in worldData.Entities)
             {
@@ -66,12 +68,12 @@ namespace MmoGameFramework
                 byte[] rotationBytes;
                 if (entity.EntityData.TryGetValue(Rotation.ComponentId, out rotationBytes))
                 {
-                    rotation = MessagePackSerializer.Deserialize<Rotation>(rotationBytes);
+                    rotation = serializer.Deserialize<Rotation>(rotationBytes);
                 }
 
-                _entityStore.Create(entity.Name, MessagePackSerializer.Deserialize<FixedVector3>(entity.EntityData[FixedVector3.ComponentId]).ToPosition(),
+                _entityStore.Create(entity.Name, serializer.Deserialize<FixedVector3>(entity.EntityData[FixedVector3.ComponentId]).ToPosition(),
                     rotation,
-                    MessagePackSerializer.Deserialize<Acls>(entity.EntityData[Acls.ComponentId]).AclList,
+                    serializer.Deserialize<Acls>(entity.EntityData[Acls.ComponentId]).AclList,
                     entity.EntityId, entity.EntityData);
 
             }
@@ -84,26 +86,39 @@ namespace MmoGameFramework
             _logger.LogInformation($"Setting Server Tick Rate {tickRate}");
             if (timeout != 25)
                 _logger.LogInformation($"Setting Server Timeout To {timeout}");
+
             _logger.LogInformation("Starting Dragon-Client connections. Port 1337");
             // create and start the server
-            server = new MmoServer(_entityStore, new NetPeerConfiguration("Dragon-Client")
-            {
-                MaximumConnections = 100,
-                Port = 1337,
-                ConnectionTimeout = timeout,
-            }, true, host.Services.GetRequiredService<ILogger<MmoServer>>(), configuration);
+            server = new MmoServer(
+                _entityStore,
+                new NetPeerConfiguration("Dragon-Client")
+                {
+                    MaximumConnections = 100,
+                    Port = 1337,
+                    ConnectionTimeout = timeout,
+                },
+                true,
+                serializer,
+                host.Services.GetRequiredService<ILogger<MmoServer>>(),
+                configuration);
             server.Start();
+
             _logger.LogInformation("Starting Dragon-Worker connections. Port 1338.");
-            workerServer = new MmoServer(_entityStore, new NetPeerConfiguration("Dragon-Worker")
-            {
-                MaximumConnections = 100,
-                Port = 1338,
-                ConnectionTimeout = timeout,
-            }, false, host.Services.GetRequiredService<ILogger<MmoServer>>(), configuration);
+            workerServer = new MmoServer(
+                _entityStore,
+                new NetPeerConfiguration("Dragon-Worker")
+                {
+                    MaximumConnections = 100,
+                    Port = 1338,
+                    ConnectionTimeout = timeout,
+                },
+                false,
+                serializer,
+                host.Services.GetRequiredService<ILogger<MmoServer>>(),
+                configuration);
             workerServer.Start();
 
             _logger.LogInformation("DragonGF is ready.");
-
 
             await host.RunAsync();
 
@@ -111,8 +126,6 @@ namespace MmoGameFramework
             workerServer.Stop();
             metricServer.Stop();
         }
-
-
 
         private static WebApplication BuildHost(string[] args)
         {

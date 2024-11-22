@@ -1,8 +1,8 @@
-using MessagePack;
 using Microsoft.Extensions.Logging;
 using Mmogf.Core.Contracts;
 using Mmogf.Core.Contracts.Commands;
 using Mmogf.Core.Contracts.Events;
+using Mmogf.Servers.Serializers;
 using Mmogf.Servers.Shared;
 using Mmogf.Servers.Worlds;
 using Prometheus;
@@ -18,11 +18,15 @@ namespace MmoGameFramework
         private int lastId = 0;
         private readonly Gauge EntitiesGauge = Metrics.CreateGauge($"dragongf_entities", "Number of entities in the world.");
 
-        private ConcurrentDictionary<EntityId, Entity> _entities = new ConcurrentDictionary<EntityId, Entity>();
+        private readonly ConcurrentDictionary<EntityId, Entity> _entities = new ConcurrentDictionary<EntityId, Entity>();
 
-        private List<GridLayer> GridLayers = new List<GridLayer>(2);
+        private readonly List<GridLayer> GridLayers = new List<GridLayer>(2);
 
-        ILogger _logger;
+
+        private readonly ILogger _logger;
+
+        private readonly ISerializer _serializer;
+
 
         public ConcurrentDictionary<EntityId, Entity> Entities => _entities;
 
@@ -36,9 +40,10 @@ namespace MmoGameFramework
         public event Action<EntityId, IEnumerable<RemoteWorkerIdentifier>> OnEntityAddSubscription;
         public event Action<EntityId, IEnumerable<RemoteWorkerIdentifier>> OnEntityRemoveSubscription;
 
-        public EntityStore(ILogger<EntityStore> logger, int cellSize)
+        public EntityStore(ILogger<EntityStore> logger, int cellSize, ISerializer serializer)
         {
             _logger = logger;
+            _serializer = serializer;
 
             var grid1 = new GridLayer(cellSize, new GridLayerIdentifier(0));
             //default 2 layers. regular checkout and infinite size
@@ -81,10 +86,10 @@ namespace MmoGameFramework
             //todo: Validate acl list for data passsed
             var data = new Dictionary<short, byte[]>()
             {
-                { EntityType.ComponentId, MessagePackSerializer.Serialize(new EntityType() { Name = entityType}) },
-                { FixedVector3.ComponentId, MessagePackSerializer.Serialize(position.ToFixedVector3()) },
-                { Rotation.ComponentId, MessagePackSerializer.Serialize(rotation) },
-                { Acls.ComponentId, MessagePackSerializer.Serialize(new Acls() { AclList = acls }) },
+                { EntityType.ComponentId, _serializer.Serialize(new EntityType() { Name = entityType}) },
+                { FixedVector3.ComponentId, _serializer.Serialize(position.ToFixedVector3()) },
+                { Rotation.ComponentId, _serializer.Serialize(rotation) },
+                { Acls.ComponentId, _serializer.Serialize(new Acls() { AclList = acls }) },
             };
             if (additionalData != null)
             {
@@ -97,7 +102,7 @@ namespace MmoGameFramework
                 }
             }
 
-            var entity = new Entity(entityId.Value, data);
+            var entity = new Entity(entityId.Value, data, _serializer);
 
             _entities.TryAdd(entityId.Value, entity);
 

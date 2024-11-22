@@ -339,3 +339,5 @@ ASALocalRun/
 healthchecksdb
 
 Worker/UnityMmo/UserSettings/
+
+Worker/UnityMmo/Assets/Packages/

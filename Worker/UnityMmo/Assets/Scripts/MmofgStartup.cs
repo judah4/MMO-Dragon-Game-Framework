@@ -4,13 +4,34 @@ using Mmogf.Core;
 using Mmogf.Core.Contracts;
 using Mmogf.Core.Contracts.Commands;
 using Mmogf.Servers.Shared;
+using ProtoBuf;
 using System.Collections.Generic;
+using System.IO;
+using System.Runtime.Serialization;
 using UnityEngine;
 
 namespace Mmogf
 {
     public static class MmogfStartup
     {
+        [DataContract]
+        class MessagePacket
+        {
+            [DataMember(Order = 1)]
+            public int Header { get; set; }
+            [DataMember(Order = 2)]
+            public byte[] Payload { get; set; }
+        }
+
+        [DataContract]
+        class Person
+        {
+            [DataMember(Order = 1)]
+            public int Id { get; set; }
+            [DataMember(Order = 2)]
+            public string Name { get; set; }
+        }
+
         static bool serializerRegistered = false;
         static bool setupRun = false;
         public static void RegisterSerializers()
@@ -30,6 +51,50 @@ namespace Mmogf
             //rethink compressed by default
             MessagePackSerializer.DefaultOptions = option;
             serializerRegistered = true;
+
+            var person1 = new Person()
+            {
+                Id = 2,
+                Name = "Test",
+            };
+
+            var messagePacket = new MessagePacket()
+            {
+                Header = 5,
+                Payload = Serialize(person1),
+            };
+
+            var serializedPacket = Serialize(messagePacket);
+            var deserializedPacket = Deserialize<MessagePacket>(serializedPacket);
+
+            var deserializedPerson = Deserialize<Person>(deserializedPacket.Payload);
+
+            Debug.Log($"Packet: {deserializedPacket.Header}, Person:{deserializedPerson.Name}, {deserializedPerson.Id}");
+            using (var ms = new MemoryStream())
+            {
+                Serializer.Serialize(ms, person1);
+                ms.Seek(0, SeekOrigin.Begin);
+                var personD = Serializer.Deserialize<Person>(ms);
+
+                Debug.Log($"Person:{personD.Name}, {personD.Id}");
+            }
+        }
+
+        private static byte[] Serialize<T>(T obj)
+        {
+            using (var ms = new MemoryStream())
+            {
+                Serializer.Serialize(ms, obj);
+                return ms.ToArray();
+            }
+        }
+
+        private static T Deserialize<T>(byte[] data)
+        {
+            using (var ms = new MemoryStream(data))
+            {
+                return Serializer.Deserialize<T>(ms);
+            }
         }
 
 #if UNITY_EDITOR

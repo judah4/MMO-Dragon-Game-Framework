@@ -1,15 +1,15 @@
-using MessagePack;
+using System.Runtime.Serialization;
 
 namespace Mmogf.Core.Contracts
 {
 
-    [MessagePackObject]
+    [DataContract]
     public struct EntityType : IEntityComponent
     {
         public const short ComponentId = 1;
         public short GetComponentId() => ComponentId;
 
-        [Key(0)]
+        [DataMember(Order = 1)]
         public string Name { get; set; }
     }
 }

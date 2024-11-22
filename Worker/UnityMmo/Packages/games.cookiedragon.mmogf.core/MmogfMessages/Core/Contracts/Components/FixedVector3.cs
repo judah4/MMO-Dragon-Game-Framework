@@ -1,5 +1,5 @@
 using Mmogf.Servers.Shared;
-using MessagePack;
+using System.Runtime.Serialization;
 
 namespace Mmogf.Core.Contracts
 {
@@ -7,17 +7,17 @@ namespace Mmogf.Core.Contracts
     /// <summary>
     /// 21.10 Fixed point decimal for entity position.
     /// </summary>
-    [MessagePackObject]
+    [DataContract]
     public partial struct FixedVector3 : IEntityComponent
     {
         public const short ComponentId = 2;
         public short GetComponentId() => ComponentId;
 
-        [Key(0)]
+        [DataMember(Order = 1)]
         public int X { get; set; }
-        [Key(1)]
+        [DataMember(Order = 2)]
         public int Y { get; set; }
-        [Key(2)]
+        [DataMember(Order = 3)]
         public int Z { get; set; }
 
         public Position ToPosition()

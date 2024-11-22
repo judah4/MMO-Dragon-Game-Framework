@@ -1,5 +1,5 @@
-using MessagePack;
 using Mmogf.Core.Contracts;
+using Mmogf.Servers.Serializers;
 using Mmogf.Servers.Shared;
 using System.Collections.Generic;
 
@@ -17,10 +17,13 @@ namespace MmoGameFramework
 
         public Acls Acls { get; private set; }
 
-        public Entity(EntityId entityId, Dictionary<short, byte[]> data) : this()
+        private ISerializer _serializer;
+
+        public Entity(EntityId entityId, Dictionary<short, byte[]> data, ISerializer serializer) : this()
         {
             EntityId = entityId;
             EntityData = data;
+            _serializer = serializer;
 
             UpdateComponent(EntityType.ComponentId, EntityData[EntityType.ComponentId]);
             UpdateComponent(FixedVector3.ComponentId, EntityData[FixedVector3.ComponentId]);
@@ -32,19 +35,20 @@ namespace MmoGameFramework
         {
             EntityData[componentId] = data;
 
+            // Serializer needs to fixed here
             switch (componentId)
             {
                 case EntityType.ComponentId:
-                    EntityType = MessagePackSerializer.Deserialize<EntityType>(EntityData[EntityType.ComponentId]);
+                    EntityType = _serializer.Deserialize<EntityType>(EntityData[EntityType.ComponentId]);
                     break;
                 case FixedVector3.ComponentId:
-                    Position = MessagePackSerializer.Deserialize<FixedVector3>(EntityData[FixedVector3.ComponentId]).ToPosition();
+                    Position = _serializer.Deserialize<FixedVector3>(EntityData[FixedVector3.ComponentId]).ToPosition();
                     break;
                 case Rotation.ComponentId:
-                    Rotation = MessagePackSerializer.Deserialize<Rotation>(EntityData[Rotation.ComponentId]);
+                    Rotation = _serializer.Deserialize<Rotation>(EntityData[Rotation.ComponentId]);
                     break;
                 case Acls.ComponentId:
-                    Acls = MessagePackSerializer.Deserialize<Acls>(EntityData[Acls.ComponentId]);
+                    Acls = _serializer.Deserialize<Acls>(EntityData[Acls.ComponentId]);
                     break;
 
             }
@@ -59,8 +63,6 @@ namespace MmoGameFramework
             };
 
             return info;
-
         }
-
     }
 }
