@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Mmogf.Core.Contracts;
 using Mmogf.Core.Contracts.Commands;
 using Mmogf.Core.Contracts.Events;
+using Mmogf.Servers;
 using Mmogf.Servers.Serializers;
 using Mmogf.Servers.Shared;
 using Mmogf.Servers.Worlds;
@@ -84,13 +85,7 @@ namespace MmoGameFramework
             }
 
             //todo: Validate acl list for data passsed
-            var data = new Dictionary<short, byte[]>()
-            {
-                { EntityType.ComponentId, _serializer.Serialize(new EntityType() { Name = entityType}) },
-                { FixedVector3.ComponentId, _serializer.Serialize(position.ToFixedVector3()) },
-                { Rotation.ComponentId, _serializer.Serialize(rotation) },
-                { Acls.ComponentId, _serializer.Serialize(new Acls() { AclList = acls }) },
-            };
+            var data = new Dictionary<short, IComponentData>();
             if (additionalData != null)
             {
                 foreach (var additional in additionalData)
@@ -98,11 +93,16 @@ namespace MmoGameFramework
                     if (data.ContainsKey(additional.Key))
                         continue;
 
-                    data.Add(additional.Key, additional.Value);
+                    data.Add(additional.Key, new EntityComponentData(additional.Value));
                 }
             }
 
-            var entity = new Entity(entityId.Value, data, _serializer);
+            var entityTypeData = new EntityType()
+            {
+                Name = entityType
+            };
+
+            var entity = new Entity(entityId.Value, entityTypeData, new Acls() { AclList = acls }, position, rotation, data);
 
             _entities.TryAdd(entityId.Value, entity);
 
@@ -121,7 +121,7 @@ namespace MmoGameFramework
             return entity;
         }
 
-        public Entity? GetEntity(EntityId entityId)
+        public Entity GetEntity(EntityId entityId)
         {
             Entity entityInfo;
             if (!_entities.TryGetValue(entityId, out entityInfo))
@@ -146,7 +146,7 @@ namespace MmoGameFramework
                 //update regions
                 //make this configurable, figure out how to check the components later
                 int gridIndex = 0;
-                if (entity.EntityData.ContainsKey(PlayerCreator.ComponentId))
+                if (entity.AdditionalData.ContainsKey(PlayerCreator.ComponentId))
                 {
                     gridIndex = 1;
                 }
@@ -241,7 +241,7 @@ namespace MmoGameFramework
             var workerIds = new List<RemoteWorkerIdentifier>();
             //make this configurable, figure out how to check the components later
             int gridIndex = 0;
-            if (entity.EntityData.ContainsKey(PlayerCreator.ComponentId))
+            if (entity.AdditionalData.ContainsKey(PlayerCreator.ComponentId))
             {
                 gridIndex = 1;
             }

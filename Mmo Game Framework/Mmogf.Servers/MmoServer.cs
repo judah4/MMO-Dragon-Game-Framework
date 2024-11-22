@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Mmogf.Core.Contracts;
 using Mmogf.Core.Contracts.Commands;
 using Mmogf.Core.Contracts.Events;
+using Mmogf.Servers;
 using Mmogf.Servers.Serializers;
 using Mmogf.Servers.Shared;
 using Prometheus;
@@ -30,6 +31,7 @@ namespace MmoGameFramework
         ILogger _logger;
         IConfiguration _configuration;
         private ISerializer _serializer;
+        private EntityToContractConverter _entityToContractConverter;
 
         bool _clientWorker = false;
         Stopwatch _stopwatch;
@@ -39,7 +41,7 @@ namespace MmoGameFramework
         public Dictionary<RemoteWorkerIdentifier, WorkerConnection> _connections = new Dictionary<RemoteWorkerIdentifier, WorkerConnection>();
         public ConcurrentDictionary<RemoteWorkerIdentifier, WorkerConnection> _workerWithSubChanges = new ConcurrentDictionary<RemoteWorkerIdentifier, WorkerConnection>();
 
-        public MmoServer(EntityStore entities, NetPeerConfiguration config, bool clientWorker, ISerializer serializer, ILogger<MmoServer> logger, IConfiguration configuration)
+        public MmoServer(EntityStore entities, NetPeerConfiguration config, bool clientWorker, ISerializer serializer, ILogger<MmoServer> logger, IConfiguration configuration, EntityToContractConverter entityToContractConverter)
         {
             _entities = entities;
             _clientWorker = clientWorker;
@@ -68,7 +70,7 @@ namespace MmoGameFramework
 
             _entities.OnEntityAddSubscription += ProcessOnEntityAddSubscription;
             _entities.OnEntityRemoveSubscription += ProcessOnEntityRemoveSubscription;
-
+            _entityToContractConverter = entityToContractConverter;
         }
 
         public void Start()
@@ -263,7 +265,7 @@ namespace MmoGameFramework
                     if (entity == null)
                         continue;
 
-                    var message = EntityInfoMessage(entity.Value);
+                    var message = EntityInfoMessage(entity);
 
                     SendToWorker(worker, message, NetDeliveryMethod.ReliableUnordered);
                 }
@@ -441,7 +443,7 @@ namespace MmoGameFramework
             if (entityVal == null)
                 return;
 
-            Entity entity = entityVal.Value;
+            Entity entity = entityVal;
 
             var workerId = new RemoteWorkerIdentifier(im.SenderConnection.RemoteUniqueIdentifier);
             WorkerConnection worker;
@@ -457,7 +459,8 @@ namespace MmoGameFramework
                 return;
             }
 
-            entity.UpdateComponent(entityUpdate.ComponentId, entityUpdate.Info);
+            var componentData = new EntityComponentData(entityUpdate.Info);
+            entity.UpdateComponent(entityUpdate.ComponentId, componentData);
             //if (_logger.IsEnabled(LogLevel.Debug) && entityUpdate.ComponentId == Position.ComponentId)
             //{
             //    var position = _serializer.Deserialize<Position>(entityUpdate.Info);
@@ -482,7 +485,7 @@ namespace MmoGameFramework
                 //disconnected??
                 return;
             }
-            var acls = entityInfo.Value.Acls;
+            var acls = entityInfo.Acls;
             if (!acls.CanWrite(eventRequest.Header.ComponentId, worker.ConnectionType))
             {
                 //log
@@ -531,13 +534,13 @@ namespace MmoGameFramework
             s_server.SendMessage(om, connections, deliveryMethod, 0);
         }
 
-        private MmoMessage EntityInfoMessage(Entity entityInfo)
+        private MmoMessage EntityInfoMessage(Entity entity)
         {
             //find who has checked out
             var message = new MmoMessage()
             {
                 MessageId = ServerCodes.EntityInfo,
-                Info = _serializer.Serialize(entityInfo.ToEntityInfo()),
+                Info = _serializer.Serialize(_entityToContractConverter.Convert(entity)),
             };
 
             return message;
@@ -595,7 +598,7 @@ namespace MmoGameFramework
             };
             //if (_logger.IsEnabled(LogLevel.Debug))
             //    _logger.LogDebug("Sending Entity Update");
-            SendSubscribed(entity.Value, message, workerId, NetDeliveryMethod.Unreliable);
+            SendSubscribed(entity, message, workerId, NetDeliveryMethod.Unreliable);
             //SendArea(entity.Value.Position, message, workerId, NetDeliveryMethod.Unreliable);
         }
 
@@ -614,7 +617,7 @@ namespace MmoGameFramework
 
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"Sending Entity Event {eventRequest.Header.ComponentId}-{eventRequest.Header.EventId}");
-            SendSubscribed(entity.Value, message, new RemoteWorkerIdentifier(0), NetDeliveryMethod.ReliableUnordered);
+            SendSubscribed(entity, message, new RemoteWorkerIdentifier(0), NetDeliveryMethod.ReliableUnordered);
             //SendArea(entity.Value.Position, message, 0, NetDeliveryMethod.ReliableUnordered);
         }
 
@@ -626,7 +629,7 @@ namespace MmoGameFramework
                 return;
 
             //todo: get ACL and find who has authority over the command
-            var acls = entity.Value.Acls;
+            var acls = entity.Acls;
             Acl? entityAcl = null;
             foreach (var acl in acls.AclList)
             {

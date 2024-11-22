@@ -1,5 +1,4 @@
 ﻿using Mmogf.Core.Contracts.Commands;
-using Mmogf.Servers.Shared;
 using System.Threading.Tasks;
 
 namespace Mmogf.Servers

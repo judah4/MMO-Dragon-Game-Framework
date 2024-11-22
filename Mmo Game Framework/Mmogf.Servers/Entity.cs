@@ -1,68 +1,64 @@
 using Mmogf.Core.Contracts;
-using Mmogf.Servers.Serializers;
+using Mmogf.Servers;
 using Mmogf.Servers.Shared;
+using System;
 using System.Collections.Generic;
 
 namespace MmoGameFramework
 {
-    public struct Entity
+    public class Entity
     {
+        public EntityId EntityId { get; }
+        public Dictionary<short, IComponentData> AdditionalData { get; }
+        public EntityType EntityType { get; }
 
-        public EntityId EntityId { get; set; }
-        public Dictionary<short, byte[]> EntityData { get; set; }
-        public EntityType EntityType { get; private set; }
+        public Acls Acls { get; }
+
         public Position Position { get; private set; }
 
         public Rotation Rotation { get; private set; }
 
-        public Acls Acls { get; private set; }
 
-        private ISerializer _serializer;
-
-        public Entity(EntityId entityId, Dictionary<short, byte[]> data, ISerializer serializer) : this()
+        public Entity(EntityId entityId, EntityType entityType, Acls acls, Position position, Rotation rotation, Dictionary<short, IComponentData> additionalData)
         {
             EntityId = entityId;
-            EntityData = data;
-            _serializer = serializer;
+            EntityType = entityType;
+            Acls = acls;
+            Position = position;
+            Rotation = rotation;
+            AdditionalData = new Dictionary<short, IComponentData>();
 
-            UpdateComponent(EntityType.ComponentId, EntityData[EntityType.ComponentId]);
-            UpdateComponent(FixedVector3.ComponentId, EntityData[FixedVector3.ComponentId]);
-            UpdateComponent(Rotation.ComponentId, EntityData[Rotation.ComponentId]);
-            UpdateComponent(Acls.ComponentId, EntityData[Acls.ComponentId]);
-        }
-
-        public void UpdateComponent(short componentId, byte[] data)
-        {
-            EntityData[componentId] = data;
-
-            // Serializer needs to fixed here
-            switch (componentId)
+            foreach (var item in additionalData)
             {
-                case EntityType.ComponentId:
-                    EntityType = _serializer.Deserialize<EntityType>(EntityData[EntityType.ComponentId]);
-                    break;
-                case FixedVector3.ComponentId:
-                    Position = _serializer.Deserialize<FixedVector3>(EntityData[FixedVector3.ComponentId]).ToPosition();
-                    break;
-                case Rotation.ComponentId:
-                    Rotation = _serializer.Deserialize<Rotation>(EntityData[Rotation.ComponentId]);
-                    break;
-                case Acls.ComponentId:
-                    Acls = _serializer.Deserialize<Acls>(EntityData[Acls.ComponentId]);
-                    break;
-
+                UpdateComponent(item.Key, item.Value);
             }
         }
 
-        public EntityInfo ToEntityInfo()
+        public void UpdateComponent(short componentId, IComponentData data)
         {
-            var info = new EntityInfo()
+            switch (componentId)
             {
-                EntityId = EntityId,
-                EntityData = EntityData,
-            };
+                case EntityType.ComponentId:
+                    throw new ArgumentException("Entity Type cannot be updated.", nameof(componentId));
+                case FixedVector3.ComponentId:
+                    throw new ArgumentException("Use Update Position instead.", nameof(componentId));
+                case Rotation.ComponentId:
+                    throw new ArgumentException("Use Update Rotation instead.", nameof(componentId));
+                case Acls.ComponentId:
+                    throw new ArgumentException("Entity acls cannot be updated at the moment.", nameof(componentId));
+            }
 
-            return info;
+            AdditionalData[componentId] = data;
+        }
+
+        public void UpdatePosition(Position position)
+        {
+            Position = position;
+        }
+
+        public void UpdateRotation(Rotation rotation)
+        {
+            Rotation = rotation;
         }
     }
 }

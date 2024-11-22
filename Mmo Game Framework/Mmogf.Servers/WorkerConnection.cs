@@ -1,11 +1,12 @@
-﻿using Mmogf.Servers.Shared;
+﻿using Mmogf.Servers;
+using Mmogf.Servers.Shared;
 using Mmogf.Servers.Worlds;
 using System;
 using System.Collections.Concurrent;
 
 namespace MmoGameFramework
 {
-    public sealed class WorkerConnection
+    public sealed class WorkerConnection : IWorkerConnection
     {
         public RemoteWorkerIdentifier WorkerId => new RemoteWorkerIdentifier(Connection.RemoteUniqueIdentifier);
         public string ConnectionType { get; set; }

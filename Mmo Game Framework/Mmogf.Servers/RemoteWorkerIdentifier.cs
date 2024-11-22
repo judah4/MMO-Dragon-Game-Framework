@@ -1,4 +1,4 @@
-namespace Mmogf.Servers.Shared
+namespace Mmogf.Servers
 {
     public struct RemoteWorkerIdentifier
     {

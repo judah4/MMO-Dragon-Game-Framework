@@ -22,7 +22,7 @@ namespace Mmogf.Servers.Shared
         public static bool operator ==(EntityId a, EntityId b) => a.Equals(b);
         public static bool operator !=(EntityId a, EntityId b) => !a.Equals(b);
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (ReferenceEquals(null, obj))
             {

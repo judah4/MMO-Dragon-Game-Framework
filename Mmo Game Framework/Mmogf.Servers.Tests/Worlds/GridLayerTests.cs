@@ -26,16 +26,16 @@ namespace Mmogf.Servers.Tests.Worlds
             return grid;
         }
 
-        Entity CreateEntity(ISerializer serializer, Position postion)
+        Entity CreateEntity(ISerializer serializer, Position position)
         {
-            var entity = new Entity(new EntityId(1), new Dictionary<short, byte[]>()
-            {
-                { EntityType.ComponentId, serializer.Serialize(new EntityType() { Name = "Npc" }) },
-                { FixedVector3.ComponentId, serializer.Serialize<FixedVector3>(postion.ToFixedVector3()) },
-                { Rotation.ComponentId, serializer.Serialize(Rotation.Zero) },
-                { Acls.ComponentId, serializer.Serialize(new Acls() { AclList = new List<Acl>(), }) },
-            },
-            serializer);
+            var entity = new Entity(
+                new EntityId(1),
+                new EntityType() { Name = "Npc" },
+                new Acls() { AclList = new List<Acl>(), },
+                position,
+                Rotation.Zero,
+                new Dictionary<short, IComponentData>()
+            );
             return entity;
         }
 

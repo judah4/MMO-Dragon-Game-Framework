@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Mmogf.Core.Contracts;
+using Mmogf.Servers;
 using Mmogf.Servers.Serializers;
 using Prometheus;
 using ProtoBuf;
@@ -32,7 +33,9 @@ namespace MmoGameFramework
             _logger = host.Services.GetRequiredService<ILogger<Program>>();
             var configuration = host.Services.GetRequiredService<IConfiguration>();
 
+            //TODO: Inject these
             var serializer = new ProtobufSerializer();
+            var entityContractConverter = new EntityToContractConverter(serializer);
 
             // Print Banner
             Console.WriteLine(Resources.Data.Banner);
@@ -100,7 +103,8 @@ namespace MmoGameFramework
                 true,
                 serializer,
                 host.Services.GetRequiredService<ILogger<MmoServer>>(),
-                configuration);
+                configuration,
+                entityContractConverter);
             server.Start();
 
             _logger.LogInformation("Starting Dragon-Worker connections. Port 1338.");
@@ -115,7 +119,8 @@ namespace MmoGameFramework
                 false,
                 serializer,
                 host.Services.GetRequiredService<ILogger<MmoServer>>(),
-                configuration);
+                configuration,
+                entityContractConverter);
             workerServer.Start();
 
             _logger.LogInformation("DragonGF is ready.");
