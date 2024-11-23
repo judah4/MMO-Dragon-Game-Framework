@@ -13,7 +13,7 @@ namespace Mmogf.Servers.ServerInterfaces
 
         void Update(Entity entity);
 
-        Entity Update(int componentId, IComponentData data);
+        Entity Update(EntityId entityId, short componentId, IComponentData data);
 
         Entity Delete(EntityId entityId);
     }
