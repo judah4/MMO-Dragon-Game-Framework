@@ -6,37 +6,36 @@ using System.Collections.Generic;
 
 namespace MmoGameFramework
 {
-    public class Entity
+    public struct ImmutableEntity
     {
         public EntityId EntityId { get; }
-        public IReadOnlyDictionary<short, IComponentData> AdditionalData => _additionalData;
+        public IReadOnlyDictionary<short, IComponentData> AdditionalData { get; }
         public EntityType EntityType { get; }
 
         public Acls Acls { get; }
 
-        public Position Position { get; private set; }
+        public Position Position { get; }
 
-        public Rotation Rotation { get; private set; }
+        public Rotation Rotation { get; }
 
-        private readonly Dictionary<short, IComponentData> _additionalData;
-
-
-        public Entity(EntityId entityId, EntityType entityType, Acls acls, Position position, Rotation rotation, IReadOnlyDictionary<short, IComponentData> additionalData)
+        public ImmutableEntity(EntityId entityId, EntityType entityType, Acls acls, Position position, Rotation rotation, IReadOnlyDictionary<short, IComponentData> additionalData)
         {
             EntityId = entityId;
             EntityType = entityType;
             Acls = acls;
             Position = position;
             Rotation = rotation;
-            _additionalData = new Dictionary<short, IComponentData>();
+            var data = new Dictionary<short, IComponentData>();
 
             foreach (var item in additionalData)
             {
-                UpdateComponent(item.Key, item.Value);
+                UpdateComponent(data, item.Key, item.Value);
             }
+
+            AdditionalData = data;
         }
 
-        public void UpdateComponent(short componentId, IComponentData data)
+        private void UpdateComponent(Dictionary<short, IComponentData> additionalData, short componentId, IComponentData data)
         {
             switch (componentId)
             {
@@ -50,17 +49,7 @@ namespace MmoGameFramework
                     throw new ArgumentException("Entity acls cannot be updated at the moment.", nameof(componentId));
             }
 
-            _additionalData[componentId] = data;
-        }
-
-        public void UpdatePosition(Position position)
-        {
-            Position = position;
-        }
-
-        public void UpdateRotation(Rotation rotation)
-        {
-            Rotation = rotation;
+            additionalData[componentId] = data;
         }
     }
 }
