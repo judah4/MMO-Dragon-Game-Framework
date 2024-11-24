@@ -13,7 +13,7 @@ namespace Mmogf.Servers.Operations
             _entities = entities;
         }
 
-        public Entity Execute(CreateEntityRequest request)
+        public ImmutableEntity Execute(CreateEntityRequest request)
         {
             var entityInfo = _entities.CreateEntity(request.EntityType, request.Position.ToPosition(), request.Rotation, request.Acls);
             return entityInfo;

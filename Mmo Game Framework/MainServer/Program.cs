@@ -20,6 +20,9 @@ namespace MmoGameFramework
 {
     class Program
     {
+        public const string SERVER_WORKER_NAME = "Dragon-Worker";
+        public const string MESH_SERVER_NAME = "Mesh-Server";
+
         //private static MmoServer server;
         //private static MmoServer workerServer;
         //private static EntityStore _entityStore;
@@ -145,13 +148,13 @@ namespace MmoGameFramework
 
             builder.Services.AddTransient<ISerializer, ProtobufSerializer>();
             builder.Services.AddTransient<IServerConfiguration, ServerConfiguration>();
-            builder.Services.AddSingleton<IWorkerConnectionConfiguration>(new UnityServerWorkerConnectionConfiguration(new NetPeerConfiguration("Dragon-Worker")
+            builder.Services.AddSingleton<IWorkerConnectionConfiguration>(new UnityServerWorkerConnectionConfiguration(new NetPeerConfiguration(SERVER_WORKER_NAME)
             {
                 MaximumConnections = 100,
                 Port = 1338,
                 ConnectionTimeout = (float)GetTimeout(builder.Configuration).TotalSeconds,
             }));
-            builder.Services.AddSingleton<IMeshServerConnectionConfiguration>(new MeshServerConnectionConfiguration(new NetPeerConfiguration("Mesh-Server")
+            builder.Services.AddSingleton<IMeshServerConnectionConfiguration>(new MeshServerConnectionConfiguration(new NetPeerConfiguration(MESH_SERVER_NAME)
             {
                 MaximumConnections = 20,
                 Port = 1339,
@@ -162,6 +165,8 @@ namespace MmoGameFramework
             builder.Services.AddSingleton<IEntityStore, LocalEntityStore>();
 
             builder.Services.AddHostedService<LidgrenHostedService>();
+            builder.Services.AddHostedService<LidgrenClientHostedService>();
+
 
             var app = builder.Build();
 

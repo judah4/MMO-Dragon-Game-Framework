@@ -7,13 +7,13 @@ namespace Mmogf.Servers.ServerInterfaces
 {
     public interface IEntityStore
     {
-        Entity CreateEntity(string entityType, Position position, Rotation rotation, List<Acl> acls);
+        ImmutableEntity CreateEntity(string entityType, Position position, Rotation rotation, List<Acl> acls);
 
-        Entity Get(EntityId entityId);
+        ImmutableEntity Get(EntityId entityId);
 
         void Update(Entity entity);
 
-        Entity Update(EntityId entityId, short componentId, IComponentData data);
+        ImmutableEntity Update(EntityId entityId, short componentId, IComponentData data);
 
         ImmutableEntity Delete(EntityId entityId);
     }

@@ -1,11 +1,8 @@
 ﻿using Lidgren.Network;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using MmoGameFramework;
 using Mmogf.Servers.Configurations;
-using Mmogf.Servers.Shared;
 using System;
-using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,38 +12,38 @@ namespace Mmogf.Servers.Hosts
     /// <summary>
     /// TODO: Set these services up as configurable per connected server type
     /// </summary>
-    public class LidgrenHostedService : IHostedService
+    public class LidgrenClientHostedService : IHostedService
     {
-        private const int DEFAULT_WORKER_INTEREST_AREA = 2000;
-
         private readonly ILogger _logger;
-        private readonly IWorkerConnectionConfiguration _config;
+        private readonly IMeshServerConnectionConfiguration _config;
         private readonly IServerConfiguration _serverConfiguration;
 
         private readonly Stopwatch _stopwatch;
         private readonly Thread _mainLoopThread;
-        private readonly Lidgren.Network.NetServer _server;
-        public ConcurrentDictionary<RemoteWorkerIdentifier, LidgrenWorkerConnection> _connections = new ConcurrentDictionary<RemoteWorkerIdentifier, LidgrenWorkerConnection>();
+        private readonly NetClient _client;
 
-        public LidgrenHostedService(ILogger<LidgrenHostedService> logger, IWorkerConnectionConfiguration config, IServerConfiguration serverConfiguration)
+        public LidgrenClientHostedService(ILogger<LidgrenClientHostedService> logger, IMeshServerConnectionConfiguration config, IServerConfiguration serverConfiguration)
         {
             _logger = logger;
             _config = config;
             _serverConfiguration = serverConfiguration;
 
             _stopwatch = new Stopwatch();
-            _server = new NetServer(_config.NetPeerConfiguration);
+            _client = new NetClient(_config.NetPeerConfiguration);
             _mainLoopThread = new Thread(async () => await Loop());
             _mainLoopThread.Priority = ThreadPriority.AboveNormal;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            _server.Start();
+            string hostIp = "127.0.0.1";
+            _client.Start();
+            NetOutgoingMessage hail = _client.CreateMessage(_config.NetPeerConfiguration.AppIdentifier);
+            _client.Connect(hostIp, _config.NetPeerConfiguration.Port, hail);
 
             _mainLoopThread.Start();
 
-            _logger.LogInformation($"Starting {_config.NetPeerConfiguration.AppIdentifier} connections. Port {_config.NetPeerConfiguration.Port}.");
+            _logger.LogInformation($"Starting {_config.NetPeerConfiguration.AppIdentifier} client on port {_config.NetPeerConfiguration.Port}.");
 
             return Task.CompletedTask;
         }
@@ -54,14 +51,14 @@ namespace Mmogf.Servers.Hosts
         public Task StopAsync(CancellationToken cancellationToken)
         {
             //send stop to peers
-            _server.Shutdown("End");
+            _client.Shutdown("End");
 
             return Task.CompletedTask;
         }
 
         private void MessageCallback(object state)
         {
-            NetIncomingMessage im = _server.ReadMessage();
+            NetIncomingMessage im = _client.ReadMessage();
 
             // Note: This should never happen but I'm not going to bet it won't.
             if (im == null)
@@ -69,8 +66,6 @@ namespace Mmogf.Servers.Hosts
                 _logger.LogError("Callback with no Message");
                 return;
             }
-
-            var workerId = new RemoteWorkerIdentifier(im.SenderConnection.RemoteUniqueIdentifier);
 
             // handle incoming message
             switch (im.MessageType)
@@ -81,7 +76,7 @@ namespace Mmogf.Servers.Hosts
                     break;
                 case NetIncomingMessageType.ErrorMessage:
                     string text2 = im.ReadString();
-                    //_logger.LogError(text2);
+                    _logger.LogError(text2);
                     break;
                 case NetIncomingMessageType.WarningMessage:
                     string text3 = im.ReadString();
@@ -99,18 +94,11 @@ namespace Mmogf.Servers.Hosts
                     {
                         _logger.LogDebug(im.SenderConnection.RemoteUniqueIdentifier + " " + status + ": " + reason);
                     }
-                    if (status == NetConnectionStatus.Connected)
-                    {
-                        HandleWorkerConnect(im);
-                    }
-                    else if (status == NetConnectionStatus.Disconnected)
-                    {
-                        _logger.LogInformation($"{_config.NetPeerConfiguration.AppIdentifier} {im.SenderConnection.RemoteUniqueIdentifier} Disconnected");
-                        HandleWorkerDisconnect(workerId);
-                    }
 
                     break;
                 case NetIncomingMessageType.Data:
+
+                    var workerId = new RemoteWorkerIdentifier(im.SenderConnection.RemoteUniqueIdentifier);
 
                     break;
                 default:
@@ -118,7 +106,7 @@ namespace Mmogf.Servers.Hosts
                     break;
             }
 
-            _server.Recycle(im);
+            _client.Recycle(im);
         }
 
         private async Task Loop()
@@ -127,9 +115,9 @@ namespace Mmogf.Servers.Hosts
             SynchronizationContext.SetSynchronizationContext(new SynchronizationContext());
 
             // Register a Callback for Testing
-            _server.RegisterReceivedCallback(MessageCallback, SynchronizationContext.Current);
+            _client.RegisterReceivedCallback(MessageCallback, SynchronizationContext.Current);
 
-            while (_server.Status != NetPeerStatus.NotRunning)
+            while (_client.Status != NetPeerStatus.NotRunning)
             {
                 _stopwatch.Restart();
                 try
@@ -154,32 +142,6 @@ namespace Mmogf.Servers.Hosts
                     _logger.LogError(e, e.Message);
                 }
             }
-        }
-
-        private void HandleWorkerDisconnect(RemoteWorkerIdentifier workerId)
-        {
-            _connections.TryRemove(workerId, out _);
-        }
-
-        private void HandleWorkerConnect(NetIncomingMessage im)
-        {
-            var interestRange = DEFAULT_WORKER_INTEREST_AREA;
-            //todo: do some sort of worker type validation from a config
-            var workerConnection = new LidgrenWorkerConnection(im.SenderConnection.RemoteHailMessage.ReadString(), im.SenderConnection, Position.Zero, interestRange);
-            _connections.TryAdd(workerConnection.WorkerId, workerConnection);
-
-            _logger.LogInformation("Remote hail: " + im.SenderConnection.RemoteHailMessage.ReadString());
-            //var message = new MmoMessage()
-            //{
-            //    MessageId = ServerCodes.ClientConnect,
-            //    Info = _serializer.Serialize(new ClientConnect()
-            //    {
-            //        ClientId = workerConnection.WorkerId.Id,
-            //    }),
-            //};
-            //NetOutgoingMessage om = _server.CreateMessage();
-            //om.Write(_serializer.Serialize(message));
-            //_server.SendMessage(om, im.SenderConnection, NetDeliveryMethod.ReliableUnordered);
         }
     }
 }

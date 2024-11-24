@@ -15,6 +15,7 @@ namespace MmoGameFramework
         public float InterestRange { get; set; }
         public Lidgren.Network.NetConnection Connection { get; set; }
 
+        //TODO: Switch these to concurrent hash sets
         /// <summary>
         /// Key is layer, value is cell position.
         /// </summary>

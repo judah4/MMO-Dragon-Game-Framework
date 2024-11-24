@@ -14,7 +14,7 @@ namespace Mmogf.Servers
 
         private readonly ConcurrentDictionary<EntityId, Entity> _entities = new ConcurrentDictionary<EntityId, Entity>();
 
-        public Entity CreateEntity(string entityType, Position position, Rotation rotation, List<Acl> acls)
+        public ImmutableEntity CreateEntity(string entityType, Position position, Rotation rotation, List<Acl> acls)
         {
             EntityId entityId;
             lock (_syncRoot)
@@ -36,7 +36,7 @@ namespace Mmogf.Servers
                 throw new System.Exception($"Failed to create an {entityType} entity.");
             }
 
-            return entity;
+            return ImmutableEntity.FromEntity(entity);
         }
 
         public ImmutableEntity Delete(EntityId entityId)
@@ -50,7 +50,7 @@ namespace Mmogf.Servers
             return ImmutableEntity.FromEntity(entityInfo);
         }
 
-        public Entity Get(EntityId entityId)
+        public ImmutableEntity Get(EntityId entityId)
         {
             Entity entityInfo;
             if (!_entities.TryGetValue(entityId, out entityInfo))
@@ -58,7 +58,7 @@ namespace Mmogf.Servers
                 throw new System.Exception($"Failed to get entity {entityId}.");
             }
 
-            return entityInfo;
+            return ImmutableEntity.FromEntity(entityInfo);
         }
 
         public void Update(Entity entity)
@@ -66,7 +66,7 @@ namespace Mmogf.Servers
             _entities[entity.EntityId] = entity;
         }
 
-        public Entity Update(EntityId entityId, short componentId, IComponentData data)
+        public ImmutableEntity Update(EntityId entityId, short componentId, IComponentData data)
         {
             Entity entityInfo;
             if (!_entities.TryGetValue(entityId, out entityInfo))
@@ -76,7 +76,7 @@ namespace Mmogf.Servers
 
             entityInfo.UpdateComponent(componentId, data);
 
-            return entityInfo;
+            return ImmutableEntity.FromEntity(entityInfo);
         }
     }
 }
