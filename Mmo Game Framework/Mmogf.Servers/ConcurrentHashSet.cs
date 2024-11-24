@@ -1,11 +1,14 @@
-﻿using System.Collections.Concurrent;
+﻿using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace Mmogf.Servers
 {
-    public class ConcurrentHashSet<T>
+    public class ConcurrentHashSet<T> : IReadOnlyCollection<T>
     {
         private ConcurrentDictionary<T, byte> _internalDictionary;
+
+        public int Count => _internalDictionary.Count;
 
         public ConcurrentHashSet()
         {
@@ -30,6 +33,16 @@ namespace Mmogf.Servers
         public ICollection<T> AsCollection()
         {
             return _internalDictionary.Keys;
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            return _internalDictionary.Keys.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return _internalDictionary.Keys.GetEnumerator();
         }
     }
 }

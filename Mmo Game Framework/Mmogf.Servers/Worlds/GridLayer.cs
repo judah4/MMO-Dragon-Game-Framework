@@ -11,7 +11,7 @@ namespace Mmogf.Servers.Worlds
     {
         private ConcurrentDictionary<GridInt, List<EntityId>> _cells = new ConcurrentDictionary<GridInt, List<EntityId>>();
         private ConcurrentDictionary<EntityId, GridInt> _entityCells = new ConcurrentDictionary<EntityId, GridInt>();
-        private ConcurrentDictionary<PositionInt, ConcurrentDictionary<RemoteWorkerIdentifier, byte>> _workerSubscriptions = new ConcurrentDictionary<PositionInt, ConcurrentDictionary<RemoteWorkerIdentifier, byte>>();
+        private ConcurrentDictionary<PositionInt, ConcurrentHashSet<RemoteWorkerIdentifier>> _workerSubscriptions = new ConcurrentDictionary<PositionInt, ConcurrentHashSet<RemoteWorkerIdentifier>>();
         //indexed by position, not grid
         private object _lock = new object();
 
@@ -45,12 +45,12 @@ namespace Mmogf.Servers.Worlds
                 //write back to _cells
                 if (_cells.TryUpdate(cell.grid, ents, cell.entities))
                 {
-                    ConcurrentDictionary<RemoteWorkerIdentifier, byte> subs;
+                    ConcurrentHashSet<RemoteWorkerIdentifier> subs;
                     if (!_workerSubscriptions.TryGetValue(cell.position, out subs))
                     {
-                        subs = new ConcurrentDictionary<RemoteWorkerIdentifier, byte>();
+                        subs = new ConcurrentHashSet<RemoteWorkerIdentifier>();
                     }
-                    OnEntityAdd?.Invoke(entity.EntityId, subs.Keys);
+                    OnEntityAdd?.Invoke(entity.EntityId, subs);
                     _entityCells.TryAdd(entity.EntityId, cell.grid);
 
                 }
@@ -74,12 +74,12 @@ namespace Mmogf.Servers.Worlds
                 //write back to _cells
                 if (_cells.TryUpdate(cell.grid, ents, cell.entities))
                 {
-                    ConcurrentDictionary<RemoteWorkerIdentifier, byte> subs;
+                    ConcurrentHashSet<RemoteWorkerIdentifier> subs;
                     if (!_workerSubscriptions.TryGetValue(cell.position, out subs))
                     {
-                        subs = new ConcurrentDictionary<RemoteWorkerIdentifier, byte>();
+                        subs = new ConcurrentHashSet<RemoteWorkerIdentifier>();
                     }
-                    OnEntityRemove?.Invoke(entity.EntityId, subs.Keys);
+                    OnEntityRemove?.Invoke(entity.EntityId, subs);
                     _entityCells.TryRemove(entity.EntityId, out cell.grid);
 
                 }
@@ -195,15 +195,15 @@ namespace Mmogf.Servers.Worlds
 
         public bool AddWorkerSub(PositionInt cellPos, LidgrenWorkerConnection worker)
         {
-            ConcurrentDictionary<RemoteWorkerIdentifier, byte> subs;
+            ConcurrentHashSet<RemoteWorkerIdentifier> subs;
             if (!_workerSubscriptions.TryGetValue(cellPos, out subs))
             {
-                subs = new ConcurrentDictionary<RemoteWorkerIdentifier, byte>();
+                subs = new ConcurrentHashSet<RemoteWorkerIdentifier>();
                 _workerSubscriptions.TryAdd(cellPos, subs);
             }
-            if (!subs.ContainsKey(worker.WorkerId))
+            if (!subs.Contains(worker.WorkerId))
             {
-                subs.TryAdd(worker.WorkerId, 1);
+                subs.TryAdd(worker.WorkerId);
                 if (_workerSubscriptions.TryUpdate(cellPos, subs, _workerSubscriptions[cellPos]))
                 {
                     worker.AddCellSubscription(Layer, cellPos);
@@ -215,15 +215,15 @@ namespace Mmogf.Servers.Worlds
 
         public bool RemoveWorkerSub(PositionInt cellPos, LidgrenWorkerConnection worker)
         {
-            ConcurrentDictionary<RemoteWorkerIdentifier, byte> subs;
+            ConcurrentHashSet<RemoteWorkerIdentifier> subs;
             if (!_workerSubscriptions.TryGetValue(cellPos, out subs))
             {
-                subs = new ConcurrentDictionary<RemoteWorkerIdentifier, byte>();
+                subs = new ConcurrentHashSet<RemoteWorkerIdentifier>();
                 _workerSubscriptions.TryAdd(cellPos, subs);
             }
-            if (subs.ContainsKey(worker.WorkerId))
+            if (subs.Contains(worker.WorkerId))
             {
-                subs.Remove(worker.WorkerId, out _);
+                subs.TryRemove(worker.WorkerId);
                 if (_workerSubscriptions.TryUpdate(cellPos, subs, _workerSubscriptions[cellPos]))
                 {
                     worker.RemoveCellSubscription(Layer, cellPos);
@@ -235,8 +235,8 @@ namespace Mmogf.Servers.Worlds
 
         public IEnumerable<RemoteWorkerIdentifier> GetWorkerSubscriptions(PositionInt cellPos)
         {
-            if (_workerSubscriptions.TryGetValue(cellPos, out ConcurrentDictionary<RemoteWorkerIdentifier, byte> subs))
-                return subs.Keys;
+            if (_workerSubscriptions.TryGetValue(cellPos, out ConcurrentHashSet<RemoteWorkerIdentifier> subs))
+                return subs;
 
             return null;
         }
