@@ -18,9 +18,9 @@ namespace MmoGameFramework
 {
     class Program
     {
-        private static MmoServer server;
-        private static MmoServer workerServer;
-        private static EntityStore _entityStore;
+        //private static MmoServer server;
+        //private static MmoServer workerServer;
+        //private static EntityStore _entityStore;
         private static ILogger<Program> _logger;
 
         static async Task Main(string[] args)
@@ -42,9 +42,9 @@ namespace MmoGameFramework
 
             var version = GetVersion();
             _logger.LogInformation($"Dragon Game Framework MMO Networking Version {version.ToString()}");
-            int cellSize = configuration.GetValue<int?>("ChunkSize") ?? 50;
-            _logger.LogInformation($"Attaching Entity Storage. Cell Size {cellSize}.");
-            _entityStore = new EntityStore(host.Services.GetRequiredService<ILogger<EntityStore>>(), cellSize, serializer);
+            //int cellSize = configuration.GetValue<int?>("ChunkSize") ?? 50;
+            //_logger.LogInformation($"Attaching Entity Storage. Cell Size {cellSize}.");
+            //_entityStore = new EntityStore(host.Services.GetRequiredService<ILogger<EntityStore>>(), cellSize, serializer);
 
             _logger.LogInformation("Loading World Configuration.");
 
@@ -158,16 +158,6 @@ namespace MmoGameFramework
             app.UseAuthorization();
             app.MapControllers();
             return app;
-        }
-
-        public static MmoServer GetServer()
-        {
-            return server;
-        }
-
-        public static MmoServer GetWorker()
-        {
-            return workerServer;
         }
 
         private static TimeSpan GetTimeout(IConfiguration configuration)

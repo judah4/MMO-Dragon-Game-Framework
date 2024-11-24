@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MmoGameFramework.Models;
 using System.Collections.Generic;
-using WebCommon.Factory;
 
 namespace MmoGameFramework.Controllers;
 
@@ -12,33 +11,33 @@ public class ServerController : ControllerBase
     [HttpGet("status")]
     public IActionResult GetServerStatus()
     {
-        var server = Program.GetServer();
+        //var server = Program.GetServer();
 
         // Create a Connections List
         var connections = new List<ConnectionStatusModel>();
-        foreach (var connection in server._connections)
-        {
-            var connectionStatusModel = new ConnectionStatusModel
-            {
-                Id = connection.Key.Id,
-                Worker = connection.Value.WorkerId.Id,
-                Position = connection.Value.InterestPosition
-            };
-
-            connections.Add(connectionStatusModel);
-        }
+        //foreach (var connection in server._connections)
+        //{
+        //    var connectionStatusModel = new ConnectionStatusModel
+        //    {
+        //        Id = connection.Key.Id,
+        //        Worker = connection.Value.WorkerId.Id,
+        //        Position = connection.Value.InterestPosition
+        //    };
+        //
+        //    connections.Add(connectionStatusModel);
+        //}
 
         var entities = new List<EntityModel>();
-        foreach (var entity in server.Entities.Entities.Values)
-        {
-            entities.Add(EntityWebFactory.Convert(entity));
-        }
+        //foreach (var entity in server.Entities.Entities.Values)
+        //{
+        //    entities.Add(EntityWebFactory.Convert(entity));
+        //}
 
         // Populate Model
         var model = new ServerStatusModel
         {
-            Type = server.WorkerType,
-            Active = server.Active,
+            Type = "Not implemented",
+            Active = false,
             Connections = connections,
             Entities = entities
         };
