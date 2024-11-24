@@ -38,8 +38,8 @@ namespace MmoGameFramework
         int _tickRate;
         public int TickRate => _tickRate;
 
-        public Dictionary<RemoteWorkerIdentifier, WorkerConnection> _connections = new Dictionary<RemoteWorkerIdentifier, WorkerConnection>();
-        public ConcurrentDictionary<RemoteWorkerIdentifier, WorkerConnection> _workerWithSubChanges = new ConcurrentDictionary<RemoteWorkerIdentifier, WorkerConnection>();
+        public Dictionary<RemoteWorkerIdentifier, LidgrenWorkerConnection> _connections = new Dictionary<RemoteWorkerIdentifier, LidgrenWorkerConnection>();
+        public ConcurrentDictionary<RemoteWorkerIdentifier, LidgrenWorkerConnection> _workerWithSubChanges = new ConcurrentDictionary<RemoteWorkerIdentifier, LidgrenWorkerConnection>();
 
         public MmoServer(EntityStore entities, NetPeerConfiguration config, bool clientWorker, ISerializer serializer, ILogger<MmoServer> logger, IConfiguration configuration, EntityToContractConverter entityToContractConverter)
         {
@@ -129,7 +129,7 @@ namespace MmoGameFramework
                     else if (status == NetConnectionStatus.Disconnected)
                     {
                         _logger.LogInformation($"{_config.AppIdentifier} {im.SenderConnection.RemoteUniqueIdentifier} Disconnected");
-                        WorkerConnection worker;
+                        LidgrenWorkerConnection worker;
                         if (_connections.TryGetValue(workerId, out worker))
                             HandleWorkerDisconnect(im, worker);
                     }
@@ -145,7 +145,7 @@ namespace MmoGameFramework
                     {
                         case ServerCodes.ChangeInterestArea:
                             var interestArea = _serializer.Deserialize<ChangeInterestArea>(simpleData.Info);
-                            WorkerConnection worker;
+                            LidgrenWorkerConnection worker;
                             if (_connections.TryGetValue(workerId, out worker))
                             {
                                 worker.InterestPosition = interestArea.Position.ToPosition();
@@ -282,7 +282,7 @@ namespace MmoGameFramework
             _workerWithSubChanges.Clear();
         }
 
-        private void HandleWorkerDisconnect(NetIncomingMessage im, WorkerConnection worker)
+        private void HandleWorkerDisconnect(NetIncomingMessage im, LidgrenWorkerConnection worker)
         {
             if (worker == null)
                 return;
@@ -301,7 +301,7 @@ namespace MmoGameFramework
                 interestRange = 100;
             }
             //todo: do some sort of worker type validation from a config
-            var workerConnection = new WorkerConnection(im.SenderConnection.RemoteHailMessage.ReadString(), im.SenderConnection, Position.Zero, interestRange);
+            var workerConnection = new LidgrenWorkerConnection(im.SenderConnection.RemoteHailMessage.ReadString(), im.SenderConnection, Position.Zero, interestRange);
             _connections.Add(workerConnection.WorkerId, workerConnection);
             var results = _entities.UpdateWorkerInterestArea(workerConnection);
             foreach (var add in results.addEntityIds)
@@ -341,7 +341,7 @@ namespace MmoGameFramework
                 return;
 
             var workerId = new RemoteWorkerIdentifier(im.SenderConnection.RemoteUniqueIdentifier);
-            WorkerConnection worker;
+            LidgrenWorkerConnection worker;
             if (!_connections.TryGetValue(workerId, out worker))
             {
                 //send failure
@@ -367,7 +367,7 @@ namespace MmoGameFramework
         private void HandleWorldCommand(NetIncomingMessage im, MmoMessage message, CommandRequest commandRequest)
         {
             var workerId = new RemoteWorkerIdentifier(im.SenderConnection.RemoteUniqueIdentifier);
-            WorkerConnection worker;
+            LidgrenWorkerConnection worker;
             if (!_connections.TryGetValue(workerId, out worker))
             {
                 //send failure
@@ -446,7 +446,7 @@ namespace MmoGameFramework
             Entity entity = entityVal;
 
             var workerId = new RemoteWorkerIdentifier(im.SenderConnection.RemoteUniqueIdentifier);
-            WorkerConnection worker;
+            LidgrenWorkerConnection worker;
             if (!_connections.TryGetValue(workerId, out worker))
             {
                 //disconnected??
@@ -479,7 +479,7 @@ namespace MmoGameFramework
             if (entityInfo == null)
                 return;
             var workerId = new RemoteWorkerIdentifier(im.SenderConnection.RemoteUniqueIdentifier);
-            WorkerConnection worker;
+            LidgrenWorkerConnection worker;
             if (!_connections.TryGetValue(workerId, out worker))
             {
                 //disconnected??
@@ -495,7 +495,7 @@ namespace MmoGameFramework
             _entities.SendEvent(eventRequest);
         }
 
-        public void SendToWorker(WorkerConnection worker, MmoMessage message, NetDeliveryMethod deliveryMethod = NetDeliveryMethod.Unreliable)
+        public void SendToWorker(LidgrenWorkerConnection worker, MmoMessage message, NetDeliveryMethod deliveryMethod = NetDeliveryMethod.Unreliable)
         {
             var bytes = _serializer.Serialize(message);
             NetOutgoingMessage om = s_server.CreateMessage(bytes.Length);
@@ -520,7 +520,7 @@ namespace MmoGameFramework
                 if (workerId == workerIdToExclude)
                     continue;
 
-                if (_connections.TryGetValue(workerId, out WorkerConnection worker))
+                if (_connections.TryGetValue(workerId, out LidgrenWorkerConnection worker))
                     connections.Add(worker.Connection);
             }
 
@@ -686,7 +686,7 @@ namespace MmoGameFramework
 
             //todo: we need an internal request table
             var workerId = new RemoteWorkerIdentifier(commandResponse.Header.RequesterId);
-            WorkerConnection worker;
+            LidgrenWorkerConnection worker;
             if (!_connections.TryGetValue(workerId, out worker))
             {
                 //disconnected??
@@ -715,7 +715,7 @@ namespace MmoGameFramework
             //probably should be buffered for 1 tick
             foreach (var workerId in workers)
             {
-                if (!_connections.TryGetValue(workerId, out WorkerConnection worker))
+                if (!_connections.TryGetValue(workerId, out LidgrenWorkerConnection worker))
                     continue;
                 HandleEntitySubChange(worker, true, entityId);
 
@@ -728,13 +728,13 @@ namespace MmoGameFramework
             //probably should be buffered for 1 tick
             foreach (var workerId in workers)
             {
-                if (!_connections.TryGetValue(workerId, out WorkerConnection worker))
+                if (!_connections.TryGetValue(workerId, out LidgrenWorkerConnection worker))
                     continue;
                 HandleEntitySubChange(worker, false, entityId);
             }
         }
 
-        private void HandleEntitySubChange(WorkerConnection worker, bool add, EntityId entityId)
+        private void HandleEntitySubChange(LidgrenWorkerConnection worker, bool add, EntityId entityId)
         {
             if (add)
             {

@@ -196,7 +196,7 @@ namespace MmoGameFramework
 
         }
 
-        public (List<EntityId> addEntityIds, List<EntityId> removeEntityIds) UpdateWorkerInterestArea(WorkerConnection worker)
+        public (List<EntityId> addEntityIds, List<EntityId> removeEntityIds) UpdateWorkerInterestArea(LidgrenWorkerConnection worker)
         {
             var addEntityIds = new List<EntityId>();
             var removeEntityIds = new List<EntityId>();
@@ -215,7 +215,7 @@ namespace MmoGameFramework
             return (addEntityIds, removeEntityIds);
         }
 
-        public void RemoveWorker(WorkerConnection worker)
+        public void RemoveWorker(LidgrenWorkerConnection worker)
         {
             var subs = worker.CellSubs;
             foreach (var sub in subs)

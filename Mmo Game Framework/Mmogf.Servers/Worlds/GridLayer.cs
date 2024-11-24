@@ -151,7 +151,7 @@ namespace Mmogf.Servers.Worlds
             return cells;
         }
 
-        public (List<EntityId> addEntityIds, List<EntityId> removeEntityIds, List<PositionInt> addCells, List<PositionInt> removeCells) UpdateWorkerInterestArea(WorkerConnection worker)
+        public (List<EntityId> addEntityIds, List<EntityId> removeEntityIds, List<PositionInt> addCells, List<PositionInt> removeCells) UpdateWorkerInterestArea(LidgrenWorkerConnection worker)
         {
             List<EntityId> addEntityIds = new List<EntityId>();
             var removeEntityIds = new List<EntityId>();
@@ -193,7 +193,7 @@ namespace Mmogf.Servers.Worlds
 
         }
 
-        public bool AddWorkerSub(PositionInt cellPos, WorkerConnection worker)
+        public bool AddWorkerSub(PositionInt cellPos, LidgrenWorkerConnection worker)
         {
             ConcurrentDictionary<RemoteWorkerIdentifier, byte> subs;
             if (!_workerSubscriptions.TryGetValue(cellPos, out subs))
@@ -213,7 +213,7 @@ namespace Mmogf.Servers.Worlds
             return false;
         }
 
-        public bool RemoveWorkerSub(PositionInt cellPos, WorkerConnection worker)
+        public bool RemoveWorkerSub(PositionInt cellPos, LidgrenWorkerConnection worker)
         {
             ConcurrentDictionary<RemoteWorkerIdentifier, byte> subs;
             if (!_workerSubscriptions.TryGetValue(cellPos, out subs))

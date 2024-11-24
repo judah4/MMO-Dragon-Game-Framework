@@ -12,7 +12,7 @@ namespace MmoGameFramework
         /// <param name="connection"></param>
         /// <param name="message"></param>
         /// <param name="deliveryMethod"></param>
-        void SendToWorker(WorkerConnection connection, MmoMessage message, NetDeliveryMethod deliveryMethod);
+        void SendToWorker(LidgrenWorkerConnection connection, MmoMessage message, NetDeliveryMethod deliveryMethod);
         /// <summary>
         /// Send a message to clients that are subscribbed to the specified entity.
         /// </summary>

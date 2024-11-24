@@ -8,11 +8,13 @@
         EntityInfo,
         ChangeInterestArea,
         EntityUpdate,
+        WorldCommandRequest,
+        WorldCommandResponse,
         EntityCommandRequest,
         EntityCommandResponse,
-        Ping,
         EntityEvent,
         EntityDelete,
         EntityCheckout,
+        Ping,
     }
 }
