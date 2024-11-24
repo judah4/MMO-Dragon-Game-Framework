@@ -3,7 +3,7 @@ using Mmogf.Core.Contracts;
 using Mmogf.Servers.Serializers;
 using System.Collections.Generic;
 
-namespace Mmogf.Servers
+namespace Mmogf.Servers.Converters
 {
     public class EntityToContractConverter
     {

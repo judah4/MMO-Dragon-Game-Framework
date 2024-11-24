@@ -4,11 +4,11 @@ using Mmogf.Servers.ServerInterfaces;
 
 namespace Mmogf.Servers.Operations
 {
-    public sealed class AddEntityOperation
+    public sealed class CreateEntityOperation
     {
         private readonly IEntityStore _entities;
 
-        public AddEntityOperation(IEntityStore entities)
+        public CreateEntityOperation(IEntityStore entities)
         {
             _entities = entities;
         }

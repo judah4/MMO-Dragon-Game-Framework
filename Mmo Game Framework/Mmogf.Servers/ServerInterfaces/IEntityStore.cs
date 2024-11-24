@@ -15,6 +15,6 @@ namespace Mmogf.Servers.ServerInterfaces
 
         Entity Update(EntityId entityId, short componentId, IComponentData data);
 
-        Entity Delete(EntityId entityId);
+        ImmutableEntity Delete(EntityId entityId);
     }
 }

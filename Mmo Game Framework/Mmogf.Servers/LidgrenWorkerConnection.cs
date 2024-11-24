@@ -1,4 +1,5 @@
-﻿using Mmogf.Servers;
+﻿using Lidgren.Network;
+using Mmogf.Servers;
 using Mmogf.Servers.Shared;
 using Mmogf.Servers.Worlds;
 using System;
@@ -44,7 +45,7 @@ namespace MmoGameFramework
 
          */
 
-        public LidgrenWorkerConnection(string connectionType, Lidgren.Network.NetConnection senderConnection, Position interestPosition, int interestRange)
+        public LidgrenWorkerConnection(string connectionType, NetConnection senderConnection, Position interestPosition, int interestRange)
         {
             if (interestRange < 1)
             {

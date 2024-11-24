@@ -96,8 +96,6 @@ namespace Mmogf.Core.Contracts
             public DeleteEntityRequest? Request { get; set; }
             [DataMember(Order = 2)]
             public NothingInternal? Response { get; set; }
-
         }
-
     }
 }

@@ -7,6 +7,5 @@ namespace Mmogf.Servers.Configurations
         public int InterestRange { get; }
 
         public NetPeerConfiguration NetPeerConfiguration { get; }
-
     }
 }

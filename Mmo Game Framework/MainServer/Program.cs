@@ -147,7 +147,7 @@ namespace MmoGameFramework
             {
                 MaximumConnections = 100,
                 Port = 1338,
-                ConnectionTimeout = GetTimeout(builder.Configuration),
+                ConnectionTimeout = (float)GetTimeout(builder.Configuration).TotalSeconds,
             }));
 
             builder.Services.AddHostedService<LidgrenHostedService>();
@@ -170,12 +170,12 @@ namespace MmoGameFramework
             return workerServer;
         }
 
-        private static int GetTimeout(IConfiguration configuration)
+        private static TimeSpan GetTimeout(IConfiguration configuration)
         {
-            var timeout = configuration.GetValue<int>("Timeout");
-            if (timeout == 0)
-                timeout = 25;
-            return timeout;
+            var timeoutInSeconds = configuration.GetValue<int>("TimeoutSeconds");
+            if (timeoutInSeconds == 0)
+                timeoutInSeconds = 25;
+            return TimeSpan.FromSeconds(timeoutInSeconds);
         }
 
         private static Version GetVersion()

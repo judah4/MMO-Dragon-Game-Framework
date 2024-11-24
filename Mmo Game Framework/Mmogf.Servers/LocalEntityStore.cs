@@ -39,7 +39,7 @@ namespace Mmogf.Servers
             return entity;
         }
 
-        public Entity Delete(EntityId entityId)
+        public ImmutableEntity Delete(EntityId entityId)
         {
             Entity entityInfo;
             if (!_entities.TryRemove(entityId, out entityInfo))
@@ -47,7 +47,7 @@ namespace Mmogf.Servers
                 throw new System.Exception($"Failed to delete entity {entityId}.");
             }
 
-            return entityInfo;
+            return ImmutableEntity.FromEntity(entityInfo);
         }
 
         public Entity Get(EntityId entityId)

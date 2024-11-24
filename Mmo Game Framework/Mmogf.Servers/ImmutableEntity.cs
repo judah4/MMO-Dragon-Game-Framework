@@ -8,6 +8,11 @@ namespace MmoGameFramework
 {
     public struct ImmutableEntity
     {
+        public static ImmutableEntity FromEntity(Entity entity)
+        {
+            return new ImmutableEntity(entity.EntityId, entity.EntityType, entity.Acls, entity.Position, entity.Rotation, entity.AdditionalData);
+        }
+
         public EntityId EntityId { get; }
         public IReadOnlyDictionary<short, IComponentData> AdditionalData { get; }
         public EntityType EntityType { get; }
