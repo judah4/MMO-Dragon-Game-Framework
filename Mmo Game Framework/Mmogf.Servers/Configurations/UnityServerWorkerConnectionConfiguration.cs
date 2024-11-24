@@ -2,13 +2,13 @@
 
 namespace Mmogf.Servers.Configurations
 {
-    public class UnityServerWorkerSetupConfiguration : IWorkerSetupConfiguration
+    public class UnityServerWorkerConnectionConfiguration : IWorkerConnectionConfiguration
     {
         public int InterestRange => 2000;
 
         public NetPeerConfiguration NetPeerConfiguration { get; }
 
-        public UnityServerWorkerSetupConfiguration(NetPeerConfiguration netPeerConfiguration)
+        public UnityServerWorkerConnectionConfiguration(NetPeerConfiguration netPeerConfiguration)
         {
             NetPeerConfiguration = netPeerConfiguration;
         }

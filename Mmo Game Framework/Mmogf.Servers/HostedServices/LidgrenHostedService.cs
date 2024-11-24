@@ -20,7 +20,7 @@ namespace Mmogf.Servers.Hosts
         private const int DEFAULT_WORKER_INTEREST_AREA = 2000;
 
         private readonly ILogger _logger;
-        private readonly UnityServerWorkerSetupConfiguration _config;
+        private readonly IWorkerConnectionConfiguration _config;
         private readonly Stopwatch _stopwatch;
         private readonly IServerConfiguration _serverConfiguration;
 
@@ -28,7 +28,7 @@ namespace Mmogf.Servers.Hosts
         private readonly Lidgren.Network.NetServer _server;
         public ConcurrentDictionary<RemoteWorkerIdentifier, LidgrenWorkerConnection> _connections = new ConcurrentDictionary<RemoteWorkerIdentifier, LidgrenWorkerConnection>();
 
-        public LidgrenHostedService(ILogger<LidgrenHostedService> logger, UnityServerWorkerSetupConfiguration config, IServerConfiguration serverConfiguration)
+        public LidgrenHostedService(ILogger<LidgrenHostedService> logger, IWorkerConnectionConfiguration config, IServerConfiguration serverConfiguration)
         {
             _logger = logger;
             _config = config;

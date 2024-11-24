@@ -2,7 +2,7 @@
 
 namespace Mmogf.Servers.Configurations
 {
-    public interface IWorkerSetupConfiguration
+    public interface IWorkerConnectionConfiguration
     {
         public int InterestRange { get; }
 

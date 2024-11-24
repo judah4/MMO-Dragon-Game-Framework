@@ -5,10 +5,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Mmogf.Servers;
 using Mmogf.Servers.Configurations;
 using Mmogf.Servers.Converters;
 using Mmogf.Servers.Hosts;
 using Mmogf.Servers.Serializers;
+using Mmogf.Servers.ServerInterfaces;
 using Prometheus;
 using ProtoBuf;
 using System;
@@ -143,12 +145,21 @@ namespace MmoGameFramework
 
             builder.Services.AddTransient<ISerializer, ProtobufSerializer>();
             builder.Services.AddTransient<IServerConfiguration, ServerConfiguration>();
-            builder.Services.AddSingleton(new UnityServerWorkerSetupConfiguration(new NetPeerConfiguration("Dragon-Worker")
+            builder.Services.AddSingleton<IWorkerConnectionConfiguration>(new UnityServerWorkerConnectionConfiguration(new NetPeerConfiguration("Dragon-Worker")
             {
                 MaximumConnections = 100,
                 Port = 1338,
                 ConnectionTimeout = (float)GetTimeout(builder.Configuration).TotalSeconds,
             }));
+            builder.Services.AddSingleton<IMeshServerConnectionConfiguration>(new MeshServerConnectionConfiguration(new NetPeerConfiguration("Mesh-Server")
+            {
+                MaximumConnections = 20,
+                Port = 1339,
+                ConnectionTimeout = (float)GetTimeout(builder.Configuration).TotalSeconds,
+            }));
+
+            // Default to the local entity store for now
+            builder.Services.AddSingleton<IEntityStore, LocalEntityStore>();
 
             builder.Services.AddHostedService<LidgrenHostedService>();
 
