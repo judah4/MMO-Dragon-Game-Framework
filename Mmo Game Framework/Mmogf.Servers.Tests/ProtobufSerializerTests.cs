@@ -59,7 +59,6 @@ namespace Mmogf.Servers.Tests
             Assert.AreEqual(expectedPayload.Position.X, deserializedMessage.Info.Payload.Position.X);
         }
 
-
         [TestMethod]
         public void Protobuf_Generics_ToNonGenerics_Test()
         {
@@ -84,6 +83,30 @@ namespace Mmogf.Servers.Tests
             Assert.IsNotNull(deserializedMessage);
 
             Assert.AreEqual(message.Info.Payload.Position.X, deserializedPayload.Position.X);
+        }
+
+        [TestMethod]
+        public void Protobuf_Generics_Partial_Test()
+        {
+            var serializer = new ProtobufSerializer();
+
+            var message = new MmoMessage<CommandRequest<CreateEntityRequest>>()
+            {
+                MessageId = ServerCodes.WorldCommandRequest,
+                Info = new CommandRequest<CreateEntityRequest>(new CommandRequestHeader()
+                {
+                    CommandId = World.CreateEntity.CommandId,
+                },
+                new CreateEntityRequest("entityType", new Position(1, 2, 3).ToFixedVector3(), Rotation.Zero, new Dictionary<short, byte[]>(), new List<Acl>() { })),
+            };
+
+            var serializedData = serializer.Serialize(message);
+
+            var deserializedMessageHeader = serializer.Deserialize<MmoMessageHeader>(serializedData);
+            var deserializedCommand = serializer.Deserialize<MmoMessagePayload<CommandRequest<CreateEntityRequest>>>(serializedData);
+
+            Assert.AreEqual(message.MessageId, deserializedMessageHeader.MessageId);
+            Assert.AreEqual(message.Info.Payload.Position.X, deserializedCommand.Info.Payload.Position.X);
         }
     }
 }
