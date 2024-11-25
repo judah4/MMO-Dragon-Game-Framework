@@ -2,7 +2,9 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MmoGameFramework;
+using Mmogf.Core.Contracts;
 using Mmogf.Servers.Configurations;
+using Mmogf.Servers.Serializers;
 using Mmogf.Servers.Shared;
 using System;
 using System.Collections.Concurrent;
@@ -22,13 +24,18 @@ namespace Mmogf.Servers.Hosts
         private readonly ILogger _logger;
         private readonly IWorkerConnectionConfiguration _config;
         private readonly IServerConfiguration _serverConfiguration;
+        private readonly ISerializer _serializer;
 
         private readonly Stopwatch _stopwatch;
         private readonly Thread _mainLoopThread;
         private readonly Lidgren.Network.NetServer _server;
         public ConcurrentDictionary<RemoteWorkerIdentifier, LidgrenWorkerConnection> _connections = new ConcurrentDictionary<RemoteWorkerIdentifier, LidgrenWorkerConnection>();
 
-        public LidgrenHostedService(ILogger<LidgrenHostedService> logger, IWorkerConnectionConfiguration config, IServerConfiguration serverConfiguration)
+        public LidgrenHostedService(
+            ILogger<LidgrenHostedService> logger,
+            IWorkerConnectionConfiguration config,
+            IServerConfiguration serverConfiguration,
+            ISerializer serializer)
         {
             _logger = logger;
             _config = config;
@@ -38,6 +45,7 @@ namespace Mmogf.Servers.Hosts
             _server = new NetServer(_config.NetPeerConfiguration);
             _mainLoopThread = new Thread(async () => await Loop());
             _mainLoopThread.Priority = ThreadPriority.AboveNormal;
+            _serializer = serializer;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -81,11 +89,11 @@ namespace Mmogf.Servers.Hosts
                     break;
                 case NetIncomingMessageType.ErrorMessage:
                     string text2 = im.ReadString();
-                    //_logger.LogError(text2);
+                    _logger.LogError(text2);
                     break;
                 case NetIncomingMessageType.WarningMessage:
                     string text3 = im.ReadString();
-                    //_logger.LogWarning(text3);
+                    _logger.LogWarning(text3);
                     break;
                 case NetIncomingMessageType.VerboseDebugMessage:
                     string text4 = im.ReadString();
@@ -111,6 +119,8 @@ namespace Mmogf.Servers.Hosts
 
                     break;
                 case NetIncomingMessageType.Data:
+
+                    var mmoMessage = _serializer.Deserialize<MmoMessage>(im.Data);
 
                     break;
                 default:

@@ -123,6 +123,19 @@ namespace Mmogf.Servers.Hosts
                 try
                 {
                     //HandleEntitySubChanges();
+                    // Simple input
+                    if (Console.KeyAvailable)
+                    {
+                        ConsoleKeyInfo key = Console.ReadKey(true);
+                        switch (key.Key)
+                        {
+                            case ConsoleKey.F1:
+                                Console.WriteLine("You pressed F1!");
+                                break;
+                            default:
+                                break;
+                        }
+                    }
 
                     var time = _stopwatch.ElapsedMilliseconds;
 
