@@ -2,7 +2,7 @@ using System.Runtime.Serialization;
 namespace Mmogf.Core.Contracts
 {
     [DataContract]
-    public struct MmoMessage
+    public struct MmoMessage : IMmoMessage
     {
         [DataMember(Order = 1)]
         public ServerCodes MessageId { get; set; }
@@ -10,8 +10,14 @@ namespace Mmogf.Core.Contracts
         public byte[] Info { get; set; }
     }
 
+    public interface IMmoMessage
+    {
+        [DataMember(Order = 1)]
+        ServerCodes MessageId { get; }
+    }
+
     [DataContract]
-    public struct MmoMessage<T>
+    public struct MmoMessage<T> : IMmoMessage
     {
         [DataMember(Order = 1)]
         public ServerCodes MessageId { get; set; }
