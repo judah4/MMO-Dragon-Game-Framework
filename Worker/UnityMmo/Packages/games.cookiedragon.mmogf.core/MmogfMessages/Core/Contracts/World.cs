@@ -30,6 +30,18 @@ namespace Mmogf.Core.Contracts
     }
 
     [DataContract]
+    public struct CreateEntityResponse
+    {
+        [DataMember(Order = 1)]
+        public EntityId EntityId { get; set; }
+
+        public CreateEntityResponse(EntityId entityId)
+        {
+            EntityId = entityId;
+        }
+    }
+
+    [DataContract]
     public struct DeleteEntityRequest
     {
         [DataMember(Order = 1)]
@@ -74,7 +86,7 @@ namespace Mmogf.Core.Contracts
 
 
         [DataContract]
-        public struct CreateEntity : ICommandBase<CreateEntityRequest, NothingInternal>, IWorldCommand
+        public struct CreateEntity : ICommandBase<CreateEntityRequest, CreateEntityResponse>, IWorldCommand
         {
             public const short CommandId = 100;
             public short GetCommandId() => CommandId;
@@ -82,7 +94,7 @@ namespace Mmogf.Core.Contracts
             [DataMember(Order = 1)]
             public CreateEntityRequest? Request { get; set; }
             [DataMember(Order = 2)]
-            public NothingInternal? Response { get; set; }
+            public CreateEntityResponse? Response { get; set; }
 
         }
 

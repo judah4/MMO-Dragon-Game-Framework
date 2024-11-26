@@ -400,7 +400,7 @@ namespace MmoGameFramework
                     var requestPayload = createEntity.Request.Value;
                     var entityInfo = _entities.Create(requestPayload.EntityType, requestPayload.Position.ToPosition(), requestPayload.Rotation, requestPayload.Acls, null, requestPayload.Components);
                     _entities.UpdateEntity(entityInfo);
-                    createEntity.Response = new NothingInternal();
+                    createEntity.Response = new CreateEntityResponse(entityInfo.EntityId);
                     SendToWorker(worker, new MmoMessage()
                     {
                         MessageId = ServerCodes.EntityCommandResponse,

@@ -10,6 +10,8 @@ namespace Mmogf.Servers.Handlers.ServerCodesHandlers
     {
         public ServerCodes ServerCode => ServerCodes.WorldCommandRequest;
 
+        private const ServerCodes SERVER_CODE_RESPONSE = ServerCodes.WorldCommandResponse;
+
         private readonly ISerializer _serializer;
         private readonly CreateEntityCommandRequestHandler _createEntityCommandRequestHandler;
 
@@ -54,9 +56,11 @@ namespace Mmogf.Servers.Handlers.ServerCodesHandlers
 
                     var entity = _createEntityCommandRequestHandler.Handle(createEntity.Request.Value);
 
+                    createEntity.Response = new CreateEntityResponse(entity.EntityId);
+
                     return new MmoMessage<CommandResponse<World.CreateEntity>>()
                     {
-                        MessageId = ServerCodes.WorldCommandResponse,
+                        MessageId = SERVER_CODE_RESPONSE,
                         Info = new CommandResponse<World.CreateEntity>(
                             CommandResponseHeader.Create(commandRequest.Header, CommandStatus.Success, ""),
                             createEntity)
