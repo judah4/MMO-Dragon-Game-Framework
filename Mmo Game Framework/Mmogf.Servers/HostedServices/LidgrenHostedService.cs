@@ -4,10 +4,12 @@ using Microsoft.Extensions.Logging;
 using MmoGameFramework;
 using Mmogf.Core.Contracts;
 using Mmogf.Servers.Configurations;
+using Mmogf.Servers.Handlers.WorldCommands;
 using Mmogf.Servers.Serializers;
 using Mmogf.Servers.Shared;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,13 +31,17 @@ namespace Mmogf.Servers.Hosts
         private readonly Stopwatch _stopwatch;
         private readonly Thread _mainLoopThread;
         private readonly Lidgren.Network.NetServer _server;
+
+        private readonly CreateEntityCommandRequestHandler _createEntityCommandRequestHandler;
+
         public ConcurrentDictionary<RemoteWorkerIdentifier, LidgrenWorkerConnection> _connections = new ConcurrentDictionary<RemoteWorkerIdentifier, LidgrenWorkerConnection>();
 
         public LidgrenHostedService(
             ILogger<LidgrenHostedService> logger,
             IWorkerConnectionConfiguration config,
             IServerConfiguration serverConfiguration,
-            ISerializer serializer)
+            ISerializer serializer,
+            CreateEntityCommandRequestHandler createEntityCommandRequestHandler)
         {
             _logger = logger;
             _config = config;
@@ -46,6 +52,7 @@ namespace Mmogf.Servers.Hosts
             _mainLoopThread = new Thread(async () => await Loop());
             _mainLoopThread.Priority = ThreadPriority.AboveNormal;
             _serializer = serializer;
+            _createEntityCommandRequestHandler = createEntityCommandRequestHandler;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -145,6 +152,21 @@ namespace Mmogf.Servers.Hosts
                 try
                 {
                     //HandleEntitySubChanges();
+                    // Simple input
+                    if (Console.KeyAvailable)
+                    {
+                        ConsoleKeyInfo key = Console.ReadKey(true);
+                        switch (key.Key)
+                        {
+                            case ConsoleKey.F1:
+                                _logger.LogDebug("You pressed F1!");
+                                var entity = _createEntityCommandRequestHandler.Handle(new Core.Contracts.CreateEntityRequest("Basic", new Position(1, 1, 1).ToFixedVector3(), Rotation.Zero, new Dictionary<short, byte[]>(), new List<Acl>()));
+                                _logger.LogDebug($"Created Entity {entity.EntityId} {entity.EntityType} at {entity.Position}");
+                                break;
+                            default:
+                                break;
+                        }
+                    }
 
                     var time = _stopwatch.ElapsedMilliseconds;
 

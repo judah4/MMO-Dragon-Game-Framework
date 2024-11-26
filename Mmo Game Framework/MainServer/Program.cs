@@ -8,7 +8,10 @@ using Microsoft.Extensions.Logging;
 using Mmogf.Servers;
 using Mmogf.Servers.Configurations;
 using Mmogf.Servers.Converters;
+using Mmogf.Servers.Handlers.ServerCodesHandlers;
+using Mmogf.Servers.Handlers.WorldCommands;
 using Mmogf.Servers.Hosts;
+using Mmogf.Servers.Operations;
 using Mmogf.Servers.Serializers;
 using Mmogf.Servers.ServerInterfaces;
 using Prometheus;
@@ -161,12 +164,19 @@ namespace MmoGameFramework
                 ConnectionTimeout = (float)GetTimeout(builder.Configuration).TotalSeconds,
             }));
 
+            // Register handlers
+            builder.Services.AddTransient<WorldCommandRequestHandler>();
+            builder.Services.AddTransient<CreateEntityCommandRequestHandler>();
+
+            // Register Operations
+            builder.Services.AddTransient<CreateEntityOperation>();
+            builder.Services.AddTransient<DeleteEntityOperation>();
+
             // Default to the local entity store for now
             builder.Services.AddSingleton<IEntityStore, LocalEntityStore>();
 
             builder.Services.AddHostedService<LidgrenHostedService>();
-            builder.Services.AddHostedService<LidgrenClientHostedService>();
-
+            //builder.Services.AddHostedService<LidgrenClientHostedService>();
 
             var app = builder.Build();
 
