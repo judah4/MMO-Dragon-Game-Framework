@@ -33,6 +33,8 @@ namespace Mmogf.Servers.Hosts
         private readonly Lidgren.Network.NetServer _server;
 
         private readonly CreateEntityCommandRequestHandler _createEntityCommandRequestHandler;
+        private readonly DeleteEntityCommandRequestHandler _deleteEntityCommandRequestHandler;
+
 
         public ConcurrentDictionary<RemoteWorkerIdentifier, LidgrenWorkerConnection> _connections = new ConcurrentDictionary<RemoteWorkerIdentifier, LidgrenWorkerConnection>();
 
@@ -41,7 +43,8 @@ namespace Mmogf.Servers.Hosts
             IWorkerConnectionConfiguration config,
             IServerConfiguration serverConfiguration,
             ISerializer serializer,
-            CreateEntityCommandRequestHandler createEntityCommandRequestHandler)
+            CreateEntityCommandRequestHandler createEntityCommandRequestHandler,
+            DeleteEntityCommandRequestHandler deleteEntityCommandRequestHandler)
         {
             _logger = logger;
             _config = config;
@@ -53,6 +56,7 @@ namespace Mmogf.Servers.Hosts
             _mainLoopThread.Priority = ThreadPriority.AboveNormal;
             _serializer = serializer;
             _createEntityCommandRequestHandler = createEntityCommandRequestHandler;
+            _deleteEntityCommandRequestHandler = deleteEntityCommandRequestHandler;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -162,6 +166,11 @@ namespace Mmogf.Servers.Hosts
                                 _logger.LogDebug("You pressed F1!");
                                 var entity = _createEntityCommandRequestHandler.Handle(new Core.Contracts.CreateEntityRequest("Basic", new Position(1, 1, 1).ToFixedVector3(), Rotation.Zero, new Dictionary<short, byte[]>(), new List<Acl>()));
                                 _logger.LogDebug($"Created Entity {entity.EntityId} {entity.EntityType} at {entity.Position}");
+                                break;
+                            case ConsoleKey.F2:
+                                _logger.LogDebug("You pressed F2!");
+                                var deletedEntity = _deleteEntityCommandRequestHandler.Handle(new Core.Contracts.DeleteEntityRequest(new EntityId(2)));
+                                _logger.LogDebug($"Deleted Entity {deletedEntity.EntityId}");
                                 break;
                             default:
                                 break;

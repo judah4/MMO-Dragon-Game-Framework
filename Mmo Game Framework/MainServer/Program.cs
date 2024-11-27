@@ -167,6 +167,7 @@ namespace MmoGameFramework
             // Register handlers
             builder.Services.AddTransient<WorldCommandRequestHandler>();
             builder.Services.AddTransient<CreateEntityCommandRequestHandler>();
+            builder.Services.AddTransient<DeleteEntityCommandRequestHandler>();
 
             // Register Operations
             builder.Services.AddTransient<CreateEntityOperation>();
