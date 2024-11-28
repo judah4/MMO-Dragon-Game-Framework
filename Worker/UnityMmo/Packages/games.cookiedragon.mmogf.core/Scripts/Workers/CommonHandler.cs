@@ -3,6 +3,7 @@ using Mmogf.Core.Contracts;
 using Mmogf.Core.Contracts.Commands;
 using Mmogf.Core.Contracts.Events;
 using Mmogf.Core.Networking;
+using Mmogf.Servers.Serializers;
 using Mmogf.Servers.Shared;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,8 +11,6 @@ using UnityEngine;
 
 namespace Mmogf.Core
 {
-
-
     public class CommonHandler : MonoBehaviour
     {
         public GameObjectRepresentation GameObjectRepresentation { get; protected set; }
@@ -36,8 +35,7 @@ namespace Mmogf.Core
         private Vector3 _interestCenter = Vector3.zero;
         [SerializeField]
         private bool _updateInterestFromPosition;
-
-
+        public ISerializer Serializer => Client.Serializer;
 
         public long ClientId
         {

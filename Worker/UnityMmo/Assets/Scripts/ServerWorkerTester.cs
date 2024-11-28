@@ -25,7 +25,7 @@ namespace Mmogf
             if (Input.GetKeyDown(KeyCode.Z))
             {
                 //create ship
-                _serverHandler.SendWorldCommand<World.CreateEntity, CreateEntityRequest, NothingInternal>(new CreateEntityRequest("Ship", new Position() { Y = 0, }.ToFixedVector3(), RandomHeading().ToRotation(),
+                _serverHandler.SendWorldCommand<World.CreateEntity, CreateEntityRequest, CreateEntityResponse>(new CreateEntityRequest("Ship", new Position() { Y = 0, }.ToFixedVector3(), RandomHeading().ToRotation(),
                     new Dictionary<short, byte[]>()
                     {
                         { Cannon.ComponentId, MessagePack.MessagePackSerializer.Serialize(new Cannon()) },
@@ -48,7 +48,7 @@ namespace Mmogf
             if (Input.GetKeyDown(KeyCode.X))
             {
                 //create shark
-                _serverHandler.SendWorldCommand<World.CreateEntity, CreateEntityRequest, NothingInternal>(new CreateEntityRequest("Shark", new Position() { Y = -5, }.ToFixedVector3(), RandomHeading().ToRotation(),
+                _serverHandler.SendWorldCommand<World.CreateEntity, CreateEntityRequest, CreateEntityResponse>(new CreateEntityRequest("Shark", new Position() { Y = -5, }.ToFixedVector3(), RandomHeading().ToRotation(),
                     new Dictionary<short, byte[]>()
                     {
                         { Cannon.ComponentId, MessagePack.MessagePackSerializer.Serialize(new Cannon()) },

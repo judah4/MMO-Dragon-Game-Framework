@@ -1,5 +1,4 @@
-﻿using System.Runtime.Serialization;
-using Mmogf.Core;
+﻿using Mmogf.Core;
 using Mmogf.Core.Contracts;
 using Mmogf.Servers.Shared;
 using System.Collections.Generic;
@@ -25,9 +24,9 @@ public class GameObjectRepresentation
     {
         EntityGameObject entityGm;
 
-        var entityType = MessagePackSerializer.Deserialize<EntityType>(entity.EntityData[EntityType.ComponentId]);
-        var position = MessagePackSerializer.Deserialize<FixedVector3>(entity.EntityData[FixedVector3.ComponentId]).ToPosition();
-        var rot = MessagePackSerializer.Deserialize<Rotation>(entity.EntityData[Rotation.ComponentId]);
+        var entityType = _server.Serializer.Deserialize<EntityType>(entity.EntityData[EntityType.ComponentId]);
+        var position = _server.Serializer.Deserialize<FixedVector3>(entity.EntityData[FixedVector3.ComponentId]).ToPosition();
+        var rot = _server.Serializer.Deserialize<Rotation>(entity.EntityData[Rotation.ComponentId]);
         var adjustedPos = _server.PositionToClient(position);
         var rotation = rot.ToQuaternion();
 
@@ -75,7 +74,7 @@ public class GameObjectRepresentation
 
             try
             {
-                entityGm.Data.Add(pair.Key, (IEntityComponent)MessagePackSerializer.Deserialize(type, pair.Value));
+                entityGm.Data.Add(pair.Key, (IEntityComponent)_server.Serializer.Deserialize(type, pair.Value));
             }
             catch (System.Exception e)
             {
@@ -103,7 +102,7 @@ public class GameObjectRepresentation
         entityGm.Data.Remove(entityUpdate.ComponentId);
         var type = ComponentMappings.GetComponentType(entityUpdate.ComponentId);
 
-        var data = (IEntityComponent)MessagePackSerializer.Deserialize(type, entityUpdate.Info);
+        var data = (IEntityComponent)_server.Serializer.Deserialize(type, entityUpdate.Info);
         entityGm.Data.Add(entityUpdate.ComponentId, data);
 
         entityGm.EntityUpdated(entityUpdate.ComponentId);

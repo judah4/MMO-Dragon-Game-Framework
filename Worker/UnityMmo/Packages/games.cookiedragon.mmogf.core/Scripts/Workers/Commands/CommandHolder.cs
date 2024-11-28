@@ -1,6 +1,6 @@
-﻿using System.Runtime.Serialization;
-using Mmogf.Core.Contracts;
+﻿using Mmogf.Core.Contracts;
 using Mmogf.Core.Contracts.Commands;
+using Mmogf.Servers.Serializers;
 using System;
 using System.Collections.Generic;
 
@@ -39,11 +39,14 @@ namespace Mmogf.Core
         public ICommandBase<TRequest, TResponse> Command { get; set; }
         public Action<CommandResult<TCommand, TRequest, TResponse>> OnResponse { get; set; }
 
-        public CommandHolderTyped() : base()
+        private ISerializer _serializer;
+
+        public CommandHolderTyped(ISerializer serializer) : base()
         {
+            _serializer = serializer;
         }
 
-        public CommandHolderTyped(CommandRequest request, ICommandBase<TRequest, TResponse> command, Action<CommandResult<TCommand, TRequest, TResponse>> response, float timeoutTimer) : base(request, timeoutTimer)
+        public CommandHolderTyped(ISerializer serializer, CommandRequest request, ICommandBase<TRequest, TResponse> command, Action<CommandResult<TCommand, TRequest, TResponse>> response, float timeoutTimer) : base(request, timeoutTimer)
         {
             OnResponse = response;
             Command = command;
@@ -56,7 +59,7 @@ namespace Mmogf.Core
             TResponse? responsePayload = null;
             if (response.Payload != null)
             {
-                var command = MessagePackSerializer.Deserialize<TCommand>(response.Payload);
+                var command = _serializer.Deserialize<TCommand>(response.Payload);
                 requestPayload = command.Request;
                 responsePayload = command.Response;
             }
@@ -90,7 +93,7 @@ namespace Mmogf.Core
 
         Dictionary<(int componentId, int commandId), List<CommandHolder>> _commandsCache = new Dictionary<(int componentId, int commandId), List<CommandHolder>>();
 
-        public CommandHolderTyped<TCommand, TRequest, TResponse> Get<TCommand, TRequest, TResponse>(CommandRequest request, ICommandBase<TRequest, TResponse> command, Action<CommandResult<TCommand, TRequest, TResponse>> response, float timeoutTimer) where TCommand : ICommandBase<TRequest, TResponse> where TRequest : struct where TResponse : struct
+        public CommandHolderTyped<TCommand, TRequest, TResponse> Get<TCommand, TRequest, TResponse>(ISerializer serializer, CommandRequest request, ICommandBase<TRequest, TResponse> command, Action<CommandResult<TCommand, TRequest, TResponse>> response, float timeoutTimer) where TCommand : ICommandBase<TRequest, TResponse> where TRequest : struct where TResponse : struct
         {
             var commandKey = (request.Header.ComponentId, request.Header.CommandId);
 
@@ -109,7 +112,7 @@ namespace Mmogf.Core
             }
             else
             {
-                commandHolder = new CommandHolderTyped<TCommand, TRequest, TResponse>();
+                commandHolder = new CommandHolderTyped<TCommand, TRequest, TResponse>(serializer);
             }
 
             commandHolder.Setup(request, command, response, timeoutTimer);

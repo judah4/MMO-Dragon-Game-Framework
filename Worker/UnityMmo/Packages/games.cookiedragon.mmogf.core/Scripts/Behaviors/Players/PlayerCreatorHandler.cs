@@ -1,4 +1,3 @@
-using System.Runtime.Serialization;
 using Mmogf.Core.Contracts;
 using Mmogf.Core.Contracts.Commands;
 using UnityEngine;
@@ -38,15 +37,15 @@ namespace Mmogf.Core
         void HandleConnect(CommandRequest request)
         {
             Debug.Log($"Got player connect! {request.Header.RequesterId} {request.Header.RequestorWorkerType}");
-            var connectPlayer = MessagePack.MessagePackSerializer.Deserialize<PlayerCreator.ConnectPlayer>(request.Payload);
+            var connectPlayer = Server.Serializer.Deserialize<PlayerCreator.ConnectPlayer>(request.Payload);
             var createPayload = CreatePlayer.Invoke(connectPlayer, request);
-            Server.SendWorldCommand<World.CreateEntity, CreateEntityRequest, NothingInternal>(createPayload,
+            Server.SendWorldCommand<World.CreateEntity, CreateEntityRequest, CreateEntityResponse>(createPayload,
                 response =>
                 {
                     Debug.Log($"Create played! {response.CommandStatus} - {response.Message}");
                 });
 
-            var payload = MessagePackSerializer.Deserialize<PlayerCreator.ConnectPlayer>(request.Payload);
+            var payload = Server.Serializer.Deserialize<PlayerCreator.ConnectPlayer>(request.Payload);
 
             //make empty response object
             Server.SendCommandResponse<PlayerCreator.ConnectPlayer, ConnectPlayerRequest, NothingInternal>(request, payload, new NothingInternal());

@@ -39,12 +39,6 @@ namespace Mmogf
             if (serializerRegistered)
                 return;
 
-            StaticCompositeResolver.Instance.Register(
-                    MessagePack.Resolvers.MmogfCoreResolver.Instance,
-                    MessagePack.Resolvers.GeneratedResolver.Instance,
-                    MessagePack.Resolvers.StandardResolver.Instance
-                );
-
             var option = MessagePackSerializerOptions.Standard.WithResolver(StaticCompositeResolver.Instance)
                 //.WithCompression(MessagePackCompression.Lz4BlockArray)
                 ;
