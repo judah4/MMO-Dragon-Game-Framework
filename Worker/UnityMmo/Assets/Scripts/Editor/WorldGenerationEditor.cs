@@ -1,5 +1,6 @@
 using Mmogf.Core;
 using Mmogf.Core.Contracts;
+using Mmogf.Servers.Serializers;
 using Mmogf.Servers.Shared;
 using System.Collections.Generic;
 using System.IO;
@@ -11,6 +12,8 @@ namespace Mmogf
     public static class WorldGenerationEditor
     {
         private static readonly string WorldGenPath = Application.dataPath + "/../worlds/default.world";
+
+        private static ISerializer _serializer = new ProtobufSerializer();
 
         [MenuItem("DragonGF/Generate World Config", priority = 1200)]
         private static void Generate()
@@ -93,8 +96,8 @@ namespace Mmogf
 
             using (var writer = File.Create(WorldGenPath))
             {
-
-                MessagePack.MessagePackSerializer.Serialize(writer, worldConfig);
+                var data = _serializer.Serialize(worldConfig);
+                writer.Write(data);
 
                 writer.Close();
             }
@@ -109,15 +112,15 @@ namespace Mmogf
 
             var data = new Dictionary<short, byte[]>();
 
-            data[FixedVector3.ComponentId] = MessagePack.MessagePackSerializer.Serialize(position.ToFixedVector3());
-            data[Rotation.ComponentId] = MessagePack.MessagePackSerializer.Serialize(rotation);
-            data[Acls.ComponentId] = MessagePack.MessagePackSerializer.Serialize(new Acls() { AclList = acls });
+            data[FixedVector3.ComponentId] = _serializer.Serialize(position.ToFixedVector3());
+            data[Rotation.ComponentId] = _serializer.Serialize(rotation);
+            data[Acls.ComponentId] = _serializer.Serialize(new Acls() { AclList = acls });
 
             if (additionalData != null)
             {
                 foreach (var dat in additionalData)
                 {
-                    data[dat.Key] = MessagePack.MessagePackSerializer.Serialize(dat.Value.GetType(), dat.Value);
+                    data[dat.Key] = _serializer.Serialize(dat.Value);
                 }
             }
 
