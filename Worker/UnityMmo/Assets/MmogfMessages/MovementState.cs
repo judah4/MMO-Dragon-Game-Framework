@@ -1,9 +1,9 @@
-using MessagePack;
 using Mmogf.Core.Contracts;
+using System.Runtime.Serialization;
 
 namespace Mmogf
 {
-    [MessagePackObject]
+    [DataContract]
     public struct MovementState : IEntityComponent
     {
         public const short ComponentId = 1004;
@@ -12,12 +12,12 @@ namespace Mmogf
             return ComponentId;
         }
 
-        [Key(0)]
+        [DataMember(Order = 1)]
         public float Forward { get; set; }
-        [Key(1)]
+        [DataMember(Order = 2)]
         public float Heading { get; set; }
 
-        [Key(2)]
+        [DataMember(Order = 3)]
         public Mmogf.Vector3d DesiredPosition { get; set; }
 
     }

@@ -1,4 +1,3 @@
-using MessagePack;
 using Mmogf.Core;
 using Mmogf.Core.Contracts.Commands;
 
@@ -24,7 +23,7 @@ namespace Mmogf
                 switch (request.Header.CommandId)
                 {
                     case Health.TakeDamageCommand.CommandId:
-                        var payload = MessagePackSerializer.Deserialize<Health.TakeDamageCommand>(request.Payload);
+                        var payload = Server.Serializer.Deserialize<Health.TakeDamageCommand>(request.Payload);
                         HandleTakeDamage(request, payload);
                         break;
                 }

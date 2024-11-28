@@ -1,8 +1,7 @@
-using MessagePack;
-using MessagePack.Resolvers;
 using Mmogf.Core;
 using Mmogf.Core.Contracts;
 using Mmogf.Core.Contracts.Commands;
+using Mmogf.Servers.Serializers;
 using Mmogf.Servers.Shared;
 using ProtoBuf;
 using System.Collections.Generic;
@@ -39,11 +38,6 @@ namespace Mmogf
             if (serializerRegistered)
                 return;
 
-            var option = MessagePackSerializerOptions.Standard.WithResolver(StaticCompositeResolver.Instance)
-                //.WithCompression(MessagePackCompression.Lz4BlockArray)
-                ;
-            //rethink compressed by default
-            MessagePackSerializer.DefaultOptions = option;
             serializerRegistered = true;
 
             var person1 = new Person()
@@ -156,7 +150,7 @@ namespace Mmogf
             ComponentMappings.Init(types, commands, events);
         }
 
-        static CreateEntityRequest CreatePlayer(PlayerCreator.ConnectPlayer connect, CommandRequest request)
+        private static CreateEntityRequest CreatePlayer(ISerializer serializer, PlayerCreator.ConnectPlayer connect, CommandRequest request)
         {
             var clientId = request.Header.RequesterId;
 
@@ -168,12 +162,12 @@ namespace Mmogf
             var createEntity = new CreateEntityRequest("Player", new Position() { Y = 0, }.ToFixedVector3(), Rotation.Zero,
                 new Dictionary<short, byte[]>()
                 {
-                    { Cannon.ComponentId, MessagePack.MessagePackSerializer.Serialize(new Cannon()) },
-                    { Health.ComponentId, MessagePack.MessagePackSerializer.Serialize(new Health() { Current = 100, Max = 100, }) },
-                    { ClientAuthCheck.ComponentId, MessagePack.MessagePackSerializer.Serialize(new ClientAuthCheck() {  WorkerId = clientId, }) },
-                    { MovementState.ComponentId, MessagePack.MessagePackSerializer.Serialize(new MovementState() {  Forward = 0, Heading = 0, DesiredPosition = new Vector3d() { Y = 0, } }) },
-                    { PlayerHeartbeatServer.ComponentId, MessagePack.MessagePackSerializer.Serialize(new PlayerHeartbeatServer() { MissedHeartbeats = 0 }) },
-                    { PlayerHeartbeatClient.ComponentId, MessagePack.MessagePackSerializer.Serialize(new PlayerHeartbeatClient() { }) },
+                    { Cannon.ComponentId, serializer.Serialize(new Cannon()) },
+                    { Health.ComponentId, serializer.Serialize(new Health() { Current = 100, Max = 100, }) },
+                    { ClientAuthCheck.ComponentId, serializer.Serialize(new ClientAuthCheck() {  WorkerId = clientId, }) },
+                    { MovementState.ComponentId, serializer.Serialize(new MovementState() {  Forward = 0, Heading = 0, DesiredPosition = new Vector3d() { Y = 0, } }) },
+                    { PlayerHeartbeatServer.ComponentId, serializer.Serialize(new PlayerHeartbeatServer() { MissedHeartbeats = 0 }) },
+                    { PlayerHeartbeatClient.ComponentId, serializer.Serialize(new PlayerHeartbeatClient() { }) },
                 },
                 new List<Acl>()
                 {

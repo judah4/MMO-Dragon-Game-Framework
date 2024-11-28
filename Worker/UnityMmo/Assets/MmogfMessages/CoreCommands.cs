@@ -1,25 +1,22 @@
-using MessagePack;
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+using System.Runtime.Serialization;
 
 namespace Mmogf
 {
 
-    [MessagePackObject]
+    [DataContract]
     public struct Nothing
     {
     }
 
-    [MessagePackObject]
+    [DataContract]
     public partial struct Vector3d : System.IEquatable<Vector3d>
     {
-        [Key(0)]
+        [DataMember(Order = 1)]
         public double X { get; set; }
-        [Key(1)]
+        [DataMember(Order = 2)]
         public double Y { get; set; }
-        [Key(2)]
+        [DataMember(Order = 2)]
         public double Z { get; set; }
 
         public bool Equals(Vector3d other)
@@ -68,14 +65,14 @@ namespace Mmogf
 
     }
 
-    [MessagePackObject]
+    [DataContract]
     public partial struct Vector3f
     {
-        [Key(0)]
+        [DataMember(Order = 1)]
         public float X { get; set; }
-        [Key(1)]
+        [DataMember(Order = 2)]
         public float Y { get; set; }
-        [Key(2)]
+        [DataMember(Order = 3)]
         public float Z { get; set; }
 
     }

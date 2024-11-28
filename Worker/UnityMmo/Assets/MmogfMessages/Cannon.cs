@@ -1,17 +1,17 @@
-﻿using MessagePack;
-using Mmogf.Core.Contracts;
+﻿using Mmogf.Core.Contracts;
+using System.Runtime.Serialization;
 
 namespace Mmogf
 {
 
-    [MessagePackObject]
+    [DataContract]
     public struct FireCommandRequest
     {
-        [Key(0)]
+        [DataMember(Order = 1)]
         public bool Left { get; set; }
     }
 
-    [MessagePackObject]
+    [DataContract]
     public struct Cannon : IEntityComponent
     {
         public const short ComponentId = 1001;
@@ -25,13 +25,13 @@ namespace Mmogf
 
         #region Events
 
-        [MessagePackObject]
+        [DataContract]
         public struct FireEvent : IEvent
         {
             public const short EventId = 20001;
             public short GetEventId() => EventId;
 
-            [Key(0)]
+            [DataMember(Order = 1)]
             public bool Left { get; set; }
         }
 
@@ -39,15 +39,16 @@ namespace Mmogf
 
         #region Commands
 
-        [MessagePackObject]
+        [DataContract]
         public struct FireCommand : ICommandBase<FireCommandRequest, Nothing>
         {
             public const short CommandId = 10001;
             public short GetCommandId() => CommandId;
 
-            [Key(0)]
+            [DataMember(Order = 1)]
             public FireCommandRequest? Request { get; set; }
-            [Key(1)]
+
+            [DataMember(Order = 2)]
             public Nothing? Response { get; set; }
 
         }

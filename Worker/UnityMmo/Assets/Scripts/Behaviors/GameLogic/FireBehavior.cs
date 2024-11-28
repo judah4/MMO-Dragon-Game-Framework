@@ -1,5 +1,4 @@
-﻿using MessagePack;
-using Mmogf;
+﻿using Mmogf;
 using Mmogf.Core;
 using Mmogf.Core.Contracts.Commands;
 using Mmogf.Core.Contracts.Events;
@@ -37,7 +36,7 @@ public class FireBehavior : BaseEntityBehavior
             switch (request.Header.CommandId)
             {
                 case Cannon.FireCommand.CommandId:
-                    var payload = MessagePackSerializer.Deserialize<Cannon.FireCommand>(request.Payload);
+                    var payload = Server.Serializer.Deserialize<Cannon.FireCommand>(request.Payload);
                     HandleFire(request, payload);
                     break;
             }
@@ -68,7 +67,7 @@ public class FireBehavior : BaseEntityBehavior
             switch (request.Header.EventId)
             {
                 case Cannon.FireEvent.EventId:
-                    var payload = MessagePackSerializer.Deserialize<Cannon.FireEvent>(request.Payload);
+                    var payload = Server.Serializer.Deserialize<Cannon.FireEvent>(request.Payload);
                     HandleFireEvent(request, payload);
                     break;
             }

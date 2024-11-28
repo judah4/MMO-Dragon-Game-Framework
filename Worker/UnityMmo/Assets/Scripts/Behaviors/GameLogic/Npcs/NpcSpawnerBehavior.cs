@@ -57,8 +57,8 @@ namespace Mmogf
             Server.SendWorldCommand<World.CreateEntity, CreateEntityRequest, CreateEntityResponse>(new CreateEntityRequest("Ship", pos.ToFixedVector3(), RandomHeading().ToRotation(),
                 new Dictionary<short, byte[]>()
                 {
-                    { Cannon.ComponentId, MessagePack.MessagePackSerializer.Serialize(new Cannon()) },
-                    { Health.ComponentId, MessagePack.MessagePackSerializer.Serialize(new Health() { Current = 100, Max = 100, }) },
+                    { Cannon.ComponentId, Server.Serializer.Serialize(new Cannon()) },
+                    { Health.ComponentId, Server.Serializer.Serialize(new Health() { Current = 100, Max = 100, }) },
                 },
                 new List<Acl>()
                 {
@@ -83,7 +83,7 @@ namespace Mmogf
             Server.SendWorldCommand<World.CreateEntity, CreateEntityRequest, CreateEntityResponse>(new CreateEntityRequest("Shark", pos.ToFixedVector3(), RandomHeading().ToRotation(),
                 new Dictionary<short, byte[]>()
                 {
-                    { Cannon.ComponentId, MessagePack.MessagePackSerializer.Serialize(new Cannon()) },
+                    { Cannon.ComponentId, Server.Serializer.Serialize(new Cannon()) },
                 },
                 new List<Acl>()
                 {

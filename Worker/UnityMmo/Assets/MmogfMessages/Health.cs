@@ -1,26 +1,26 @@
-using MessagePack;
 using Mmogf.Core.Contracts;
+using System.Runtime.Serialization;
 
 namespace Mmogf
 {
 
-    [MessagePackObject]
+    [DataContract]
     public struct TakeDamageResponse
     {
-        [Key(0)]
+        [DataMember(Order = 1)]
         public bool Dead { get; set; }
-        [Key(1)]
+        [DataMember(Order = 2)]
         public bool Killed { get; set; }
     }
 
-    [MessagePackObject]
+    [DataContract]
     public struct TakeDamageRequest
     {
-        [Key(0)]
+        [DataMember(Order = 1)]
         public int Amount { get; set; }
     }
 
-    [MessagePackObject]
+    [DataContract]
     public struct Health : IEntityComponent
     {
         public const short ComponentId = 1002;
@@ -29,22 +29,22 @@ namespace Mmogf
             return ComponentId;
         }
 
-        [Key(0)]
+        [DataMember(Order = 1)]
         public int Current { get; set; }
-        [Key(1)]
+        [DataMember(Order = 2)]
         public int Max { get; set; }
 
         #region Commands
 
-        [MessagePackObject]
+        [DataContract]
         public struct TakeDamageCommand : ICommandBase<TakeDamageRequest, TakeDamageResponse>
         {
             public const short CommandId = 10002;
             public short GetCommandId() => CommandId;
 
-            [Key(0)]
+            [DataMember(Order = 1)]
             public TakeDamageRequest? Request { get; set; }
-            [Key(1)]
+            [DataMember(Order = 2)]
             public TakeDamageResponse? Response { get; set; }
 
         }

@@ -1,5 +1,6 @@
 using Mmogf.Core.Contracts;
 using Mmogf.Core.Contracts.Commands;
+using Mmogf.Servers.Serializers;
 using UnityEngine;
 
 namespace Mmogf.Core
@@ -7,7 +8,7 @@ namespace Mmogf.Core
     public class PlayerCreatorHandler : BaseEntityBehavior
     {
 
-        public static System.Func<PlayerCreator.ConnectPlayer, CommandRequest, CreateEntityRequest> CreatePlayer;
+        public static System.Func<ISerializer, PlayerCreator.ConnectPlayer, CommandRequest, CreateEntityRequest> CreatePlayer;
 
         private void Update()
         {
@@ -38,7 +39,7 @@ namespace Mmogf.Core
         {
             Debug.Log($"Got player connect! {request.Header.RequesterId} {request.Header.RequestorWorkerType}");
             var connectPlayer = Server.Serializer.Deserialize<PlayerCreator.ConnectPlayer>(request.Payload);
-            var createPayload = CreatePlayer.Invoke(connectPlayer, request);
+            var createPayload = CreatePlayer.Invoke(Server.Serializer, connectPlayer, request);
             Server.SendWorldCommand<World.CreateEntity, CreateEntityRequest, CreateEntityResponse>(createPayload,
                 response =>
                 {
